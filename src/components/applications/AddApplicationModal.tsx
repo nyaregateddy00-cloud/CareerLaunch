@@ -4,6 +4,8 @@ import { Modal } from '../common/Modal';
 import { Input, Textarea } from '../common/Input';
 import { Button } from '../common/Button';
 
+const STAGES: ApplicationStage[] = ['Saved', 'Applied', 'Shortlisted', 'Assessment', 'Interview', 'Offer', 'Rejected', 'Withdrawn'];
+
 interface AddApplicationModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,8 +14,6 @@ interface AddApplicationModalProps {
   userId: string;
 }
 
-const STAGES: ApplicationStage[] = ['Saved', 'Applied', 'Shortlisted', 'Interview', 'Offer', 'Rejected'];
-const STAGES: ApplicationStage[] = ['Saved', 'Applied', 'Shortlisted', 'Assessment', 'Interview', 'Offer', 'Rejected', 'Withdrawn'];
 
 export const AddApplicationModal: React.FC<AddApplicationModalProps> = ({
   isOpen,
