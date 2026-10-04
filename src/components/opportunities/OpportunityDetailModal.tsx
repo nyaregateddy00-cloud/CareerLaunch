@@ -82,7 +82,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
               </p>
               <div className="flex items-center gap-2 mt-2 flex-wrap">
                 <Badge variant="blue" size="sm">{opportunity.type}</Badge>
-                <Badge variant="green" size="sm">{opportunity.workMode}</Badge>
+                {opportunity.workMode && <Badge variant="green" size="sm">{opportunity.workMode}</Badge>}
                 <Badge variant="outline" size="sm">{opportunity.experienceLevel}</Badge>
               </div>
             </div>
