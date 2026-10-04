@@ -175,7 +175,7 @@ export const AIChatWindow: React.FC = () => {
               {isAIConfigured ? (
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-brand-green-700 dark:text-brand-green-300 bg-brand-green-50 dark:bg-brand-green-950 px-2 py-0.5 rounded-full border border-brand-green-200 dark:border-brand-green-800">
                   <span className="w-1.5 h-1.5 rounded-full bg-brand-green-500 animate-pulse"></span>
-                  Active (Gemini 1.5)
+                  Active (Gemini)
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
