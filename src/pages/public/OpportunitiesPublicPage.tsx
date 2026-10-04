@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { OpportunityFilterBar } from '../../components/opportunities/OpportunityFilterBar';
 import { OpportunityCard } from '../../components/opportunities/OpportunityCard';
 import { OpportunityDetailModal } from '../../components/opportunities/OpportunityDetailModal';
 import { EmptyState } from '../../components/common/EmptyState';
 import { mockStorage } from '../../lib/mockStorage';
-import { Opportunity } from '../../types';
+import { isSupabaseConfigured, supabase } from '../../lib/supabase';
+import { Opportunity, ExperienceLevel, WorkMode } from '../../types';
 import { Search } from 'lucide-react';
 import { Footer } from '../../components/layout/Footer';
 
@@ -19,14 +20,74 @@ export const OpportunitiesPublicPage: React.FC = () => {
   const [selectedExp, setSelectedExp] = useState<string>('All');
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [savedOppIds, setSavedOppIds] = useState<string[]>(() => mockStorage.getSavedOpportunityIds());
+  const [allOpportunities, setAllOpportunities] = useState<Opportunity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const allOpportunities = mockStorage.getOpportunities();
+  useEffect(() => {
+    let isActive = true;
+
+    const loadOpportunities = async () => {
+      if (!isSupabaseConfigured) {
+        if (isActive) {
+          setAllOpportunities(mockStorage.getOpportunities());
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('opportunities')
+        .select('*')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
+
+      if (!isActive) return;
+
+      if (error) {
+        setLoadError(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      const opportunities: Opportunity[] = (data ?? []).map((row) => ({
+        id: row.id,
+        title: row.title,
+        company: row.company,
+        companyLogo: row.company_logo ?? undefined,
+        location: row.location,
+        country: row.country ?? 'Kenya',
+        type: row.type as Opportunity['type'],
+        workMode: row.work_mode as WorkMode | null,
+        experienceLevel: (row.experience_level ?? 'Entry Level') as ExperienceLevel,
+        salaryRange: row.salary_range ?? undefined,
+        currency: (row.currency ?? 'KES') as Opportunity['currency'],
+        deadline: row.deadline ?? undefined,
+        description: row.description,
+        requirements: row.requirements ?? [],
+        tags: row.tags ?? [],
+        applicationUrl: row.application_url ?? undefined,
+        contactEmail: row.contact_email ?? undefined,
+        source: row.source ?? 'Employer listing',
+        status: row.status as Opportunity['status'],
+        createdAt: row.created_at,
+      }));
+
+      setAllOpportunities(opportunities);
+      setIsLoading(false);
+    };
+
+    void loadOpportunities();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   const filteredOpportunities = useMemo(() => {
     return allOpportunities.filter((opp) => {
       if (opp.status !== 'published') return false;
 
-      // Search Query filter
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchesTitle = opp.title.toLowerCase().includes(q);
@@ -36,13 +97,8 @@ export const OpportunitiesPublicPage: React.FC = () => {
         if (!matchesTitle && !matchesCompany && !matchesTags && !matchesDesc) return false;
       }
 
-      // Type filter
       if (selectedType !== 'All' && opp.type !== selectedType) return false;
-
-      // Work Mode filter
       if (selectedWorkMode !== 'All' && opp.workMode !== selectedWorkMode) return false;
-
-      // Experience Level filter
       if (selectedExp !== 'All' && opp.experienceLevel !== selectedExp) return false;
 
       return true;
@@ -74,7 +130,6 @@ export const OpportunitiesPublicPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Filter Bar */}
         <OpportunityFilterBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -91,8 +146,19 @@ export const OpportunitiesPublicPage: React.FC = () => {
           totalCount={filteredOpportunities.length}
         />
 
-        {/* Grid List */}
-        {filteredOpportunities.length > 0 ? (
+        {isLoading ? (
+          <p className="py-12 text-center text-sm text-slate-500" role="status">
+            Loading opportunities…
+          </p>
+        ) : loadError ? (
+          <EmptyState
+            icon={<Search className="w-6 h-6" />}
+            title="Couldn’t load opportunities"
+            description={`The opportunities database could not be reached: ${loadError}`}
+            actionText="Try Again"
+            onAction={() => window.location.reload()}
+          />
+        ) : filteredOpportunities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredOpportunities.map((opp) => (
               <OpportunityCard
@@ -127,4 +193,3 @@ export const OpportunitiesPublicPage: React.FC = () => {
     </div>
   );
 };
-
