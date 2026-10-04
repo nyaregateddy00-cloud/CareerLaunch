@@ -25,14 +25,84 @@ interface Message {
   timestamp: string;
 }
 
-function renderMessageText(text: string): React.ReactNode {
+function renderInlineText(text: string): React.ReactNode[] {
   const parts = text.split(/(\*\*[\s\S]*?\*\*)/g);
   return parts.map((part, index) => {
     if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
-      return <strong key={index}>{part.slice(2, -2)}</strong>;
+      return <strong key={index} className="font-semibold text-inherit">{part.slice(2, -2)}</strong>;
     }
     return <React.Fragment key={index}>{part.replace(/\*\*/g, '')}</React.Fragment>;
   });
+}
+
+function renderMessageText(text: string): React.ReactNode[] {
+  const blocks: React.ReactNode[] = [];
+  let paragraph: string[] = [];
+  let listKind: 'ordered' | 'unordered' | null = null;
+  let listItems: string[] = [];
+  let key = 0;
+
+  const flushParagraph = () => {
+    const value = paragraph.join(' ').trim();
+    if (value) {
+      blocks.push(<p key={key++} className="m-0 leading-6">{renderInlineText(value)}</p>);
+    }
+    paragraph = [];
+  };
+
+  const flushList = () => {
+    if (!listKind || listItems.length === 0) return;
+    const ListTag = listKind === 'ordered' ? 'ol' : 'ul';
+    const marker = listKind === 'ordered' ? 'list-decimal' : 'list-disc';
+    blocks.push(
+      <ListTag key={key++} className={marker + ' list-outside space-y-1 pl-5'}>
+        {listItems.map((item, index) => (
+          <li key={index} className="pl-1 leading-6">{renderInlineText(item)}</li>
+        ))}
+      </ListTag>,
+    );
+    listKind = null;
+    listItems = [];
+  };
+
+  for (const rawLine of text.replace(/\r/g, '').split('\n')) {
+    const line = rawLine.trim();
+    if (!line) {
+      flushParagraph();
+      flushList();
+      continue;
+    }
+
+    const heading = line.match(/^(#{1,3})\s+(.+)$/);
+    if (heading) {
+      flushParagraph();
+      flushList();
+      blocks.push(
+        <h4 key={key++} className="m-0 pt-1 text-sm font-bold text-slate-900 dark:text-white">
+          {renderInlineText(heading[2])}
+        </h4>,
+      );
+      continue;
+    }
+
+    const unordered = line.match(/^(?:[-*•])\s+(.+)$/);
+    const ordered = line.match(/^\d+[.)]\s+(.+)$/);
+    if (unordered || ordered) {
+      flushParagraph();
+      const nextKind = ordered ? 'ordered' : 'unordered';
+      if (listKind && listKind !== nextKind) flushList();
+      listKind = nextKind;
+      listItems.push((ordered || unordered)![1]);
+      continue;
+    }
+
+    flushList();
+    paragraph.push(line);
+  }
+
+  flushParagraph();
+  flushList();
+  return blocks;
 }
 
 const INITIAL_MESSAGES: Message[] = [
@@ -299,7 +369,7 @@ export const AIChatWindow: React.FC = () => {
                   </button>
                 )}
 
-                <div className="whitespace-pre-wrap space-y-2 pr-6">{renderMessageText(msg.text)}</div>
+                <div className="space-y-3 pr-6">{renderMessageText(msg.text)}</div>
 
                 <div
                   className={`mt-2 text-[10px] font-medium ${
