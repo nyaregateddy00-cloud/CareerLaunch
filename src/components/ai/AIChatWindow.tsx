@@ -466,6 +466,7 @@ export const AIChatWindow: React.FC = () => {
       <div className="shrink-0 border-t border-slate-100 bg-slate-50 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-900/70">
         <details className="group">
           <summary className="cursor-pointer list-none text-[11px] font-medium text-slate-600 outline-none transition-colors hover:text-brand-blue-700 focus-visible:ring-2 focus-visible:ring-brand-green-500 dark:text-slate-300 dark:hover:text-brand-green-300">
+            <HelpCircle className="mr-1 inline h-3 w-3" aria-hidden="true" />
             Your message and relevant career records are sent to Google Gemini
             <span className="ml-1 text-brand-blue-700 underline dark:text-brand-green-300">Details</span>
           </summary>
@@ -482,7 +483,7 @@ export const AIChatWindow: React.FC = () => {
             e.preventDefault();
             handleSend();
           }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2.5"
         >
           <input
             type="text"
