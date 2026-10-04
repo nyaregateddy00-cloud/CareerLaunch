@@ -22,7 +22,6 @@ import { OpportunityDetailModal } from '../../components/opportunities/Opportuni
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { formatDate } from '../../lib/utils';
-import { isSupabaseConfigured } from '../../lib/supabase';
 
 export const DashboardPage: React.FC = () => {
   const { user, authNotice } = useAuth();
@@ -79,7 +78,6 @@ export const DashboardPage: React.FC = () => {
 
   if (!user) return null;
 
-  const syncIssue = workspaceSaveError || authNotice;
   const firstName = user.fullName.split(' ')[0];
   const upcomingInterviews = applications
     .filter((a) => a.stage === 'Interview' && a.interviewDate && new Date(a.interviewDate).getTime() >= Date.now())
@@ -115,28 +113,11 @@ export const DashboardPage: React.FC = () => {
       {/* Profile Strength Interactive Card */}
       <ProfileStrengthCard user={user} />
 
-      <div
-        role={syncIssue ? 'alert' : 'status'}
-        className={`rounded-xl border px-4 py-3 text-xs ${
-          syncIssue
-            ? 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200'
-            : isSupabaseConfigured
-              ? 'border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200'
-              : 'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
-        }`}
-      >
-        <p className="font-semibold">
-          {syncIssue ? 'Account sync needs attention' : isSupabaseConfigured ? 'Account sync is on' : 'Demo mode'}
+      {(authNotice || workspaceSaveError) && (
+        <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
+          Some changes may not have synced to your account. They may still be available in this browser. Please try again later.
         </p>
-        <p className="mt-1">
-          {syncIssue
-            ? 'Some changes may remain only in this browser until account sync is restored.'
-            : isSupabaseConfigured
-              ? 'Changes saved to your account are available across devices. This browser also keeps a cache. Older demo data is not imported automatically.'
-              : 'Career records are saved only in this browser and will not sync across devices.'}
-        </p>
-        {syncIssue && <p className="mt-1 break-words">{syncIssue}</p>}
-      </div>
+      )}
 
       {/* KPI Stats Overview */}
       <StatsOverview
