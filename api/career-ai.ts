@@ -59,6 +59,17 @@ export default async function handler(req: RequestShape, res: ResponseShape): Pr
     res.status(204).json({});
     return;
   }
+  if (req.method === 'GET') {
+    res.status(200).json({
+      service: 'CareerLaunch AI',
+      endpoint: 'reachable',
+      providerKeyConfigured: Boolean(environment.GEMINI_API_KEY),
+      authConfigured: Boolean(environment.VITE_SUPABASE_URL && (
+        environment.VITE_SUPABASE_PUBLISHABLE_KEY || environment.VITE_SUPABASE_ANON_KEY
+      )),
+    });
+    return;
+  }
   if (req.method !== 'POST') {
     responseError(res, 405, 'Use POST to send a message.');
     return;
