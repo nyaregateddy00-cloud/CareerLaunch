@@ -180,7 +180,7 @@ export const AIChatWindow: React.FC = () => {
         const noticeMessage: Message = {
           id: `msg-${Date.now() + 1}`,
           sender: 'system',
-          text: 'AI integration is not connected yet. Configure VITE_AI_API_URL with a secured server-side endpoint to enable career coaching. Provider API keys must stay on the server and must not be placed in browser-exposed VITE_ variables.',
+          text: 'CareerLaunch AI is temporarily unavailable. Please try again shortly.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
         setMessages((prev) => [...prev, noticeMessage]);
@@ -457,6 +457,10 @@ export const AIChatWindow: React.FC = () => {
       {/* AI data use disclosure */}
       <p className="px-4 pt-3 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
         CareerLaunch AI uses your saved career profile and records to personalize replies. Your message, chat history, and relevant saved career details are sent to Google Gemini. Profile contact details and application notes are not included automatically.
+      </p>
+
+      <p className="px-4 pt-3 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
+        CareerLaunch AI uses your saved profile, CV summary, skills, experience, education, projects, applications, and saved opportunities as context. Your question and recent chat are also sent to Google Gemini. Saved email/phone fields and application notes are not added automatically; free-text content you wrote may still contain personal details.
       </p>
 
       {/* Input Form Bar */}
