@@ -174,25 +174,57 @@ export async function POST(request: Request): Promise<Response> {
       skills.length ? `User skills: ${skills.join(', ')}.` : '',
     ].filter(Boolean).join('\n');
 
-    const geminiResponse = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiApiKey },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemInstruction }] },
-          contents: [...history, { role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 900, temperature: 0.6 },
-        }),
-      },
-    );
-
-    const result = await geminiResponse.json().catch(() => ({})) as {
+    type GeminiResult = {
       candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
       error?: { message?: string };
     };
-    if (!geminiResponse.ok) {
-      return errorResponse(request, 502, result.error?.message || 'The AI provider could not complete the request.');
+    const models = ['gemini-3.8-flash', 'gemini-3.5-flash-lite'];
+    let geminiResponse: Response | undefined;
+    let result: GeminiResult = {};
+
+    // If the preferred model is temporarily busy, fall back to the lighter
+    // stable model. Retry the fallback once for transient overload/rate-limit errors.
+    for (const [modelIndex, model] of models.entries()) {
+      const maxAttempts = modelIndex === models.length - 1 ? 2 : 1;
+      for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        if (attempt > 0) {
+          await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 400));
+        }
+
+        geminiResponse = await fetch(
+          'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': geminiApiKey },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: systemInstruction }] },
+              contents: [...history, { role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: { maxOutputTokens: 900, temperature: 0.6 },
+            }),
+          },
+        );
+
+        result = await geminiResponse.json().catch(() => ({})) as GeminiResult;
+        if (geminiResponse.ok) break;
+
+        const isTransient = [408, 429, 500, 502, 503, 504].includes(geminiResponse.status);
+        if (!isTransient) {
+          return errorResponse(
+            request,
+            502,
+            result.error?.message || 'The AI provider could not complete the request.',
+          );
+        }
+      }
+      if (geminiResponse?.ok) break;
+    }
+
+    if (!geminiResponse?.ok) {
+      return errorResponse(
+        request,
+        502,
+        result.error?.message || 'CareerLaunch AI is temporarily busy. Please try again shortly.',
+      );
     }
 
     const generatedText = result.candidates?.[0]?.content?.parts
