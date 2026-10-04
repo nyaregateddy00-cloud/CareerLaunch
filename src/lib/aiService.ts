@@ -88,8 +88,24 @@ Tone: Professional, encouraging, actionable, modern, concise. Focus on practical
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `API error: ${response.status}`);
+        const responseText = await response.text().catch(() => '');
+        let message = '';
+        try {
+          const errorData = JSON.parse(responseText);
+          message = errorData.error?.message || '';
+        } catch {
+          // Vercel may return a plain text or HTML routing error.
+        }
+        const endpointPath = (() => {
+          try { return new URL(this.endpoint!, window.location.origin).pathname; }
+          catch { return 'configured endpoint'; }
+        })();
+        const responseType = response.headers.get('content-type') || 'unknown response type';
+        const detail = responseText.replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 240);
+        throw new Error(
+          message ||
+          `API error ${response.status} at ${endpointPath} (${responseType})${detail ? `: ${detail}` : ''}`
+        );
       }
 
       const data = await response.json();
