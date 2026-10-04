@@ -2,16 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Bot,
   Send,
-  Sparkles,
   RefreshCw,
   Copy,
   Check,
   Lightbulb,
   AlertCircle,
-  FileText,
-  Briefcase,
   HelpCircle,
-  TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../common/Button';
@@ -308,15 +304,15 @@ export const AIChatWindow: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-card dark:shadow-card-dark overflow-hidden flex flex-col h-[calc(100vh-9rem)] max-h-[820px]">
+    <div className="flex h-[calc(100dvh-13rem)] min-h-[420px] max-h-[820px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900 dark:shadow-card-dark sm:rounded-3xl">
       {/* Top Header */}
-      <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-brand-green-500/10 dark:bg-brand-green-500/20 border border-brand-green-500/30 flex items-center justify-center text-brand-green-600 dark:text-brand-green-400">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-slate-800 dark:bg-slate-900/80 sm:px-6 sm:py-4">
+        <div className="mx-auto flex w-full max-w-4xl items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-green-500/30 bg-brand-green-500/10 text-brand-green-600 dark:bg-brand-green-500/20 dark:text-brand-green-400 sm:h-10 sm:w-10 sm:rounded-2xl">
             <Bot className="w-6 h-6" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                 CareerLaunch AI
               </h3>
@@ -339,7 +335,7 @@ export const AIChatWindow: React.FC = () => {
 
         <button
           onClick={clearChat}
-          className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors"
+          className="rounded-xl p-2.5 text-slate-400 transition-colors hover:bg-slate-200/70 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-green-500 dark:hover:bg-slate-800 dark:hover:text-slate-200"
           title="Reset conversation"
         >
           <RefreshCw className="w-4 h-4" />
@@ -349,7 +345,7 @@ export const AIChatWindow: React.FC = () => {
       {/* Honest Status Banner when API Key is not set */}
       {!isAIConfigured && (
         <div className="px-6 py-3 bg-amber-50/80 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-900/50 flex items-center justify-between text-xs text-amber-800 dark:text-amber-300">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
             <span>
               <strong>Preview Mode:</strong> Configure a server-side AI endpoint to enable live responses.
@@ -359,7 +355,7 @@ export const AIChatWindow: React.FC = () => {
       )}
 
       {/* Suggestion Chips */}
-      <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 overflow-x-auto flex items-center gap-2 no-scrollbar">
+      <div className="flex items-center gap-2 overflow-x-auto border-b border-slate-100 bg-white px-4 py-2.5 dark:border-slate-800/80 dark:bg-slate-900 sm:px-6 sm:py-3 no-scrollbar">
         <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1 uppercase tracking-wider flex-shrink-0">
           <Lightbulb className="w-3.5 h-3.5 text-amber-500" />
           Quick Prompts:
@@ -368,7 +364,7 @@ export const AIChatWindow: React.FC = () => {
           <button
             key={idx}
             onClick={() => handleSend(item.prompt)}
-            className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-brand-green-500 hover:text-brand-green-600 dark:hover:text-brand-green-400 transition-colors whitespace-nowrap flex-shrink-0"
+            className="shrink-0 whitespace-nowrap rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-brand-green-500 hover:bg-brand-green-50 hover:text-brand-green-700 focus:outline-none focus:ring-2 focus:ring-brand-green-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-green-300"
           >
             {item.title}
           </button>
@@ -376,7 +372,7 @@ export const AIChatWindow: React.FC = () => {
       </div>
 
       {/* Messages Stream */}
-      <div className="flex-1 p-6 overflow-y-auto space-y-6">
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto bg-slate-50/40 px-3 py-4 dark:bg-slate-950/20 sm:space-y-6 sm:p-6 lg:p-8">
         {messages.map((msg) => {
           if (msg.sender === 'system') {
             return (
@@ -395,7 +391,7 @@ export const AIChatWindow: React.FC = () => {
           return (
             <div
               key={msg.id}
-              className={`flex items-start gap-3.5 ${
+              className={`mx-auto flex w-full max-w-4xl items-start gap-2.5 sm:gap-3.5 ${
                 msg.sender === 'user' ? 'flex-row-reverse' : 'flex-row'
               }`}
             >
@@ -407,17 +403,17 @@ export const AIChatWindow: React.FC = () => {
                     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
                   }
                   alt="User"
-                  className="w-8 h-8 rounded-xl object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0"
+                  className="h-8 w-8 shrink-0 rounded-xl border border-slate-200 object-cover dark:border-slate-700 sm:h-9 sm:w-9"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-xl bg-brand-green-500 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand-green-500 text-white shadow-sm sm:h-9 sm:w-9">
                   <Bot className="w-4 h-4" />
                 </div>
               )}
 
               {/* Bubble */}
               <div
-                className={`relative max-w-2xl rounded-2xl p-4 sm:p-5 text-xs sm:text-sm leading-relaxed shadow-sm ${
+                className={`relative min-w-0 max-w-[calc(100%-2.75rem)] rounded-2xl p-3.5 text-[13px] leading-6 shadow-sm sm:max-w-[min(82%,42rem)] sm:p-5 sm:text-sm ${
                   msg.sender === 'user'
                     ? 'bg-brand-blue-900 text-white rounded-tr-none'
                     : 'bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-200/80 dark:border-slate-800 rounded-tl-none'
@@ -456,7 +452,7 @@ export const AIChatWindow: React.FC = () => {
             <div className="w-8 h-8 rounded-xl bg-brand-green-500 flex items-center justify-center text-white flex-shrink-0">
               <Bot className="w-4 h-4 animate-bounce" />
             </div>
-            <div className="bg-slate-100 dark:bg-slate-800 rounded-2xl p-4 text-xs text-slate-500 flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-500 shadow-sm dark:border-slate-700 dark:bg-slate-800">
               <span className="w-2 h-2 rounded-full bg-brand-green-500 animate-pulse"></span>
               <span>CareerLaunch AI is thinking...</span>
             </div>
@@ -467,16 +463,20 @@ export const AIChatWindow: React.FC = () => {
       </div>
 
       {/* AI data use disclosure */}
-      <p className="px-4 pt-3 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
-        CareerLaunch AI uses your saved career profile and records to personalize replies. Your message, chat history, and relevant saved career details are sent to Google Gemini. Profile contact details and application notes are not included automatically.
-      </p>
-
-      <p className="px-4 pt-3 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
-        CareerLaunch AI uses your saved profile, CV summary, skills, experience, education, projects, applications, and saved opportunities as context. Your question and recent chat are also sent to Google Gemini. Saved email/phone fields and application notes are not added automatically; free-text content you wrote may still contain personal details.
-      </p>
+      <div className="shrink-0 border-t border-slate-100 bg-slate-50 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-900/70">
+        <details className="group">
+          <summary className="cursor-pointer list-none text-[11px] font-medium text-slate-600 outline-none transition-colors hover:text-brand-blue-700 focus-visible:ring-2 focus-visible:ring-brand-green-500 dark:text-slate-300 dark:hover:text-brand-green-300">
+            Your message and relevant career records are sent to Google Gemini
+            <span className="ml-1 text-brand-blue-700 underline dark:text-brand-green-300">Details</span>
+          </summary>
+          <p className="mt-2 max-w-4xl text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+            Replies can use your saved profile, CV summary, skills, experience, education, projects, applications, and saved opportunities. Saved email/phone fields and application notes are not added automatically, but free-text records you wrote may contain personal details.
+          </p>
+        </details>
+      </div>
 
       {/* Input Form Bar */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <div className="shrink-0 border-t border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900 sm:p-4">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -489,7 +489,7 @@ export const AIChatWindow: React.FC = () => {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Ask anything (e.g. 'How do I explain my industrial attachment in an interview?')..."
-            className="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-green-500 transition-all"
+            className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-green-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white sm:px-4"
           />
           <Button
             type="submit"
