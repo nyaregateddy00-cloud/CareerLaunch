@@ -1,10 +1,6 @@
 /**
- * CareerLaunch AI Service Layer
- * 
- * Provides an honest, modular interface for AI career assistance.
- * If a server-side VITE_AI_API_URL is not configured, it transparently returns
- * isConfigured: false so the UI presents an honest "Configuration Required"
- * or "Coming Soon" state rather than fake responses.
+ * Authenticated client for CareerLaunch's same-origin, server-side AI endpoint.
+ * User career data is sent only with a chat message and is filtered server-side.
  */
 
 import { supabase } from './supabase';
@@ -48,34 +44,18 @@ class AIService {
     prompt: string,
     history: AIChatMessage[] = [],
     task?: AIAssistantTask,
-    userContext?: { fullName?: string; headline?: string; skills?: string[] }
+    userContext?: { fullName?: string; headline?: string; skills?: string[]; careerContext?: string }
   ): Promise<AIResponse> {
     if (!this.isConfigured()) {
       return {
         success: false,
         isConfigured: false,
         content: '',
-        error: 'AI service is not configured. Set VITE_AI_API_URL to a secured server-side endpoint.',
+        error: 'The CareerLaunch AI endpoint is unavailable. Please try again later.',
       };
     }
 
     try {
-      const systemInstruction = `You are CareerLaunch AI, an expert career advisor specializing in university students, graduates, and professionals in Kenya and Africa. 
-User Context: ${userContext?.fullName ? `User: ${userContext.fullName}` : ''} ${userContext?.headline ? `Role/Headline: ${userContext.headline}` : ''} ${userContext?.skills?.length ? `Skills: ${userContext.skills.join(', ')}` : ''}.
-Task Focus: ${task || 'General career mentorship'}.
-Tone: Professional, encouraging, actionable, modern, concise. Focus on practical African & international career opportunities.`;
-
-      const contents = [
-        ...history.slice(-6).map((msg) => ({
-          role: msg.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: msg.content }],
-        })),
-        {
-          role: 'user',
-          parts: [{ text: `${systemInstruction}\n\nUser Question: ${prompt}` }],
-        },
-      ];
-
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
       if (!session?.access_token) throw new Error('Sign in to use CareerLaunch AI.');
@@ -86,7 +66,7 @@ Tone: Professional, encouraging, actionable, modern, concise. Focus on practical
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ contents, prompt, history, task, userContext }),
+        body: JSON.stringify({ prompt, history, task, userContext }),
       });
 
       if (!response.ok) {
