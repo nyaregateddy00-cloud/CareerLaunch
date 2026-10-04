@@ -25,6 +25,16 @@ interface Message {
   timestamp: string;
 }
 
+function renderMessageText(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[\s\S]*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    return <React.Fragment key={index}>{part.replace(/\*\*/g, '')}</React.Fragment>;
+  });
+}
+
 const INITIAL_MESSAGES: Message[] = [
   {
     id: 'msg-1',
@@ -277,7 +287,7 @@ export const AIChatWindow: React.FC = () => {
               >
                 {msg.sender === 'assistant' && (
                   <button
-                    onClick={() => copyToClipboard(msg.text, msg.id)}
+                    onClick={() => copyToClipboard(msg.text.replace(/\\*\\*/g, ''), msg.id)}
                     className="absolute top-3 right-3 p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                     title="Copy message"
                   >
@@ -289,7 +299,7 @@ export const AIChatWindow: React.FC = () => {
                   </button>
                 )}
 
-                <div className="whitespace-pre-wrap space-y-2 pr-6">{msg.text}</div>
+                <div className="whitespace-pre-wrap space-y-2 pr-6">{renderMessageText(msg.text)}</div>
 
                 <div
                   className={`mt-2 text-[10px] font-medium ${
