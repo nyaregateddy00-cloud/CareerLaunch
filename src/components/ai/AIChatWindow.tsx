@@ -287,7 +287,7 @@ export const AIChatWindow: React.FC = () => {
               >
                 {msg.sender === 'assistant' && (
                   <button
-                    onClick={() => copyToClipboard(msg.text.replace(/\\*\\*/g, ''), msg.id)}
+                    onClick={() => copyToClipboard(msg.text.replace(/\*\*/g, ''), msg.id)}
                     className="absolute top-3 right-3 p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                     title="Copy message"
                   >
