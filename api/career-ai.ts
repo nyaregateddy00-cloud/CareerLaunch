@@ -91,13 +91,13 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   const authorization = request.headers.get('authorization') ?? '';
-  const accessToken = authorization.match(/^Bearer\\s+(.+)$/i)?.[1];
+  const accessToken = authorization.match(/^Bearer\s+(.+)$/i)?.[1];
   if (!accessToken) {
     return errorResponse(request, 401, 'Sign in to use CareerLaunch AI.');
   }
 
   try {
-    const authResponse = await fetch(`${supabaseUrl.replace(/\\/$/, '')}/auth/v1/user`, {
+    const authResponse = await fetch(`${(supabaseUrl.endsWith('/') ? supabaseUrl.slice(0, -1) : supabaseUrl)}/auth/v1/user`, {
       headers: { apikey: supabaseKey, Authorization: `Bearer ${accessToken}` },
     });
     if (!authResponse.ok) {
@@ -172,7 +172,7 @@ export async function POST(request: Request): Promise<Response> {
       `Requested focus: ${task}.`,
       headline ? `User career headline: ${headline}.` : '',
       skills.length ? `User skills: ${skills.join(', ')}.` : '',
-    ].filter(Boolean).join('\\n');
+    ].filter(Boolean).join('\n');
 
     const geminiResponse = await fetch(
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent',
