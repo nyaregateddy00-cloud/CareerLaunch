@@ -35,7 +35,9 @@ class AIService {
   private endpoint: string | undefined;
 
   constructor() {
-    this.endpoint = import.meta.env.VITE_AI_API_URL;
+    // Keep the browser pointed at our same-origin Vercel function. The
+    // provider key and all provider requests remain server-side.
+    this.endpoint = '/api/career-ai';
   }
 
   public isConfigured(): boolean {
