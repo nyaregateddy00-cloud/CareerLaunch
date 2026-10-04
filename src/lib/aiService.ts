@@ -7,6 +7,8 @@
  * or "Coming Soon" state rather than fake responses.
  */
 
+import { supabase } from './supabase';
+
 export interface AIChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -72,9 +74,16 @@ Tone: Professional, encouraging, actionable, modern, concise. Focus on practical
         },
       ];
 
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (!session?.access_token) throw new Error('Sign in to use CareerLaunch AI.');
+
       const response = await fetch(this.endpoint!, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ contents, prompt, history, task, userContext }),
       });
 
