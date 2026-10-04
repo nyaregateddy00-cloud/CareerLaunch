@@ -113,9 +113,6 @@ export const DashboardPage: React.FC = () => {
       {/* Profile Strength Interactive Card */}
       <ProfileStrengthCard user={user} />
 
-      <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
-        Career records are cached in this browser. With Supabase configured and the updated schema applied, they are synchronized to your account for use across devices. Demo mode stays in this browser.
-      </div>
       {(authNotice || workspaceSaveError) && <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">{workspaceSaveError || authNotice}</p>}
 
       {/* KPI Stats Overview */}
