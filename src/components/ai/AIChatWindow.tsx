@@ -190,7 +190,62 @@ export const AIChatWindow: React.FC = () => {
     }
 
     try {
-      const skills = mockStorage.getUserSkills().map((s) => s.skillName);
+      const skillRecords = mockStorage.getUserSkills();
+      const skills = skillRecords.map((skill) => skill.skillName);
+      const experienceRecords = mockStorage.getExperience();
+      const educationRecords = mockStorage.getEducation();
+      const projectRecords = mockStorage.getProjects();
+      const certificationRecords = mockStorage.getCertifications();
+      const languageRecords = mockStorage.getLanguages();
+      const applicationRecords = mockStorage.getApplications();
+      const savedOpportunityIds = new Set(mockStorage.getSavedOpportunityIds());
+      const cv = mockStorage.getCV();
+      const portfolio = mockStorage.getPortfolio();
+      const savedOpportunities = mockStorage.getOpportunities()
+        .filter((opportunity) => savedOpportunityIds.has(opportunity.id))
+        .slice(0, 10)
+        .map(({ title, company, location, type, deadline, tags }) => ({
+          title, company, location, type, deadline, tags: tags.slice(0, 8),
+        }));
+
+      // Share relevant career details for this chat, but omit profile contact
+      // details, application notes, and account/authentication data.
+      const careerContext = JSON.stringify({
+        profile: {
+          role: user?.role,
+          headline: user?.headline?.slice(0, 300),
+          bio: user?.bio?.slice(0, 800),
+          location: user?.location?.slice(0, 160),
+        },
+        cv: { title: cv.title.slice(0, 160), summary: cv.content.summary.slice(0, 2000) },
+        skills: skillRecords.slice(0, 30).map(({ skillName, category, proficiencyLevel, yearsOfExperience }) => ({
+          name: skillName.slice(0, 100), category, proficiency: proficiencyLevel, years: yearsOfExperience,
+        })),
+        experience: experienceRecords.slice(0, 8).map(({ company, position, employmentType, location, startDate, endDate, isCurrent, description }) => ({
+          company: company.slice(0, 160), position: position.slice(0, 160), type: employmentType,
+          location: location.slice(0, 160), startDate, endDate, isCurrent, description: description.slice(0, 700),
+        })),
+        education: educationRecords.slice(0, 8).map(({ institution, degree, fieldOfStudy, startDate, endDate, isCurrent, grade, description }) => ({
+          institution: institution.slice(0, 180), degree: degree.slice(0, 140), field: fieldOfStudy.slice(0, 140),
+          startDate, endDate, isCurrent, grade: grade?.slice(0, 80), description: description?.slice(0, 500),
+        })),
+        projects: projectRecords.slice(0, 10).map(({ title, description, tags, isFeatured }) => ({
+          title: title.slice(0, 160), description: description.slice(0, 700), tags: tags.slice(0, 10), isFeatured,
+        })),
+        certifications: certificationRecords.slice(0, 12).map(({ name, issuer, issueDate, expiryDate }) => ({
+          name: name.slice(0, 160), issuer: issuer.slice(0, 160), issueDate, expiryDate,
+        })),
+        languages: languageRecords.slice(0, 12).map(({ name, proficiency }) => ({ name: name.slice(0, 80), proficiency })),
+        applications: applicationRecords.slice(0, 12).map(({ company, position, stage, dateApplied, deadline, interviewDate, followUpDate }) => ({
+          company: company.slice(0, 160), position: position.slice(0, 160), stage, dateApplied, deadline, interviewDate, followUpDate,
+        })),
+        portfolio: {
+          headline: portfolio.headline.slice(0, 300),
+          bio: portfolio.bio.slice(0, 800),
+          published: portfolio.isPublished,
+        },
+        savedOpportunities,
+      });
       const history: AIChatMessage[] = messages
         .filter((m) => m.sender !== 'system')
         .map((m) => ({
@@ -204,6 +259,7 @@ export const AIChatWindow: React.FC = () => {
         fullName: user?.fullName,
         headline: user?.headline,
         skills,
+        careerContext,
       });
 
       const aiMessage: Message = {
@@ -397,6 +453,11 @@ export const AIChatWindow: React.FC = () => {
 
         <div ref={messagesEndRef} />
       </div>
+
+      {/* AI data use disclosure */}
+      <p className="px-4 pt-3 text-[10px] leading-relaxed text-slate-500 dark:text-slate-400">
+        CareerLaunch AI uses your saved career profile and records to personalize replies. Your message, chat history, and relevant saved career details are sent to Google Gemini. Profile contact details and application notes are not included automatically.
+      </p>
 
       {/* Input Form Bar */}
       <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
