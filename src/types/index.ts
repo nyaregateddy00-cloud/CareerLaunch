@@ -177,7 +177,7 @@ export interface Opportunity {
   location: string;
   country: string;
   type: OpportunityType;
-  workMode: WorkMode;
+  workMode: WorkMode | null;
   experienceLevel: ExperienceLevel;
   salaryRange?: string;
   currency: 'KES' | 'USD' | 'EUR' | 'GBP';
