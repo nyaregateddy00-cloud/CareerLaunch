@@ -45,9 +45,11 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
             <Badge variant={getTypeVariant(opportunity.type)} size="sm">
               {opportunity.type}
             </Badge>
-            <Badge variant="outline" size="sm">
-              {opportunity.workMode}
-            </Badge>
+            {opportunity.workMode && (
+              <Badge variant="outline" size="sm">
+                {opportunity.workMode}
+              </Badge>
+            )}
           </div>
 
           <button
