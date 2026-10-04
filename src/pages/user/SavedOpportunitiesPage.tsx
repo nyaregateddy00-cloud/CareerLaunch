@@ -69,7 +69,7 @@ export const SavedOpportunitiesPage: React.FC = () => {
         <EmptyState
           icon={<Bookmark className="w-8 h-8 text-amber-500" />}
           title="No saved opportunities yet"
-          description="Browse thousands of jobs, internships, and scholarships across Kenya and Africa to save roles for later."
+          description="Browse the opportunity catalog and save listings to review later. Confirm deadlines and requirements with each listing source."
           action={
             <Link to="/opportunities">
               <Button size="sm" variant="primary">

@@ -35,10 +35,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     github_url TEXT,
     linkedin_url TEXT,
     portfolio_url TEXT,
+    website_url TEXT,
     twitter_url TEXT,
     created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
+
+ALTER TABLE public.profiles
+    ADD COLUMN IF NOT EXISTS website_url TEXT;
 
 
 -- ==============================================================================
@@ -686,12 +690,14 @@ BEGIN
         email,
         headline,
         role,
-        profile_strength
+        profile_strength,
+        avatar_url
     )
     VALUES (
         NEW.id,
         COALESCE(
             NEW.raw_user_meta_data->>'full_name',
+            NEW.raw_user_meta_data->>'name',
             'New Member'
         ),
         NEW.email,
@@ -704,13 +710,14 @@ BEGIN
             THEN NEW.raw_user_meta_data->>'role'
             ELSE 'job_seeker'
         END,
-        35
+        35,
+        COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture')
     );
 
     RETURN NEW;
 
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 
 -- Remove existing trigger if it exists
@@ -723,3 +730,29 @@ CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_new_user();
+
+
+-- ============================================================================
+-- 21. PRIVATE WORKSPACE SNAPSHOTS
+-- The current React screens use synchronous browser storage. This private,
+-- owner-scoped JSON snapshot keeps that workspace state synchronized across
+-- devices while the UI is migrated to normalized table CRUD operations.
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.workspace_snapshots (
+    user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.workspace_snapshots ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users manage their own workspace snapshot"
+    ON public.workspace_snapshots;
+CREATE POLICY "Users manage their own workspace snapshot"
+    ON public.workspace_snapshots
+    FOR ALL TO authenticated
+    USING (auth.uid() = user_id)
+    WITH CHECK (auth.uid() = user_id);
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.workspace_snapshots TO authenticated;

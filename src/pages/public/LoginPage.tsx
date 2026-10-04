@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Rocket, Lock, Mail, ArrowRight, UserCheck, Shield } from 'lucide-react';
+import { Rocket, Lock, Mail, ArrowRight, UserCheck, Shield, Chrome } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Card } from '../../components/common/Card';
 import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../../lib/mockData';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 export const LoginPage: React.FC = () => {
-  const { login, switchUser, isLoading } = useAuth();
-  const [email, setEmail] = useState('teddy.mwangi@uonbi.ac.ke');
-  const [password, setPassword] = useState('password123');
+  const { login, signInWithGoogle, switchUser, isLoading, authError } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -26,6 +27,8 @@ export const LoginPage: React.FC = () => {
     switchUser(userId);
     navigate('/dashboard');
   };
+
+  const handleGoogleLogin = async () => { await signInWithGoogle(); };
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-950">
@@ -49,6 +52,7 @@ export const LoginPage: React.FC = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
         <Card className="p-8 space-y-6">
           <form onSubmit={handleLogin} className="space-y-4">
+            {!isSupabaseConfigured && <p className="rounded-lg bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-800 dark:text-amber-200">Demo mode: signing in with an email opens a local sample account. The password is not checked or stored.</p>}
             <Input
               label="Email Address"
               type="email"
@@ -93,10 +97,16 @@ export const LoginPage: React.FC = () => {
             </Button>
           </form>
 
+          <Button type="button" variant="secondary" className="w-full" isLoading={isLoading} onClick={handleGoogleLogin} leftIcon={<Chrome className="w-4 h-4" />}>
+            Continue with Google
+          </Button>
+
+          {authError && <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">{authError}</p>}
+
           {/* Quick Demo Personas Login Buttons */}
-          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+          {!isSupabaseConfigured && <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center mb-2">
-              Instant 1-Click Demo Login
+              Demo profiles (local preview)
             </p>
             <div className="grid grid-cols-1 gap-2">
               <button
@@ -135,7 +145,7 @@ export const LoginPage: React.FC = () => {
                 <Shield className="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" />
               </button>
             </div>
-          </div>
+          </div>}
 
           <div className="text-center text-xs text-slate-500">
             Don't have an account?{' '}

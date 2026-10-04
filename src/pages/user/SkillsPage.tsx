@@ -95,7 +95,7 @@ export const SkillsPage: React.FC = () => {
             Target Role Gap Analysis
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Comparing your profile against active job specifications at Safaricom, Andela & tech hubs
+            Explore sample role skill profiles. They are not connected to live employer job specifications.
           </p>
         </div>
 

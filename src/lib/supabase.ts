@@ -6,7 +6,9 @@ const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 
 export const isSupabaseConfigured = Boolean(
   supabaseUrl &&
   supabasePublishableKey &&
-  supabaseUrl.startsWith('https://')
+  supabaseUrl.startsWith('https://') &&
+  !/your-|placeholder/i.test(supabaseUrl) &&
+  !/your-|placeholder/i.test(supabasePublishableKey)
 );
 
 if (!isSupabaseConfigured) {

@@ -24,25 +24,35 @@ import { Button } from '../../components/common/Button';
 import { formatDate } from '../../lib/utils';
 
 export const DashboardPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, authNotice } = useAuth();
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [savedOppIds, setSavedOppIds] = useState<string[]>([]);
   const [recommendedOpps, setRecommendedOpps] = useState<Opportunity[]>([]);
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
+  const [workspaceSaveError, setWorkspaceSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     setApplications(mockStorage.getApplications());
     setSavedOppIds(mockStorage.getSavedOpportunityIds());
     // Get top 2 published opportunities matching user
-    setRecommendedOpps(mockStorage.getOpportunities().slice(0, 2));
+    setRecommendedOpps(mockStorage.getOpportunities().filter((opportunity) => opportunity.status === 'published').slice(0, 2));
 
     const handleStorage = () => {
       setApplications(mockStorage.getApplications());
       setSavedOppIds(mockStorage.getSavedOpportunityIds());
-      setRecommendedOpps(mockStorage.getOpportunities().slice(0, 2));
+      setRecommendedOpps(mockStorage.getOpportunities().filter((opportunity) => opportunity.status === 'published').slice(0, 2));
     };
     window.addEventListener('careerlaunch_storage_change', handleStorage);
     return () => window.removeEventListener('careerlaunch_storage_change', handleStorage);
+  }, []);
+
+  useEffect(() => {
+    const handlePersistenceError = (event: Event) => {
+      const detail = (event as CustomEvent<string>).detail;
+      setWorkspaceSaveError(detail || 'Workspace changes could not be synchronized.');
+    };
+    window.addEventListener('careerlaunch_persistence_error', handlePersistenceError);
+    return () => window.removeEventListener('careerlaunch_persistence_error', handlePersistenceError);
   }, []);
 
   const handleToggleSave = (id: string) => {
@@ -58,16 +68,20 @@ export const DashboardPage: React.FC = () => {
   }, []);
 
   const upcomingDeadlines = useMemo(() => {
+    const now = Date.now();
     return mockStorage
       .getOpportunities()
-      .filter((o) => o.deadline)
+      .filter((o) => o.status === 'published' && o.deadline && new Date(o.deadline).getTime() >= now)
+      .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
       .slice(0, 2);
   }, []);
 
   if (!user) return null;
 
   const firstName = user.fullName.split(' ')[0];
-  const upcomingInterviews = applications.filter((a) => a.stage === 'Interview' && a.interviewDate);
+  const upcomingInterviews = applications
+    .filter((a) => a.stage === 'Interview' && a.interviewDate && new Date(a.interviewDate).getTime() >= Date.now())
+    .sort((a, b) => new Date(a.interviewDate!).getTime() - new Date(b.interviewDate!).getTime());
 
   return (
     <div className="space-y-8">
@@ -99,6 +113,11 @@ export const DashboardPage: React.FC = () => {
       {/* Profile Strength Interactive Card */}
       <ProfileStrengthCard user={user} />
 
+      <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+        Career records are cached in this browser. With Supabase configured and the updated schema applied, they are synchronized to your account for use across devices. Demo mode stays in this browser.
+      </div>
+      {(authNotice || workspaceSaveError) && <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">{workspaceSaveError || authNotice}</p>}
+
       {/* KPI Stats Overview */}
       <StatsOverview
         applications={applications}
@@ -115,7 +134,7 @@ export const DashboardPage: React.FC = () => {
                 <FileText className="w-5 h-5" />
               </div>
               <h4 className="text-sm font-bold text-slate-900 dark:text-white">CV Builder</h4>
-              <p className="text-xs text-slate-500 mt-1">Polish ATS-proof CV and preview clean A4 templates.</p>
+              <p className="text-xs text-slate-500 mt-1">Edit your CV content and preview the available templates.</p>
             </div>
             <div className="mt-4 flex items-center text-xs font-semibold text-brand-blue-700 dark:text-brand-blue-400">
               Open Builder <ArrowRight className="w-3.5 h-3.5 ml-1" />
@@ -130,9 +149,7 @@ export const DashboardPage: React.FC = () => {
                 <Globe className="w-5 h-5" />
               </div>
               <h4 className="text-sm font-bold text-slate-900 dark:text-white">Shareable Portfolio</h4>
-              <p className="text-xs text-slate-500 mt-1">
-                careerlaunch.co.ke/u/{user.fullName.toLowerCase().replace(/\s+/g, '')}
-              </p>
+              <p className="text-xs text-slate-500 mt-1">Edit your portfolio profile and visibility settings.</p>
             </div>
             <div className="mt-4 flex items-center text-xs font-semibold text-brand-green-600 dark:text-brand-green-400">
               View & Edit <ArrowRight className="w-3.5 h-3.5 ml-1" />
@@ -147,7 +164,7 @@ export const DashboardPage: React.FC = () => {
                 <Sparkles className="w-5 h-5" />
               </div>
               <h4 className="text-sm font-bold text-slate-900 dark:text-white">Skill Gap Analyzer</h4>
-              <p className="text-xs text-slate-500 mt-1">Benchmark skills against Safaricom, Andela & tech hubs.</p>
+              <p className="text-xs text-slate-500 mt-1">Review your skills and add experience you want to highlight.</p>
             </div>
             <div className="mt-4 flex items-center text-xs font-semibold text-cyan-700 dark:text-cyan-400">
               Check Gaps <ArrowRight className="w-3.5 h-3.5 ml-1" />
@@ -162,7 +179,7 @@ export const DashboardPage: React.FC = () => {
                 <Bot className="w-5 h-5" />
               </div>
               <h4 className="text-sm font-bold text-slate-900 dark:text-white">CareerLaunch AI</h4>
-              <p className="text-xs text-slate-500 mt-1">Practice interview simulation and review job applications.</p>
+              <p className="text-xs text-slate-500 mt-1">Open career guidance tools available in this deployment.</p>
             </div>
             <div className="mt-4 flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               Start Session <ArrowRight className="w-3.5 h-3.5 ml-1" />
@@ -180,9 +197,7 @@ export const DashboardPage: React.FC = () => {
               <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
                 Recommended Opportunities
               </h3>
-              <p className="text-xs text-slate-500">
-                Matches your profile, skills, and target career pathway
-              </p>
+              <p className="text-xs text-slate-500">From the opportunity catalog. Confirm details with the listing source.</p>
             </div>
             <Link
               to="/opportunities"
@@ -254,7 +269,7 @@ export const DashboardPage: React.FC = () => {
                     to="/ai-assistant"
                     className="text-[11px] font-bold text-brand-blue-700 dark:text-brand-green-400 inline-block hover:underline pt-1"
                   >
-                    Simulate this interview with AI →
+                    Open interview preparation →
                   </Link>
                 </div>
               ))

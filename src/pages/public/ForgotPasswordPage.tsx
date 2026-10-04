@@ -4,15 +4,16 @@ import { Rocket, Mail, ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Card } from '../../components/common/Card';
+import { useAuth } from '../../context/AuthContext';
 
 export const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  const { resetPassword, isLoading, authError, authNotice } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    setError('Password recovery is not connected yet. Please contact support to regain access.');
+    await resetPassword(email);
   };
 
   return (
@@ -30,7 +31,7 @@ export const ForgotPasswordPage: React.FC = () => {
           Reset your password
         </h2>
         <p className="mt-1 text-xs text-slate-500">
-          Password recovery is not available until account authentication is connected.
+          Enter your account email and we’ll send a reset link if recovery is configured.
         </p>
       </div>
 
@@ -47,9 +48,10 @@ export const ForgotPasswordPage: React.FC = () => {
                 leftIcon={<Mail className="w-4 h-4" />}
               />
 
-              {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
-              <Button type="submit" variant="primary" size="lg" className="w-full">
-                Check Recovery Availability
+              {authError && <p role="alert" className="text-sm text-rose-600">{authError}</p>}
+              {authNotice && <p role="status" className="text-sm text-emerald-700">{authNotice}</p>}
+              <Button type="submit" variant="primary" size="lg" className="w-full" isLoading={isLoading}>
+                Send reset link
               </Button>
 
               <div className="text-center pt-2">

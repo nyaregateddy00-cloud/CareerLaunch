@@ -78,7 +78,10 @@ export const PricingPage: React.FC = () => {
             Simple, Transparent Plans for Every Stage
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Start for free during campus, scale up as you land high-paying roles. M-Pesa, card, and PayPal supported.
+            Compare the current plan preview. Subscription checkout, payment methods, and plan entitlements are not connected in this deployment.
+          </p>
+          <p role="note" className="mx-auto max-w-xl rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+            Pricing and features shown below are illustrative only. No payment will be taken through this page.
           </p>
 
           {/* Monthly / Annual toggle */}

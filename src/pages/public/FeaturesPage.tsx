@@ -21,12 +21,12 @@ export const FeaturesPage: React.FC = () => {
   const features = [
     {
       title: 'Interactive CV Builder',
-      subtitle: 'ATS-Proof Resumes Built in Minutes',
-      desc: 'Craft structured, modern CVs formatted specifically for applicant tracking systems used by multinationals and banks across Africa. Includes 3 tailored design templates and instant PDF generation with clean print styling.',
+      subtitle: 'Structured CVs with a print view',
+      desc: 'Add your career details to a CV layout and preview the result. Use your browser print dialog to save a PDF.',
       points: [
         'Multi-template switching (Modern Nairobi, Executive ATS, Clean Minimal)',
-        'Built-in AI summary and bullet point enhancer',
-        'One-click download as clean A4 PDF',
+        'Edit profile, skills, projects, education, and experience',
+        'Print-friendly CV preview',
         'Integrated skills and project highlights',
       ],
       icon: FileText,
@@ -34,10 +34,10 @@ export const FeaturesPage: React.FC = () => {
     },
     {
       title: 'Shareable Portfolio Engine',
-      subtitle: 'Proof of Work on Your Own Custom URL',
-      desc: 'Every user claims their personal vanity link (careerlaunch.co.ke/u/username). Showcase deployed web applications, GitHub repos, case studies, and recommendations without coding a portfolio from scratch.',
+      subtitle: 'Organize and preview your work',
+      desc: 'Create a portfolio profile and preview it on the domain where CareerLaunch is deployed.',
       points: [
-        'Instant live URL for social media and job applications',
+        'Shareable route on the current deployment',
         'Direct "Hire Me" contact integration',
         'Featured projects showcase with responsive imagery and live demo links',
         'Mobile-optimized for smartphone-first recruiters',
@@ -47,13 +47,13 @@ export const FeaturesPage: React.FC = () => {
     },
     {
       title: 'Opportunity Discovery Engine',
-      subtitle: 'Genuine African Opportunities, Zero Spam',
-      desc: 'Discover verified jobs, NITA attachments, internships, scholarships, and remote freelance contracts. Filter by work mode (hybrid, remote, on-site), experience level, and verified salary ranges.',
+      subtitle: 'Browse the opportunity catalog',
+      desc: 'Explore job, internship, attachment, scholarship, and freelance listings. Verify deadlines, pay, and requirements with the original source.',
       points: [
-        'Accredited Kenyan industrial attachments with NITA clearance notes',
+        'Filter by location, work mode, experience, and opportunity type',
         'Transparent salary and stipend data in KES and USD',
         'One-click bookmarking and application tracking',
-        'Verified corporate and tech hub listings',
+        'Listings may be sample data and are not independently verified',
       ],
       icon: Search,
       link: '/opportunities',
@@ -73,8 +73,8 @@ export const FeaturesPage: React.FC = () => {
     },
     {
       title: 'Skills & Role Gap Analyzer',
-      subtitle: 'Know Exactly What Skills Employers Demand',
-      desc: 'Benchmark your current technical and soft skills against verified job descriptions from top employers like Safaricom, Equity Group, Microsoft ADC, and Andela.',
+      subtitle: 'Explore skills for roles you are considering',
+      desc: 'Review your skills against sample role profiles. These examples are not connected to live employer job specifications.',
       points: [
         'Dynamic Match Score percentage for target career roles',
         'Identifies missing high-priority and medium-priority skills',
@@ -86,13 +86,11 @@ export const FeaturesPage: React.FC = () => {
     },
     {
       title: 'CareerLaunch AI',
-      subtitle: 'Your African Career Intelligence Assistant',
-      desc: 'An AI assistant trained on African hiring dynamics, local interview nuances, and tech stacks. Get instant feedback on your CV summary, generate company-specific cover letters, and simulate technical interviews.',
+      subtitle: 'Assistant interface',
+      desc: 'Assistant responses require a configured AI service. Availability depends on the current deployment.',
       points: [
-        'Context-aware responses tailored to Kenyan and African ecosystems',
-        'Pre-built prompts for CV polish, cover letters, and interview simulations',
-        'Clean modular architecture ready for custom API key integration',
-        'Real-time career guidance 24/7',
+        'Open the assistant interface from your dashboard',
+        'AI functionality must be configured by the deployment operator',
       ],
       icon: Bot,
       link: '/ai-assistant',
@@ -107,10 +105,10 @@ export const FeaturesPage: React.FC = () => {
             <span>Platform Capabilities</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-950 dark:text-white tracking-tight">
-            Complete Toolkit for Modern Career Growth
+            Career Tools for Your Next Step
           </h1>
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed">
-            From your first campus attachment to high-impact international remote roles, CareerLaunch gives you every tool required to succeed.
+            Explore the tools available to organize your profile, career materials, opportunity search, and applications.
           </p>
         </div>
 

@@ -60,7 +60,7 @@ export const PortfolioBuilderPage: React.FC = () => {
             Public Portfolio Builder
           </h1>
           <p className="text-xs sm:text-sm text-slate-500">
-            Showcase your projects and skills on your own shareable URL: <span className="font-semibold text-brand-blue-700 dark:text-brand-green-400">careerlaunch.co.ke{publicUrl}</span>
+            Preview and share your portfolio at <span className="font-semibold text-brand-blue-700 dark:text-brand-green-400">{window.location.origin}{publicUrl}</span>
           </p>
         </div>
 

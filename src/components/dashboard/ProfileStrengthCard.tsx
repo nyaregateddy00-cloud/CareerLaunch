@@ -52,7 +52,7 @@ export const ProfileStrengthCard: React.FC<ProfileStrengthCardProps> = ({ user }
       },
     ];
 
-    return { strengthScore: user.profileStrength || score, checklist: items };
+    return { strengthScore: score, checklist: items };
   }, [user]);
 
   const incompleteItems = checklist.filter((item) => !item.completed);
@@ -68,16 +68,15 @@ export const ProfileStrengthCard: React.FC<ProfileStrengthCardProps> = ({ user }
         <div className="space-y-2 max-w-lg">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-green-500/20 text-brand-green-300 border border-brand-green-500/30">
             <Sparkles className="w-3.5 h-3.5 text-brand-green-400" />
-            <span>Profile Strength Optimization</span>
+            <span>Career profile progress</span>
           </div>
 
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-            Your Profile Strength: <span className="text-brand-green-400">{strengthScore}%</span>
+            Career profile: <span className="text-brand-green-400">{strengthScore}% complete</span>
           </h2>
 
           <p className="text-xs sm:text-sm text-brand-blue-200 leading-relaxed">
-            Profiles above 80% strength receive 4x more direct outreach from recruiters at Safaricom,
-            Equity, Andela, and regional tech startups.
+            A complete profile makes it easier to present your experience, skills, and work in one place.
           </p>
 
           <div className="w-full bg-brand-blue-800/80 rounded-full h-3 overflow-hidden mt-3">
@@ -91,7 +90,7 @@ export const ProfileStrengthCard: React.FC<ProfileStrengthCardProps> = ({ user }
         {/* Action recommendations list */}
         <div className="bg-brand-blue-950/80 backdrop-blur-sm border border-brand-blue-800/80 rounded-2xl p-5 min-w-[280px] sm:min-w-[320px] space-y-2.5">
           <h4 className="text-xs font-bold uppercase tracking-wider text-brand-blue-300">
-            {incompleteItems.length > 0 ? 'Recommended Next Steps' : 'All Milestones Completed!'}
+            {incompleteItems.length > 0 ? 'A useful next step' : 'Profile checklist'}
           </h4>
           <div className="space-y-2">
             {displayItems.map((item, idx) => (

@@ -35,6 +35,7 @@ import {
   INITIAL_SKILL_GAPS,
   INITIAL_ADMIN_STATS
 } from './mockData';
+import { isSupabaseConfigured, supabase } from './supabase';
 
 const STORAGE_KEYS = {
   CURRENT_USER: 'careerlaunch_current_user',
@@ -56,10 +57,114 @@ const STORAGE_KEYS = {
   THEME: 'careerlaunch_theme',
 };
 
+const CLOUD_WORKSPACE_KEYS = [
+  STORAGE_KEYS.APPLICATIONS,
+  STORAGE_KEYS.SAVED_OPP_IDS,
+  STORAGE_KEYS.USER_SKILLS,
+  STORAGE_KEYS.EXPERIENCE,
+  STORAGE_KEYS.EDUCATION,
+  STORAGE_KEYS.PROJECTS,
+  STORAGE_KEYS.CERTIFICATIONS,
+  STORAGE_KEYS.LANGUAGES,
+  STORAGE_KEYS.PORTFOLIO,
+  STORAGE_KEYS.CV,
+  STORAGE_KEYS.NOTIFICATIONS,
+];
+const EMPTY_FOR_NEW_ACCOUNT = new Set([
+  STORAGE_KEYS.APPLICATIONS,
+  STORAGE_KEYS.SAVED_OPP_IDS,
+  STORAGE_KEYS.USER_SKILLS,
+  STORAGE_KEYS.EXPERIENCE,
+  STORAGE_KEYS.EDUCATION,
+  STORAGE_KEYS.PROJECTS,
+  STORAGE_KEYS.CERTIFICATIONS,
+  STORAGE_KEYS.LANGUAGES,
+  STORAGE_KEYS.NOTIFICATIONS,
+]);
+let remoteUserId: string | null = null;
+let hydratingWorkspace = false;
+const storageKeyFor = (key: string, userId = remoteUserId) =>
+  userId && CLOUD_WORKSPACE_KEYS.includes(key) ? `${key}:${userId}` : key;
+
+function scheduleWorkspaceSave(userId: string): void {
+  if (!isSupabaseConfigured || hydratingWorkspace) return;
+  queueMicrotask(() => {
+    const payload: Record<string, unknown> = {};
+    for (const key of CLOUD_WORKSPACE_KEYS) {
+      const raw = localStorage.getItem(storageKeyFor(key, userId));
+      if (!raw) continue;
+      try { payload[key] = JSON.parse(raw); } catch { /* Ignore corrupt browser cache entries. */ }
+    }
+    void supabase.from('workspace_snapshots').upsert({
+      user_id: userId,
+      payload,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'user_id' }).then(({ error }) => {
+      if (error) window.dispatchEvent(new CustomEvent('careerlaunch_persistence_error', { detail: error.message }));
+    });
+  });
+}
+
+export function setRemoteWorkspaceUser(userId: string | null): void {
+  remoteUserId = isSupabaseConfigured ? userId : null;
+}
+
+export async function restoreRemoteWorkspace(): Promise<void> {
+  if (!isSupabaseConfigured || !remoteUserId) return;
+  const currentUserId = remoteUserId;
+  const { data, error } = await supabase
+    .from('workspace_snapshots')
+    .select('payload')
+    .eq('user_id', currentUserId)
+    .maybeSingle();
+  if (error) throw error;
+  hydratingWorkspace = true;
+  try {
+    const payload = data?.payload as Record<string, unknown> | undefined;
+    for (const key of CLOUD_WORKSPACE_KEYS) {
+      const value = payload?.[key];
+      if (value !== undefined) localStorage.setItem(storageKeyFor(key, currentUserId), JSON.stringify(value));
+    }
+  } finally {
+    hydratingWorkspace = false;
+  }
+}
+
 function getItem<T>(key: string, defaultValue: T): T {
   try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
+    const item = localStorage.getItem(storageKeyFor(key));
+    if (item) return JSON.parse(item);
+    if (remoteUserId && EMPTY_FOR_NEW_ACCOUNT.has(key)) return [] as T;
+    if (remoteUserId && key === STORAGE_KEYS.CV) {
+      const profile = getItem<UserProfile>(STORAGE_KEYS.CURRENT_USER, INITIAL_USER_TEDDY);
+      return {
+        ...INITIAL_CV,
+        id: `cv-${remoteUserId}`,
+        userId: remoteUserId,
+        title: `${profile.fullName} - CV`,
+        content: {
+          ...INITIAL_CV.content,
+          personalInfo: { fullName: profile.fullName, email: profile.email, phone: profile.phone || '', location: profile.location, headline: profile.headline },
+          summary: '', experience: [], education: [], skills: [], projects: [], certifications: [], languages: [],
+        },
+      } as T;
+    }
+    if (remoteUserId && key === STORAGE_KEYS.PORTFOLIO) {
+      const profile = getItem<UserProfile>(STORAGE_KEYS.CURRENT_USER, INITIAL_USER_TEDDY);
+      return {
+        ...INITIAL_PORTFOLIO,
+        id: `portfolio-${remoteUserId}`,
+        userId: remoteUserId,
+        slug: `${profile.fullName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${remoteUserId.slice(-6)}`,
+        headline: profile.headline,
+        bio: profile.bio,
+        isPublished: false,
+        socialLinks: { email: profile.email },
+        featuredProjectIds: [],
+        viewCount: 0,
+      } as T;
+    }
+    return defaultValue;
   } catch {
     return defaultValue;
   }
@@ -67,8 +172,9 @@ function getItem<T>(key: string, defaultValue: T): T {
 
 function setItem<T>(key: string, value: T): void {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
+    localStorage.setItem(storageKeyFor(key), JSON.stringify(value));
     window.dispatchEvent(new CustomEvent('careerlaunch_storage_change', { detail: { key } }));
+    if (remoteUserId && CLOUD_WORKSPACE_KEYS.includes(key)) scheduleWorkspaceSave(remoteUserId);
   } catch (e) {
     console.error(`Error saving to localStorage key ${key}`, e);
   }

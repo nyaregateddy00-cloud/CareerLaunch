@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Rocket, User, Mail, Lock, Briefcase, ArrowRight } from 'lucide-react';
+import { Rocket, User, Mail, Lock, Briefcase, ArrowRight, Chrome } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Card } from '../../components/common/Card';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 export const RegisterPage: React.FC = () => {
-  const { signup, isLoading } = useAuth();
+  const { signup, signInWithGoogle, isLoading, authError, authNotice } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<UserRole>('student');
@@ -19,11 +20,13 @@ export const RegisterPage: React.FC = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !email) return;
-    const ok = await signup(fullName, email, role, headline);
+    const ok = await signup(fullName, email, password, role, headline);
     if (ok) {
       navigate('/dashboard');
     }
   };
+
+  const handleGoogleSignup = async () => { await signInWithGoogle(); };
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-950">
@@ -47,6 +50,7 @@ export const RegisterPage: React.FC = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
         <Card className="p-8 space-y-6">
           <form onSubmit={handleRegister} className="space-y-4">
+            {!isSupabaseConfigured && <p className="rounded-lg bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-800 dark:text-amber-200">Demo mode: profile data stays in this browser. A real account requires Supabase to be configured.</p>}
             <Input
               label="Full Name"
               required
@@ -95,6 +99,7 @@ export const RegisterPage: React.FC = () => {
               label="Password"
               type="password"
               required
+              minLength={8}
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -116,6 +121,14 @@ export const RegisterPage: React.FC = () => {
               Launch My Account
             </Button>
           </form>
+
+          <Button type="button" variant="secondary" className="w-full" isLoading={isLoading} onClick={handleGoogleSignup} leftIcon={<Chrome className="w-4 h-4" />}>
+            Sign up with Google
+          </Button>
+          {isSupabaseConfigured && <p className="text-center text-[11px] text-slate-500">Google accounts start with the Job Seeker role. You can complete your career profile after signing in.</p>}
+
+          {authError && <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">{authError}</p>}
+          {authNotice && <p role="status" className="text-sm text-emerald-700 dark:text-emerald-400">{authNotice}</p>}
 
           <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100 dark:border-slate-800">
             Already have an account?{' '}
