@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Rocket, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Rocket, Mail, ArrowLeft } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Card } from '../../components/common/Card';
 
 export const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
-    setSubmitted(true);
+    setError('Password recovery is not connected yet. Please contact support to regain access.');
   };
 
   return (
@@ -30,29 +30,13 @@ export const ForgotPasswordPage: React.FC = () => {
           Reset your password
         </h2>
         <p className="mt-1 text-xs text-slate-500">
-          Enter your email address and we'll send you recovery instructions.
+          Password recovery is not available until account authentication is connected.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
         <Card className="p-8">
-          {submitted ? (
-            <div className="text-center space-y-4 py-4">
-              <CheckCircle2 className="w-12 h-12 text-brand-green-500 mx-auto" />
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Password Reset Link Sent</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                If an account exists for <span className="font-semibold text-slate-800 dark:text-slate-200">{email}</span>, you will receive an email with reset instructions shortly.
-              </p>
-              <div className="pt-2">
-                <Link to="/login">
-                  <Button variant="secondary" size="sm" className="w-full">
-                    Return to Login
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 label="Email Address"
                 type="email"
@@ -63,8 +47,9 @@ export const ForgotPasswordPage: React.FC = () => {
                 leftIcon={<Mail className="w-4 h-4" />}
               />
 
+              {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
               <Button type="submit" variant="primary" size="lg" className="w-full">
-                Send Reset Link
+                Check Recovery Availability
               </Button>
 
               <div className="text-center pt-2">
@@ -76,8 +61,7 @@ export const ForgotPasswordPage: React.FC = () => {
                   Back to Sign In
                 </Link>
               </div>
-            </form>
-          )}
+          </form>
         </Card>
       </div>
     </div>

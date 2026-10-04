@@ -14,6 +14,8 @@ export const ContactPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const body = `Name: ${name}\nEmail: ${email}\n\n${message}`;
+    window.location.href = `mailto:support@careerlaunch.co.ke?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setSubmitted(true);
   };
 
@@ -88,7 +90,7 @@ export const ContactPage: React.FC = () => {
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white">Message Received!</h3>
                   <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
-                    Thank you, {name}. A member of our Nairobi support team will respond to {email} within 24 business hours.
+                    Your email app should open with this message addressed to support. The team won’t receive it until you send it there.
                   </p>
                   <Button variant="secondary" size="sm" onClick={() => setSubmitted(false)}>
                     Send Another Message

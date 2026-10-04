@@ -100,7 +100,7 @@ export const AIChatWindow: React.FC = () => {
         const noticeMessage: Message = {
           id: `msg-${Date.now() + 1}`,
           sender: 'system',
-          text: `ℹ️ **AI Integration Notice**\n\nThe CareerLaunch AI Assistant service is currently awaiting API credentials.\n\nTo activate live conversational AI coaching powered by Google Gemini:\n1. Open your project root `.env` file\n2. Add your key: \`VITE_GEMINI_API_KEY="your_api_key_here"\`\n3. Restart the development server\n\nOnce configured, CareerLaunch AI will provide real-time custom CV optimizations, cover letters, and interview coaching based on your profile!`,
+          text: 'AI integration is not connected yet. Configure VITE_AI_API_URL with a secured server-side endpoint to enable career coaching. Provider API keys must stay on the server and must not be placed in browser-exposed VITE_ variables.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
         setMessages((prev) => [...prev, noticeMessage]);
@@ -179,7 +179,7 @@ export const AIChatWindow: React.FC = () => {
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
-                  Awaiting VITE_GEMINI_API_KEY
+                  Awaiting secure AI endpoint
                 </span>
               )}
             </div>
@@ -204,7 +204,7 @@ export const AIChatWindow: React.FC = () => {
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
             <span>
-              <strong>Preview Mode:</strong> Add <code>VITE_GEMINI_API_KEY</code> to your environment file to enable live AI responses.
+              <strong>Preview Mode:</strong> Configure a server-side AI endpoint to enable live responses.
             </span>
           </div>
         </div>

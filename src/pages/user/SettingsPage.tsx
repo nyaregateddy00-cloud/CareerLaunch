@@ -81,10 +81,8 @@ export const SettingsPage: React.FC = () => {
               variant="outline"
               onClick={() =>
                 showToast(
-                  isSupabaseConfigured
-                    ? 'Password reset email sent!'
-                    : 'Configure Supabase Auth in .env to enable remote password reset.',
-                  isSupabaseConfigured ? 'success' : 'info'
+                  'Password recovery is not connected yet. Please contact support to regain access.',
+                  'info'
                 )
               }
             >

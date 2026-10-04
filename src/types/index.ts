@@ -21,6 +21,7 @@ export interface UserProfile {
   githubUrl?: string;
   linkedinUrl?: string;
   portfolioUrl?: string;
+  websiteUrl?: string;
   twitterUrl?: string;
   createdAt: string;
   updatedAt: string;
@@ -195,9 +196,11 @@ export type ApplicationStage =
   | 'Saved' 
   | 'Applied' 
   | 'Shortlisted' 
+  | 'Assessment'
   | 'Interview' 
   | 'Offer' 
-  | 'Rejected';
+  | 'Rejected'
+  | 'Withdrawn';
 
 export interface JobApplication {
   id: string;
@@ -212,6 +215,7 @@ export interface JobApplication {
   salary?: string;
   jobUrl?: string;
   interviewDate?: string;
+  followUpDate?: string;
   updatedAt: string;
 }
 
@@ -235,6 +239,7 @@ export interface CareerResource {
   tags: string[];
   isFeatured: boolean;
   publishedAt: string;
+  readTimeMinutes?: number;
 }
 
 export interface Notification {

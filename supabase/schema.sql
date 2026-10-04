@@ -474,20 +474,40 @@ ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 -- PROFILES POLICIES
 -- ==============================================================================
 
-CREATE POLICY "Public profiles are viewable by everyone"
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
+CREATE POLICY "Users can view their own profile"
 ON public.profiles
 FOR SELECT
-USING (true);
+USING (auth.uid() = id);
 
 CREATE POLICY "Users can insert their own profile"
 ON public.profiles
 FOR INSERT
 WITH CHECK (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
 CREATE POLICY "Users can update their own profile"
 ON public.profiles
 FOR UPDATE
-USING (auth.uid() = id);
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
+
+-- Prevent client-side privilege escalation through the editable profile row.
+CREATE OR REPLACE FUNCTION public.prevent_profile_role_change()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.role IS DISTINCT FROM OLD.role AND auth.role() <> 'service_role' THEN
+        RAISE EXCEPTION 'Profile roles can only be changed by a trusted server administrator';
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS prevent_profile_role_change ON public.profiles;
+CREATE TRIGGER prevent_profile_role_change
+    BEFORE UPDATE OF role ON public.profiles
+    FOR EACH ROW EXECUTE FUNCTION public.prevent_profile_role_change();
 
 
 -- ==============================================================================
@@ -679,10 +699,11 @@ BEGIN
             NEW.raw_user_meta_data->>'headline',
             'Aspiring Professional | CareerLaunch'
         ),
-        COALESCE(
-            NEW.raw_user_meta_data->>'role',
-            'job_seeker'
-        ),
+        CASE
+            WHEN NEW.raw_user_meta_data->>'role' IN ('student', 'graduate', 'job_seeker', 'freelancer', 'career_changer')
+            THEN NEW.raw_user_meta_data->>'role'
+            ELSE 'job_seeker'
+        END,
         35
     );
 

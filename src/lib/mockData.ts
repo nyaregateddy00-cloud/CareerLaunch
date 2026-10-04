@@ -8,6 +8,7 @@ import {
   Project,
   Certification,
   CareerResource,
+  Language,
   AdminStats,
   PortfolioConfig,
   CVDocument,

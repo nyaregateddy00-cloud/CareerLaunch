@@ -232,7 +232,7 @@ export const LearningPage: React.FC = () => {
                 <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800/80">
                   <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-3">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> {res.readTimeMinutes} min read
+                      <Clock className="w-3.5 h-3.5" /> {res.readTime}
                     </span>
                     <span>By {res.author}</span>
                   </div>
@@ -270,7 +270,7 @@ export const LearningPage: React.FC = () => {
                 </Badge>
                 <span>•</span>
                 <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5" /> {activeArticle.readTimeMinutes} min read
+                  <Clock className="w-3.5 h-3.5" /> {activeArticle.readTime}
                 </span>
                 <span>•</span>
                 <span>By {activeArticle.author}</span>

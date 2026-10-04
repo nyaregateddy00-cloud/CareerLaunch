@@ -2,7 +2,7 @@
  * CareerLaunch AI Service Layer
  * 
  * Provides an honest, modular interface for AI career assistance.
- * If VITE_GEMINI_API_KEY is not configured, it transparently returns
+ * If a server-side VITE_AI_API_URL is not configured, it transparently returns
  * isConfigured: false so the UI presents an honest "Configuration Required"
  * or "Coming Soon" state rather than fake responses.
  */
@@ -30,14 +30,14 @@ export type AIAssistantTask =
   | 'general_advice';
 
 class AIService {
-  private apiKey: string | undefined;
+  private endpoint: string | undefined;
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    this.endpoint = import.meta.env.VITE_AI_API_URL;
   }
 
   public isConfigured(): boolean {
-    return Boolean(this.apiKey && this.apiKey.trim() !== '' && !this.apiKey.includes('placeholder'));
+    return Boolean(this.endpoint && this.endpoint.trim() !== '');
   }
 
   public async sendMessage(
@@ -51,7 +51,7 @@ class AIService {
         success: false,
         isConfigured: false,
         content: '',
-        error: 'AI service is not configured. Please provide a VITE_GEMINI_API_KEY in your environment configuration.',
+        error: 'AI service is not configured. Set VITE_AI_API_URL to a secured server-side endpoint.',
       };
     }
 
@@ -60,9 +60,6 @@ class AIService {
 User Context: ${userContext?.fullName ? `User: ${userContext.fullName}` : ''} ${userContext?.headline ? `Role/Headline: ${userContext.headline}` : ''} ${userContext?.skills?.length ? `Skills: ${userContext.skills.join(', ')}` : ''}.
 Task Focus: ${task || 'General career mentorship'}.
 Tone: Professional, encouraging, actionable, modern, concise. Focus on practical African & international career opportunities.`;
-
-      // Call Gemini REST API directly using fetch
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
 
       const contents = [
         ...history.slice(-6).map((msg) => ({
@@ -75,10 +72,10 @@ Tone: Professional, encouraging, actionable, modern, concise. Focus on practical
         },
       ];
 
-      const response = await fetch(endpoint, {
+      const response = await fetch(this.endpoint!, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents }),
+        body: JSON.stringify({ contents, prompt, history, task, userContext }),
       });
 
       if (!response.ok) {
@@ -87,8 +84,7 @@ Tone: Professional, encouraging, actionable, modern, concise. Focus on practical
       }
 
       const data = await response.json();
-      const generatedText =
-        data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+      const generatedText = data.content || data.text || 'No response generated.';
 
       return {
         success: true,
