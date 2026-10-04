@@ -199,9 +199,10 @@ export const AIChatWindow: React.FC = () => {
       const languageRecords = mockStorage.getLanguages();
       const applicationRecords = mockStorage.getApplications();
       const savedOpportunityIds = new Set(mockStorage.getSavedOpportunityIds());
+      const allOpportunities = mockStorage.getOpportunities();
       const cv = mockStorage.getCV();
       const portfolio = mockStorage.getPortfolio();
-      const availableOpportunities = mockStorage.getOpportunities()
+      const availableOpportunities = allOpportunities
         .filter((opportunity) => opportunity.status === 'published')
         .slice(0, 20)
         .map(({ title, company, location, type, workMode, experienceLevel, deadline, salaryRange, description, requirements, tags }) => ({
@@ -211,11 +212,12 @@ export const AIChatWindow: React.FC = () => {
           requirements: requirements.slice(0, 5).map((item) => item.slice(0, 120)),
           tags: tags.slice(0, 8),
         }));
-      const savedOpportunities = availableOpportunities.filter((opportunity) =>
-        [...savedOpportunityIds].some((id) =>
-          mockStorage.getOpportunities().find((item) => item.id === id)?.title === opportunity.title
-        )
-      );
+      const savedOpportunities = allOpportunities
+        .filter((opportunity) => savedOpportunityIds.has(opportunity.id))
+        .slice(0, 10)
+        .map(({ title, company, location, type, deadline }) => ({
+          title: title.slice(0, 160), company: company.slice(0, 160), location: location.slice(0, 160), type, deadline,
+        }));
 
       // Share relevant career details for this chat, but omit profile contact
       // details, application notes, and account/authentication data.
