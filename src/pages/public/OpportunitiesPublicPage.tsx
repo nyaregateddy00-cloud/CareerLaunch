@@ -5,8 +5,8 @@ import { OpportunityCard } from '../../components/opportunities/OpportunityCard'
 import { OpportunityDetailModal } from '../../components/opportunities/OpportunityDetailModal';
 import { EmptyState } from '../../components/common/EmptyState';
 import { mockStorage } from '../../lib/mockStorage';
-import { isSupabaseConfigured, supabase } from '../../lib/supabase';
-import { Opportunity, ExperienceLevel, WorkMode } from '../../types';
+import { getPublishedOpportunities } from '../../lib/opportunities';
+import { Opportunity } from '../../types';
 import { Search } from 'lucide-react';
 import { Footer } from '../../components/layout/Footer';
 
@@ -28,52 +28,16 @@ export const OpportunitiesPublicPage: React.FC = () => {
     let isActive = true;
 
     const loadOpportunities = async () => {
-      if (!isSupabaseConfigured) {
-        if (isActive) {
-          setAllOpportunities(mockStorage.getOpportunities());
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('opportunities')
-        .select('*')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false });
-
-      if (!isActive) return;
-
-      if (error) {
-        setLoadError(error.message);
+      try {
+        const opportunities = await getPublishedOpportunities();
+        if (!isActive) return;
+        setAllOpportunities(opportunities);
+      } catch (error) {
+        if (!isActive) return;
+        setLoadError(error instanceof Error ? error.message : 'Unknown database error');
         setIsLoading(false);
         return;
       }
-
-      const opportunities: Opportunity[] = (data ?? []).map((row) => ({
-        id: row.id,
-        title: row.title,
-        company: row.company,
-        companyLogo: row.company_logo ?? undefined,
-        location: row.location,
-        country: row.country ?? 'Kenya',
-        type: row.type as Opportunity['type'],
-        workMode: row.work_mode as WorkMode | null,
-        experienceLevel: (row.experience_level ?? 'Entry Level') as ExperienceLevel,
-        salaryRange: row.salary_range ?? undefined,
-        currency: (row.currency ?? 'KES') as Opportunity['currency'],
-        deadline: row.deadline ?? undefined,
-        description: row.description,
-        requirements: row.requirements ?? [],
-        tags: row.tags ?? [],
-        applicationUrl: row.application_url ?? undefined,
-        contactEmail: row.contact_email ?? undefined,
-        source: row.source ?? 'Employer listing',
-        status: row.status as Opportunity['status'],
-        createdAt: row.created_at,
-      }));
-
-      setAllOpportunities(opportunities);
       setIsLoading(false);
     };
 

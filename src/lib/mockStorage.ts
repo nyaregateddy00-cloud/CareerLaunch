@@ -27,7 +27,6 @@ import {
   INITIAL_LANGUAGES,
   INITIAL_PORTFOLIO,
   INITIAL_CV,
-  INITIAL_OPPORTUNITIES,
   INITIAL_APPLICATIONS,
   INITIAL_SAVED_OPP_IDS,
   INITIAL_RESOURCES,
@@ -206,7 +205,11 @@ export const mockStorage = {
 
   // --- OPPORTUNITIES ---
   getOpportunities(): Opportunity[] {
-    return getItem<Opportunity[]>(STORAGE_KEYS.OPPORTUNITIES, INITIAL_OPPORTUNITIES);
+    const opportunities = getItem<Opportunity[]>(STORAGE_KEYS.OPPORTUNITIES, []);
+    // Remove the old hard-coded preview listings from browsers that cached them.
+    const current = opportunities.filter((opportunity) => !/^opp-[1-9]$/.test(opportunity.id));
+    if (current.length !== opportunities.length) setItem(STORAGE_KEYS.OPPORTUNITIES, current);
+    return current;
   },
   saveOpportunity(opp: Opportunity): void {
     const list = this.getOpportunities();

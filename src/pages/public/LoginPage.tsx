@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Rocket, Lock, Mail, ArrowRight, UserCheck, Shield, Chrome } from 'lucide-react';
+import { Lock, Mail, ArrowRight, UserCheck, Shield, Chrome } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Card } from '../../components/common/Card';
 import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../../lib/mockData';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import { BrandLogo } from '../../components/branding/BrandLogo';
 
 export const LoginPage: React.FC = () => {
   const { login, signInWithGoogle, switchUser, isLoading, authError } = useAuth();
@@ -33,14 +34,7 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-950">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link to="/" className="inline-flex items-center gap-2 mb-4">
-          <div className="w-10 h-10 rounded-xl bg-brand-blue-900 dark:bg-brand-blue-600 flex items-center justify-center text-white shadow-md">
-            <Rocket className="w-5 h-5 text-brand-green-400" />
-          </div>
-          <span className="text-2xl font-extrabold tracking-tight text-brand-blue-900 dark:text-white">
-            Career<span className="text-brand-green-500">Launch</span>
-          </span>
-        </Link>
+        <BrandLogo variant="full" className="mb-4" imageClassName="w-24 sm:w-28" />
         <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
           Sign in to your account
         </h2>

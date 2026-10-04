@@ -113,11 +113,10 @@ export const DashboardPage: React.FC = () => {
       {/* Profile Strength Interactive Card */}
       <ProfileStrengthCard user={user} />
 
-      {(authNotice || workspaceSaveError) && (
-        <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-200">
-          Some changes may not have synced to your account. They may still be available in this browser. Please try again later.
-        </p>
-      )}
+      <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+        Career records are cached in this browser. With Supabase configured and the updated schema applied, they are synchronized to your account for use across devices. Demo mode stays in this browser.
+      </div>
+      {(authNotice || workspaceSaveError) && <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">{workspaceSaveError || authNotice}</p>}
 
       {/* KPI Stats Overview */}
       <StatsOverview

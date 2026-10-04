@@ -16,6 +16,8 @@ import {
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Footer } from '../../components/layout/Footer';
+import { CareerPhoto } from '../../components/landing/CareerPhoto';
+import { careerPhotos } from '../../components/landing/careerPhotos';
 
 export const FeaturesPage: React.FC = () => {
   const features = [
@@ -31,6 +33,7 @@ export const FeaturesPage: React.FC = () => {
       ],
       icon: FileText,
       link: '/cv-builder',
+      photo: careerPhotos.southAfricaRemoteWork,
     },
     {
       title: 'Shareable Portfolio Engine',
@@ -57,6 +60,7 @@ export const FeaturesPage: React.FC = () => {
       ],
       icon: Search,
       link: '/opportunities',
+      photo: careerPhotos.kenyaDigitalLearning,
     },
     {
       title: 'Kanban Application Tracker',
@@ -83,6 +87,7 @@ export const FeaturesPage: React.FC = () => {
       ],
       icon: Sparkles,
       link: '/skills',
+      photo: careerPhotos.nigeriaProfessional,
     },
     {
       title: 'CareerLaunch AI',
@@ -146,11 +151,15 @@ export const FeaturesPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="w-full lg:w-5/12 bg-slate-100 dark:bg-slate-800/60 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700 flex flex-col items-center justify-center text-center min-h-[220px]">
-                <feat.icon className="w-16 h-16 text-brand-blue-900 dark:text-brand-blue-400 opacity-60 mb-3" />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Live Feature in CareerLaunch</span>
-                <span className="text-xs text-slate-400 mt-1">Ready for instant use without complex setups</span>
-              </div>
+              {feat.photo ? (
+                <CareerPhoto photo={feat.photo} className="w-full lg:w-5/12" sizes="(max-width: 1024px) 100vw, 40vw" />
+              ) : (
+                <div className="w-full lg:w-5/12 bg-slate-100 dark:bg-slate-800/60 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-700 flex flex-col items-center justify-center text-center min-h-[220px]">
+                  <feat.icon className="w-16 h-16 text-brand-blue-900 dark:text-brand-blue-400 opacity-60 mb-3" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Live Feature in CareerLaunch</span>
+                  <span className="text-xs text-slate-400 mt-1">Ready for instant use without complex setups</span>
+                </div>
+              )}
             </div>
           ))}
         </div>

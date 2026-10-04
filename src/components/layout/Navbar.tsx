@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Rocket,
   Sun,
   Moon,
   Bell,
@@ -20,6 +19,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../../lib/mockData';
 import { mockStorage } from '../../lib/mockStorage';
+import { BrandLogo } from '../branding/BrandLogo';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, switchUser, isAdmin } = useAuth();
@@ -56,19 +56,7 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
           <div className="flex items-center gap-8">
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-10 h-10 rounded-xl bg-brand-blue-900 dark:bg-brand-blue-600 flex items-center justify-center text-white shadow-md shadow-brand-blue-900/10 group-hover:scale-105 transition-transform">
-                <Rocket className="w-5 h-5 text-brand-green-400 group-hover:rotate-12 transition-transform" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-extrabold tracking-tight text-brand-blue-900 dark:text-white flex items-center gap-1.5">
-                  Career<span className="text-brand-green-500">Launch</span>
-                </span>
-                <span className="text-[10px] font-medium tracking-wide uppercase text-slate-400 -mt-1 hidden sm:block">
-                  Kenya & Africa
-                </span>
-              </div>
-            </Link>
+            <BrandLogo to={isAuthenticated ? '/dashboard' : '/'} showRegion />
 
             {/* Desktop Navigation Links */}
             <nav className="hidden lg:flex items-center gap-1">

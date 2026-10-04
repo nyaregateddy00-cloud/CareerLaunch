@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Rocket, Mail, Heart } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { Button } from '../common/Button';
+import { BrandLogo } from '../branding/BrandLogo';
 
 export const Footer: React.FC = () => {
   return (
@@ -10,14 +11,10 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
-            <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-brand-blue-900 dark:bg-brand-blue-600 flex items-center justify-center text-white">
-                <Rocket className="w-5 h-5 text-brand-green-400" />
-              </div>
-              <span className="text-xl font-black tracking-tight text-brand-blue-900 dark:text-white">
-                Career<span className="text-brand-green-500">Launch</span>
-              </span>
-            </Link>
+            <div className="space-y-2">
+              <BrandLogo to="/" />
+              <p className="pl-[50px] text-xs font-medium text-slate-500 dark:text-slate-400">Build Your Skills. Launch Your Career.</p>
+            </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
               Empowering university students, graduates, freelancers, and ambitious job seekers across Kenya and Africa to build skills, create high-impact CVs, and launch rewarding careers.
             </p>
@@ -94,11 +91,6 @@ export const Footer: React.FC = () => {
 
         <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <p>© {new Date().getFullYear()} CareerLaunch. “Build Your Skills. Launch Your Career.” All rights reserved.</p>
-          <div className="flex items-center gap-1 text-slate-500">
-            <span>Built with</span>
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
-            <span>for the future of African talent.</span>
-          </div>
         </div>
       </div>
     </footer>
