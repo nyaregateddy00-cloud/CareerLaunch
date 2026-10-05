@@ -1,42 +1,71 @@
 import { ExperienceLevel, Opportunity, WorkMode } from '../types';
 import { isSupabaseConfigured, supabase } from './supabase';
 
+const OPPORTUNITIES_CACHE_TTL = 30_000;
+let publishedOpportunitiesCache: Opportunity[] | null = null;
+let publishedOpportunitiesExpiresAt = 0;
+let publishedOpportunitiesRequest: Promise<Opportunity[]> | null = null;
+
+/** Return cached data, including stale data, so route changes can render immediately. */
+export function getCachedPublishedOpportunities(): Opportunity[] | null {
+  return publishedOpportunitiesCache;
+}
+
+/** Mark cached results stale without discarding them; consumers can keep rendering them. */
+export function invalidatePublishedOpportunitiesCache(): void {
+  publishedOpportunitiesExpiresAt = 0;
+}
+
 export async function getPublishedOpportunities(): Promise<Opportunity[]> {
   if (!isSupabaseConfigured) return [];
+  if (publishedOpportunitiesCache && Date.now() < publishedOpportunitiesExpiresAt) {
+    return publishedOpportunitiesCache;
+  }
+  if (publishedOpportunitiesRequest) return publishedOpportunitiesRequest;
 
-  const { data, error } = await supabase
-    .from('opportunities')
-    .select('*')
-    .eq('status', 'published')
-    .order('created_at', { ascending: false });
+  publishedOpportunitiesRequest = (async () => {
+    const { data, error } = await supabase
+      .from('opportunities')
+      .select('*')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false });
 
-  if (error) throw error;
+    if (error) throw error;
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  return (data ?? [])
-    .filter((row) => !row.deadline || new Date(`${row.deadline}T00:00:00`).getTime() >= today.getTime())
-    .map((row) => ({
-      id: row.id,
-      title: row.title,
-      company: row.company,
-      companyLogo: row.company_logo ?? undefined,
-      location: row.location,
-      country: row.country ?? 'Kenya',
-      type: row.type as Opportunity['type'],
-      workMode: row.work_mode as WorkMode | null,
-      experienceLevel: (row.experience_level ?? 'Entry Level') as ExperienceLevel,
-      salaryRange: row.salary_range ?? undefined,
-      currency: (row.currency ?? 'KES') as Opportunity['currency'],
-      deadline: row.deadline ?? undefined,
-      description: row.description,
-      requirements: row.requirements ?? [],
-      tags: row.tags ?? [],
-      applicationUrl: row.application_url ?? undefined,
-      contactEmail: row.contact_email ?? undefined,
-      source: row.source ?? 'Employer listing',
-      status: row.status as Opportunity['status'],
-      createdAt: row.created_at,
-    }));
+    const opportunities = (data ?? [])
+      .filter((row) => !row.deadline || new Date(`${row.deadline}T00:00:00`).getTime() >= today.getTime())
+      .map((row) => ({
+        id: row.id,
+        title: row.title,
+        company: row.company,
+        companyLogo: row.company_logo ?? undefined,
+        location: row.location,
+        country: row.country ?? 'Kenya',
+        type: row.type as Opportunity['type'],
+        workMode: row.work_mode as WorkMode | null,
+        experienceLevel: (row.experience_level ?? 'Entry Level') as ExperienceLevel,
+        salaryRange: row.salary_range ?? undefined,
+        currency: (row.currency ?? 'KES') as Opportunity['currency'],
+        deadline: row.deadline ?? undefined,
+        description: row.description,
+        requirements: row.requirements ?? [],
+        tags: row.tags ?? [],
+        applicationUrl: row.application_url ?? undefined,
+        contactEmail: row.contact_email ?? undefined,
+        source: row.source ?? 'Employer listing',
+        status: row.status as Opportunity['status'],
+        createdAt: row.created_at,
+      }));
+
+    publishedOpportunitiesCache = opportunities;
+    publishedOpportunitiesExpiresAt = Date.now() + OPPORTUNITIES_CACHE_TTL;
+    return opportunities;
+  })().finally(() => {
+    publishedOpportunitiesRequest = null;
+  });
+
+  return publishedOpportunitiesRequest;
 }

@@ -25,22 +25,20 @@ import { formatDate } from '../../lib/utils';
 
 export const DashboardPage: React.FC = () => {
   const { user, authNotice } = useAuth();
-  const [applications, setApplications] = useState<JobApplication[]>([]);
-  const [savedOppIds, setSavedOppIds] = useState<string[]>([]);
-  const [recommendedOpps, setRecommendedOpps] = useState<Opportunity[]>([]);
+  const [applications, setApplications] = useState<JobApplication[]>(() => mockStorage.getApplications());
+  const [savedOppIds, setSavedOppIds] = useState<string[]>(() => mockStorage.getSavedOpportunityIds());
+  const [recommendedOpps, setRecommendedOpps] = useState<Opportunity[]>(() => mockStorage.getOpportunities().filter((opportunity) => opportunity.status === 'published').slice(0, 2));
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [workspaceSaveError, setWorkspaceSaveError] = useState<string | null>(null);
 
   useEffect(() => {
-    setApplications(mockStorage.getApplications());
-    setSavedOppIds(mockStorage.getSavedOpportunityIds());
-    // Get top 2 published opportunities matching user
-    setRecommendedOpps(mockStorage.getOpportunities().filter((opportunity) => opportunity.status === 'published').slice(0, 2));
-
-    const handleStorage = () => {
-      setApplications(mockStorage.getApplications());
-      setSavedOppIds(mockStorage.getSavedOpportunityIds());
-      setRecommendedOpps(mockStorage.getOpportunities().filter((opportunity) => opportunity.status === 'published').slice(0, 2));
+    const handleStorage = (event: Event) => {
+      const key = (event as CustomEvent<{ key?: string }>).detail?.key;
+      if (!key || key === 'careerlaunch_applications') setApplications(mockStorage.getApplications());
+      if (!key || key === 'careerlaunch_saved_opp_ids') setSavedOppIds(mockStorage.getSavedOpportunityIds());
+      if (!key || key === 'careerlaunch_opportunities') {
+        setRecommendedOpps(mockStorage.getOpportunities().filter((opportunity) => opportunity.status === 'published').slice(0, 2));
+      }
     };
     window.addEventListener('careerlaunch_storage_change', handleStorage);
     return () => window.removeEventListener('careerlaunch_storage_change', handleStorage);
@@ -197,7 +195,7 @@ export const DashboardPage: React.FC = () => {
               <p className="text-xs text-slate-500">From the opportunity catalog. Confirm details with the listing source.</p>
             </div>
             <Link
-              to="/opportunities"
+              to="/app/opportunities"
               className="text-xs font-bold text-brand-blue-700 dark:text-brand-green-400 hover:underline"
             >
               Browse All
@@ -225,7 +223,7 @@ export const DashboardPage: React.FC = () => {
               <p className="text-xs text-slate-500 mt-1">
                 Explore our full catalog to discover graduate jobs, internships, and attachments.
               </p>
-              <Link to="/opportunities" className="inline-block mt-3">
+              <Link to="/app/opportunities" className="inline-block mt-3">
                 <Button size="sm" variant="outline">
                   Explore Opportunities
                 </Button>

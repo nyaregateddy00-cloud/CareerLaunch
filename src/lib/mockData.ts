@@ -12,7 +12,8 @@ import {
   PortfolioConfig,
   CVDocument,
   Notification,
-  RoleSkillGap
+  RoleSkillGap,
+  Opportunity
 } from '../types';
 
 export const INITIAL_USER_TEDDY: UserProfile = {

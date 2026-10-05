@@ -24,7 +24,7 @@ import { Badge } from '../../components/common/Badge';
 import { OpportunityCard } from '../../components/opportunities/OpportunityCard';
 import { OpportunityDetailModal } from '../../components/opportunities/OpportunityDetailModal';
 import { mockStorage } from '../../lib/mockStorage';
-import { getPublishedOpportunities } from '../../lib/opportunities';
+import { getCachedPublishedOpportunities, getPublishedOpportunities } from '../../lib/opportunities';
 import { Opportunity } from '../../types';
 import { Footer } from '../../components/layout/Footer';
 import { AfricaMap } from '../../components/landing/AfricaMap';
@@ -35,7 +35,7 @@ import { careerPhotos } from '../../components/landing/careerPhotos';
 export const LandingPage: React.FC = () => {
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [savedOppIds, setSavedOppIds] = useState<string[]>(() => mockStorage.getSavedOpportunityIds());
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>(() => getCachedPublishedOpportunities() ?? []);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
@@ -165,7 +165,6 @@ export const LandingPage: React.FC = () => {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-brand-blue-50/70 to-transparent dark:from-brand-blue-950/30" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[.92fr_1.08fr] lg:gap-14 lg:px-8">
           <div className="max-w-2xl">
-            <BrandLogo variant="full" to="/" className="mb-5" imageClassName="w-24 sm:w-28" />
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-green-200 bg-brand-green-50 px-3.5 py-2 text-xs font-bold text-brand-green-800 dark:border-brand-green-800 dark:bg-brand-green-950/60 dark:text-brand-green-300">
               <span className="h-2 w-2 rounded-full bg-brand-green-500" aria-hidden="true" />
               Made for Africa's next generation of talent
@@ -196,7 +195,7 @@ export const LandingPage: React.FC = () => {
           <div className="relative mx-auto w-full max-w-xl">
             <div className="absolute -inset-4 rounded-[2rem] bg-brand-blue-50/70 dark:bg-brand-blue-950/30" aria-hidden="true" />
             <div className="relative rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/10 dark:border-slate-700 dark:bg-slate-900 sm:p-7">
-              <CareerPhoto photo={careerPhotos.nigeriaProfessional} priority sizes="(max-width: 1024px) 100vw, 44vw" className="mb-5" imageClassName="aspect-[16/9]" />
+              <CareerPhoto photo={careerPhotos.lagosDeveloper} priority sizes="(max-width: 1024px) 100vw, 44vw" className="mb-5" imageClassName="aspect-[16/9]" />
               <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-5 dark:border-slate-800">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[.14em] text-brand-green-700 dark:text-brand-green-400">Your career workspace</p>
@@ -374,7 +373,7 @@ export const LandingPage: React.FC = () => {
               <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">Build your profile, prepare application materials, explore the catalog, and track the roles you apply to. Check opportunity details with the original source before applying.</p>
               <Link to="/register" className="inline-flex mt-6"><Button variant="primary" rightIcon={<ArrowRight className="w-4 h-4" />}>Create a profile</Button></Link>
             </div>
-            <CareerPhoto photo={careerPhotos.lagosDeveloper} sizes="(max-width: 1024px) 100vw, 460px" imageClassName="object-[center_30%]" />
+            <CareerPhoto photo={careerPhotos.nigeriaProfessional} sizes="(max-width: 1024px) 100vw, 460px" imageClassName="object-[center_30%]" />
             </div>
           </Card>
         </div>
@@ -452,4 +451,3 @@ export const LandingPage: React.FC = () => {
     </div>
   );
 };
-

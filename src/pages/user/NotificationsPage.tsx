@@ -13,7 +13,7 @@ import { formatDate } from '../../lib/utils';
 
 export const NotificationsPage: React.FC = () => {
   const { showToast } = useToast();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>(() => mockStorage.getNotifications());
   const [filter, setFilter] = useState<'all' | 'unread' | 'opportunities' | 'applications'>('all');
 
   const loadData = () => {
@@ -21,9 +21,12 @@ export const NotificationsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
-    window.addEventListener('careerlaunch_storage_change', loadData);
-    return () => window.removeEventListener('careerlaunch_storage_change', loadData);
+    const handleStorage = (event: Event) => {
+      const key = (event as CustomEvent<{ key?: string }>).detail?.key;
+      if (!key || key === 'careerlaunch_notifications') loadData();
+    };
+    window.addEventListener('careerlaunch_storage_change', handleStorage);
+    return () => window.removeEventListener('careerlaunch_storage_change', handleStorage);
   }, []);
 
   const handleMarkAllRead = () => {

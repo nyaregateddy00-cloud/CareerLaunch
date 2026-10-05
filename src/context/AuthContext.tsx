@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { UserProfile, UserRole } from '../types';
 import { mockStorage, restoreRemoteWorkspace, setRemoteWorkspaceUser } from '../lib/mockStorage';
 import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../lib/mockData';
@@ -31,10 +31,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(isSupabaseConfigured);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authNotice, setAuthNotice] = useState<string | null>(null);
+  const profileLoadRequests = useRef(new Map<string, Promise<void>>());
+  const activeRemoteUserId = useRef<string | null>(null);
 
   const loadSupabaseProfile = async (session: Session | null) => {
-    if (!session?.user) { setRemoteWorkspaceUser(null); setUser(null); return; }
-    const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
+    if (!session?.user) {
+      activeRemoteUserId.current = null;
+      setRemoteWorkspaceUser(null);
+      setUser(null);
+      return;
+    }
+
+    const userId = session.user.id;
+    activeRemoteUserId.current = userId;
+    const pendingLoad = profileLoadRequests.current.get(userId);
+    if (pendingLoad) return pendingLoad;
+
+    const load = (async () => {
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+    if (activeRemoteUserId.current !== userId) return;
     const row = data as Record<string, unknown> | null;
     const metadata = session.user.user_metadata || {};
     const allowedRoles: UserRole[] = ['student', 'graduate', 'job_seeker', 'freelancer', 'career_changer', 'employer'];
@@ -64,9 +79,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await restoreRemoteWorkspace();
     } catch (error) {
+      if (activeRemoteUserId.current !== userId) return;
       setAuthNotice(error instanceof Error
         ? `Your account is signed in, but workspace sync is unavailable. Apply the updated Supabase schema to enable it. (${error.message})`
         : 'Your account is signed in, but workspace sync is unavailable. Apply the updated Supabase schema to enable it.');
+    }
+    })();
+
+    profileLoadRequests.current.set(userId, load);
+    try {
+      await load;
+    } finally {
+      if (profileLoadRequests.current.get(userId) === load) profileLoadRequests.current.delete(userId);
     }
   };
 
@@ -82,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     });
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'INITIAL_SESSION') return;
+      if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') return;
       if (active) void loadSupabaseProfile(session);
     });
     return () => { active = false; listener.subscription.unsubscribe(); };

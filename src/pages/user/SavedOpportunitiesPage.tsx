@@ -14,7 +14,10 @@ import { Link } from 'react-router-dom';
 export const SavedOpportunitiesPage: React.FC = () => {
   const { showToast } = useToast();
   const [savedIds, setSavedIds] = useState<string[]>(() => mockStorage.getSavedOpportunityIds());
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>(() => {
+    const ids = mockStorage.getSavedOpportunityIds();
+    return mockStorage.getOpportunities().filter((opportunity) => ids.includes(opportunity.id));
+  });
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
 
   const loadData = () => {
@@ -25,9 +28,12 @@ export const SavedOpportunitiesPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
-    window.addEventListener('careerlaunch_storage_change', loadData);
-    return () => window.removeEventListener('careerlaunch_storage_change', loadData);
+    const handleStorage = (event: Event) => {
+      const key = (event as CustomEvent<{ key?: string }>).detail?.key;
+      if (!key || key === 'careerlaunch_saved_opp_ids' || key === 'careerlaunch_opportunities') loadData();
+    };
+    window.addEventListener('careerlaunch_storage_change', handleStorage);
+    return () => window.removeEventListener('careerlaunch_storage_change', handleStorage);
   }, []);
 
   const handleToggleSave = (id: string) => {
@@ -71,7 +77,7 @@ export const SavedOpportunitiesPage: React.FC = () => {
           title="No saved opportunities yet"
           description="Browse the opportunity catalog and save listings to review later. Confirm deadlines and requirements with each listing source."
           action={
-            <Link to="/opportunities">
+            <Link to="/app/opportunities">
               <Button size="sm" variant="primary">
                 Browse Opportunities
               </Button>

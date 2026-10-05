@@ -81,7 +81,7 @@ export const PricingPage: React.FC = () => {
             Compare the current plan preview. Subscription checkout, payment methods, and plan entitlements are not connected in this deployment.
           </p>
           <p role="note" className="mx-auto max-w-xl rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
-            Pricing and features shown below are illustrative only. No payment will be taken through this page.
+            Pricing and features are for preview only. Payments are not processed on this page.
           </p>
 
           {/* Monthly / Annual toggle */}

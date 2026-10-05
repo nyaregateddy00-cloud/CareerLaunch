@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   User,
   MapPin,
@@ -55,12 +55,13 @@ export const ProfilePage: React.FC = () => {
   const [twitterUrl, setTwitterUrl] = useState(user?.twitterUrl || '');
 
   // Sub-entities state
-  const [experience, setExperience] = useState<Experience[]>([]);
-  const [education, setEducation] = useState<Education[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [certifications, setCertifications] = useState<Certification[]>([]);
-  const [skills, setSkills] = useState<UserSkill[]>([]);
-  const [languages, setLanguages] = useState<Language[]>([]);
+  const [experience, setExperience] = useState<Experience[]>(() => mockStorage.getExperience());
+  const [education, setEducation] = useState<Education[]>(() => mockStorage.getEducation());
+  const [projects, setProjects] = useState<Project[]>(() => mockStorage.getProjects());
+  const [certifications, setCertifications] = useState<Certification[]>(() => mockStorage.getCertifications());
+  const [skills, setSkills] = useState<UserSkill[]>(() => mockStorage.getUserSkills());
+  const [languages, setLanguages] = useState<Language[]>(() => mockStorage.getLanguages());
+  const loadedUserId = useRef(user?.id);
 
   // Language input state
   const [newLangName, setNewLangName] = useState('');
@@ -78,13 +79,18 @@ export const ProfilePage: React.FC = () => {
       setLinkedinUrl(user.linkedinUrl || '');
       setTwitterUrl(user.twitterUrl || '');
     }
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || loadedUserId.current === user.id) return;
+    loadedUserId.current = user.id;
     setExperience(mockStorage.getExperience());
     setEducation(mockStorage.getEducation());
     setProjects(mockStorage.getProjects());
     setCertifications(mockStorage.getCertifications());
     setSkills(mockStorage.getUserSkills());
     setLanguages(mockStorage.getLanguages());
-  }, [user]);
+  }, [user?.id]);
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();

@@ -7,7 +7,7 @@ import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { AdminRoute } from './components/auth/AdminRoute';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { AppLayout } from './components/layout/AppLayout';
-import { LoadingSpinner } from './components/common/LoadingSpinner';
+import { PageLoadingState } from './components/common/PageLoadingState';
 
 // Public Pages
 const LandingPage = lazy(() => import('./pages/public/LandingPage').then((module) => ({ default: module.LandingPage })));
@@ -50,7 +50,7 @@ export function App() {
       <AuthProvider>
         <ToastProvider>
           <BrowserRouter>
-          <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><LoadingSpinner size="lg" text="Loading page..." /></div>}>
+          <Suspense fallback={<PageLoadingState />}>
             <Routes>
               {/* Public Layout Routes with Navbar */}
               <Route element={<PublicLayout />}>
@@ -73,6 +73,7 @@ export function App() {
               {/* Authenticated User Shell Routes Protected via ProtectedRoute */}
               <Route element={<ProtectedRoute />}>
                 <Route element={<AppLayout />}>
+                  <Route path="/app/opportunities" element={<OpportunitiesPublicPage />} />
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/cv-builder" element={<CVBuilderPage />} />

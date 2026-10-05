@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Users, Search, Filter, ShieldCheck, Mail, MapPin, CheckCircle2 } from 'lucide-react';
 import { mockStorage } from '../../lib/mockStorage';
 import { UserProfile, UserRole } from '../../types';
@@ -8,7 +8,7 @@ import { Button } from '../../components/common/Button';
 import { formatDate } from '../../lib/utils';
 
 export const AdminUsersPage: React.FC = () => {
-  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>(() => mockStorage.getAllUsers());
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('All');
   const [successAlert, setSuccessAlert] = useState('');
@@ -16,10 +16,6 @@ export const AdminUsersPage: React.FC = () => {
   const loadUsers = () => {
     setUsers(mockStorage.getAllUsers());
   };
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
 
   const handleRoleChange = (userId: string, newRole: UserRole) => {
     const userToUpdate = users.find(u => u.id === userId);

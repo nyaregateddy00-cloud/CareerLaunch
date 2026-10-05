@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   Shield,
@@ -13,19 +13,14 @@ import {
   BookOpen
 } from 'lucide-react';
 import { mockStorage } from '../../lib/mockStorage';
-import { AdminStats, Opportunity } from '../../types';
+import { Opportunity } from '../../types';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 
 export const AdminDashboardPage: React.FC = () => {
-  const [stats, setStats] = useState<AdminStats>(() => mockStorage.getAdminStats());
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-
-  useEffect(() => {
-    setStats(mockStorage.getAdminStats());
-    setOpportunities(mockStorage.getOpportunities().slice(0, 5));
-  }, []);
+  const stats = mockStorage.getAdminStats();
+  const opportunities = mockStorage.getOpportunities().slice(0, 5);
 
   return (
     <div className="space-y-8">

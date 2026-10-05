@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Briefcase, Plus, Search, Trash2, Edit2, CheckCircle2, Building2 } from 'lucide-react';
 import { mockStorage } from '../../lib/mockStorage';
 import { Opportunity, OpportunityType, WorkMode, ExperienceLevel } from '../../types';
@@ -10,7 +10,7 @@ import { Input, Textarea } from '../../components/common/Input';
 import { formatDate } from '../../lib/utils';
 
 export const AdminOpportunitiesPage: React.FC = () => {
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>(() => mockStorage.getOpportunities());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOpp, setEditingOpp] = useState<Opportunity | null>(null);
   const [search, setSearch] = useState('');
@@ -30,10 +30,6 @@ export const AdminOpportunitiesPage: React.FC = () => {
   const loadData = () => {
     setOpportunities(mockStorage.getOpportunities());
   };
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   const openAddModal = () => {
     setEditingOpp(null);
@@ -56,7 +52,7 @@ export const AdminOpportunitiesPage: React.FC = () => {
     setCompany(opp.company);
     setLocation(opp.location);
     setType(opp.type);
-    setWorkMode(opp.workMode);
+    setWorkMode(opp.workMode || 'Hybrid');
     setExperienceLevel(opp.experienceLevel);
     setSalaryRange(opp.salaryRange || '');
     setDeadline(opp.deadline || '');

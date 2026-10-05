@@ -21,13 +21,14 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { BrandLogo } from '../branding/BrandLogo';
+import { prefetchRoute } from '../../lib/routePreload';
 
 export const Sidebar: React.FC = () => {
   const { user, isAdmin } = useAuth();
 
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Find Opportunities', path: '/opportunities', icon: Search },
+    { label: 'Find Opportunities', path: '/app/opportunities', icon: Search },
     { label: 'Application Tracker', path: '/applications', icon: Kanban },
     { label: 'CV Builder', path: '/cv-builder', icon: FileText },
     { label: 'Portfolio Builder', path: '/portfolio-builder', icon: Globe },
@@ -101,6 +102,9 @@ export const Sidebar: React.FC = () => {
           <NavLink
             key={item.path}
             to={item.path}
+            onMouseEnter={() => prefetchRoute(item.path)}
+            onFocus={() => prefetchRoute(item.path)}
+            onTouchStart={() => prefetchRoute(item.path)}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 isActive
@@ -128,9 +132,12 @@ export const Sidebar: React.FC = () => {
               Admin Console
             </div>
             {adminNavItems.map(item => (
-              <NavLink
-                key={item.path}
-                to={item.path}
+          <NavLink
+            key={item.path}
+            to={item.path}
+            onMouseEnter={() => prefetchRoute(item.path)}
+            onFocus={() => prefetchRoute(item.path)}
+            onTouchStart={() => prefetchRoute(item.path)}
                 className={({ isActive }) =>
                   `flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                     isActive

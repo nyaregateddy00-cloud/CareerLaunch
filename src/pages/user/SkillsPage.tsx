@@ -24,8 +24,8 @@ const CATEGORIES: SkillCategory[] = [
 export const SkillsPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
-  const [skills, setSkills] = useState<UserSkill[]>([]);
-  const [skillGaps, setSkillGaps] = useState<RoleSkillGap[]>([]);
+  const [skills, setSkills] = useState<UserSkill[]>(() => mockStorage.getUserSkills());
+  const [skillGaps, setSkillGaps] = useState<RoleSkillGap[]>(() => mockStorage.getSkillGaps());
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const loadData = () => {
@@ -34,9 +34,12 @@ export const SkillsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
-    window.addEventListener('careerlaunch_storage_change', loadData);
-    return () => window.removeEventListener('careerlaunch_storage_change', loadData);
+    const handleStorage = (event: Event) => {
+      const key = (event as CustomEvent<{ key?: string }>).detail?.key;
+      if (!key || key === 'careerlaunch_user_skills' || key === 'careerlaunch_skill_gaps') loadData();
+    };
+    window.addEventListener('careerlaunch_storage_change', handleStorage);
+    return () => window.removeEventListener('careerlaunch_storage_change', handleStorage);
   }, []);
 
   const handleSaveSkill = (skill: UserSkill) => {

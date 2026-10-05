@@ -20,6 +20,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../../lib/mockData';
 import { mockStorage } from '../../lib/mockStorage';
 import { BrandLogo } from '../branding/BrandLogo';
+import { prefetchRoute } from '../../lib/routePreload';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, switchUser, isAdmin } = useAuth();
@@ -33,11 +34,33 @@ export const Navbar: React.FC = () => {
   const unreadNotifications = mockStorage.getNotifications().filter(n => !n.isRead).length;
 
   const publicNavLinks = [
-    { label: 'Explore Opportunities', path: '/opportunities' },
+    { label: 'Explore Opportunities', path: isAuthenticated ? '/app/opportunities' : '/opportunities' },
     { label: 'Features', path: '/features' },
     { label: 'Resources & Guides', path: '/resources' },
     { label: 'Pricing', path: '/pricing' },
     { label: 'About', path: '/about' },
+  ];
+  const mobileCareerLinks = [
+    { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Find Opportunities', path: '/app/opportunities' },
+    { label: 'Application Tracker', path: '/applications' },
+    { label: 'CV Builder', path: '/cv-builder' },
+    { label: 'Portfolio Builder', path: '/portfolio-builder' },
+    { label: 'Skills & Gaps', path: '/skills' },
+    { label: 'CareerLaunch AI', path: '/ai-assistant' },
+    { label: 'Saved Opportunities', path: '/saved-opportunities' },
+    { label: 'Learning & Playbooks', path: '/learning' },
+    { label: 'Notifications', path: '/notifications' },
+    { label: 'Profile', path: '/profile' },
+    { label: 'Settings', path: '/settings' },
+  ];
+  const mobileAdminLinks = [
+    { label: 'Admin Dashboard', path: '/admin' },
+    { label: 'Manage Users', path: '/admin/users' },
+    { label: 'Manage Opportunities', path: '/admin/opportunities' },
+    { label: 'Manage Resources', path: '/admin/resources' },
+    { label: 'Platform Analytics', path: '/admin/analytics' },
+    { label: 'Reports', path: '/admin/reports' },
   ];
 
   const handleLogout = () => {
@@ -59,12 +82,15 @@ export const Navbar: React.FC = () => {
             <BrandLogo to={isAuthenticated ? '/dashboard' : '/'} showRegion />
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden xl:flex flex-nowrap items-center gap-1">
               {publicNavLinks.map(link => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  onMouseEnter={() => prefetchRoute(link.path)}
+                  onFocus={() => prefetchRoute(link.path)}
+                  onTouchStart={() => prefetchRoute(link.path)}
+                  className={`whitespace-nowrap px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isLinkActive(link.path)
                       ? 'text-brand-blue-900 dark:text-brand-green-400 font-semibold'
                       : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
@@ -82,7 +108,7 @@ export const Navbar: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
-                className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-brand-green-300 dark:border-brand-green-800 bg-brand-green-50 dark:bg-brand-green-950/40 text-brand-green-800 dark:text-brand-green-300 hover:bg-brand-green-100 transition-colors"
+                className="hidden sm:flex flex-nowrap items-center gap-1.5 whitespace-nowrap text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-brand-green-300 dark:border-brand-green-800 bg-brand-green-50 dark:bg-brand-green-950/40 text-brand-green-800 dark:text-brand-green-300 hover:bg-brand-green-100 transition-colors"
                 title="Switch persona to test different user roles"
               >
                 <span className="w-2 h-2 rounded-full bg-brand-green-500 animate-pulse"></span>
@@ -298,7 +324,10 @@ export const Navbar: React.FC = () => {
             {/* Mobile Menu Hamburger Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
+              className="xl:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -307,12 +336,15 @@ export const Navbar: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden py-4 border-t border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-2 duration-150">
+          <div id="mobile-navigation" className="xl:hidden max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain py-4 border-t border-slate-200 dark:border-slate-800 animate-in slide-in-from-top-2 duration-150">
             <div className="flex flex-col space-y-1">
               {publicNavLinks.map(link => (
                 <Link
                   key={link.path}
                   to={link.path}
+                  onMouseEnter={() => prefetchRoute(link.path)}
+                  onFocus={() => prefetchRoute(link.path)}
+                  onTouchStart={() => prefetchRoute(link.path)}
                   onClick={() => setMobileMenuOpen(false)}
                   className="px-3 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
@@ -327,49 +359,38 @@ export const Navbar: React.FC = () => {
                       My Career Hub
                     </span>
                   </div>
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    to="/cv-builder"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-                  >
-                    Interactive CV Builder
-                  </Link>
-                  <Link
-                    to="/applications"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-                  >
-                    Applications Tracker
-                  </Link>
-                  <Link
-                    to="/skills"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
-                  >
-                    Skills & Gap Analysis
-                  </Link>
-                  <Link
-                    to="/ai-assistant"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2 text-sm text-brand-green-600 dark:text-brand-green-400 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
-                  >
-                    CareerLaunch AI
-                  </Link>
-                  {isAdmin && (
+                  {mobileCareerLinks.map((link) => (
                     <Link
-                      to="/admin"
+                      key={link.path}
+                      to={link.path}
+                      onMouseEnter={() => prefetchRoute(link.path)}
+                      onFocus={() => prefetchRoute(link.path)}
+                      onTouchStart={() => prefetchRoute(link.path)}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="px-3 py-2 text-sm text-brand-blue-600 dark:text-brand-blue-400 font-semibold"
+                      className={`px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 ${link.path === '/ai-assistant' ? 'font-semibold text-brand-green-600 dark:text-brand-green-400' : 'text-slate-700 dark:text-slate-200'}`}
                     >
-                      Admin Portal
+                      {link.label}
                     </Link>
+                  ))}
+                  {isAdmin && (
+                    <>
+                      <div className="pt-2 pb-1 border-t border-slate-100 dark:border-slate-800">
+                        <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Admin</span>
+                      </div>
+                      {mobileAdminLinks.map((link) => (
+                        <Link
+                          key={link.path}
+                          to={link.path}
+                          onMouseEnter={() => prefetchRoute(link.path)}
+                          onFocus={() => prefetchRoute(link.path)}
+                          onTouchStart={() => prefetchRoute(link.path)}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="px-3 py-2 text-sm font-semibold text-brand-blue-600 dark:text-brand-blue-400 hover:bg-brand-blue-50 dark:hover:bg-brand-blue-950/40"
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </>
                   )}
                 </>
               )}

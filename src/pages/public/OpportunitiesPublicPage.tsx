@@ -5,7 +5,7 @@ import { OpportunityCard } from '../../components/opportunities/OpportunityCard'
 import { OpportunityDetailModal } from '../../components/opportunities/OpportunityDetailModal';
 import { EmptyState } from '../../components/common/EmptyState';
 import { mockStorage } from '../../lib/mockStorage';
-import { getPublishedOpportunities } from '../../lib/opportunities';
+import { getCachedPublishedOpportunities, getPublishedOpportunities, invalidatePublishedOpportunitiesCache } from '../../lib/opportunities';
 import { Opportunity } from '../../types';
 import { Search } from 'lucide-react';
 import { Footer } from '../../components/layout/Footer';
@@ -20,9 +20,10 @@ export const OpportunitiesPublicPage: React.FC = () => {
   const [selectedExp, setSelectedExp] = useState<string>('All');
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [savedOppIds, setSavedOppIds] = useState<string[]>(() => mockStorage.getSavedOpportunityIds());
-  const [allOpportunities, setAllOpportunities] = useState<Opportunity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [allOpportunities, setAllOpportunities] = useState<Opportunity[]>(() => getCachedPublishedOpportunities() ?? []);
+  const [isLoading, setIsLoading] = useState(() => getCachedPublishedOpportunities() === null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let isActive = true;
@@ -34,7 +35,9 @@ export const OpportunitiesPublicPage: React.FC = () => {
         setAllOpportunities(opportunities);
       } catch (error) {
         if (!isActive) return;
-        setLoadError(error instanceof Error ? error.message : 'Unknown database error');
+        if (!getCachedPublishedOpportunities()) {
+          setLoadError(error instanceof Error ? error.message : 'Unknown database error');
+        }
         setIsLoading(false);
         return;
       }
@@ -46,7 +49,7 @@ export const OpportunitiesPublicPage: React.FC = () => {
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [retryCount]);
 
   const filteredOpportunities = useMemo(() => {
     return allOpportunities.filter((opp) => {
@@ -82,6 +85,13 @@ export const OpportunitiesPublicPage: React.FC = () => {
     setSearchParams({});
   };
 
+  const handleRetry = () => {
+    invalidatePublishedOpportunitiesCache();
+    setLoadError(null);
+    if (allOpportunities.length === 0) setIsLoading(true);
+    setRetryCount((count) => count + 1);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50 dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 flex-1 space-y-8">
@@ -111,16 +121,18 @@ export const OpportunitiesPublicPage: React.FC = () => {
         />
 
         {isLoading ? (
-          <p className="py-12 text-center text-sm text-slate-500" role="status">
-            Loading opportunities…
-          </p>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" role="status" aria-label="Loading opportunities">
+            {[0, 1, 2].map((item) => (
+              <div key={item} className="h-52 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 motion-reduce:animate-none" />
+            ))}
+          </div>
         ) : loadError ? (
           <EmptyState
             icon={<Search className="w-6 h-6" />}
             title="Couldn’t load opportunities"
             description={`The opportunities database could not be reached: ${loadError}`}
             actionText="Try Again"
-            onAction={() => window.location.reload()}
+            onAction={handleRetry}
           />
         ) : filteredOpportunities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

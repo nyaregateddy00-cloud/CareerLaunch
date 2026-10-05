@@ -34,7 +34,7 @@ const COLUMNS: { id: ApplicationStage; title: string; color: string; border: str
 export const ApplicationsTrackerPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
-  const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [applications, setApplications] = useState<JobApplication[]>(() => mockStorage.getApplications());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingApp, setEditingApp] = useState<JobApplication | null>(null);
   const [searchFilter, setSearchFilter] = useState('');
@@ -44,9 +44,12 @@ export const ApplicationsTrackerPage: React.FC = () => {
   };
 
   useEffect(() => {
-    loadData();
-    window.addEventListener('careerlaunch_storage_change', loadData);
-    return () => window.removeEventListener('careerlaunch_storage_change', loadData);
+    const handleStorage = (event: Event) => {
+      const key = (event as CustomEvent<{ key?: string }>).detail?.key;
+      if (!key || key === 'careerlaunch_applications') loadData();
+    };
+    window.addEventListener('careerlaunch_storage_change', handleStorage);
+    return () => window.removeEventListener('careerlaunch_storage_change', handleStorage);
   }, []);
 
   const handleUpdateStage = (id: string, stage: ApplicationStage) => {
