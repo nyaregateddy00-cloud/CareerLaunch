@@ -365,13 +365,16 @@ export const LandingPage: React.FC = () => {
 
       {/* Product workspace preview */}
       <section className="py-20 bg-slate-50/60 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="p-8 sm:p-10">
-            <div className="max-w-2xl">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="p-6 sm:p-10">
+            <div className="grid min-w-0 items-center gap-8 lg:grid-cols-2">
+            <div className="min-w-0">
               <h2 className="text-xs font-bold uppercase tracking-wider text-brand-green-600 dark:text-brand-green-400 mb-2">A practical workspace</h2>
               <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">Keep your next career steps in one place</h3>
               <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">Build your profile, prepare application materials, explore the catalog, and track the roles you apply to. Check opportunity details with the original source before applying.</p>
               <Link to="/register" className="inline-flex mt-6"><Button variant="primary" rightIcon={<ArrowRight className="w-4 h-4" />}>Create a profile</Button></Link>
+            </div>
+            <CareerPhoto photo={careerPhotos.lagosDeveloper} sizes="(max-width: 1024px) 100vw, 460px" imageClassName="object-[center_30%]" />
             </div>
           </Card>
         </div>

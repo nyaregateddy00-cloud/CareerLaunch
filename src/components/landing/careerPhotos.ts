@@ -20,4 +20,8 @@ export const careerPhotos = {
     imageId: 'photo-1573164713988-8665fc963095',
     alt: 'A Black woman working on a laptop during a technology meeting.',
   },
+  lagosDeveloper: {
+    imageId: 'photo-1544813813-2c73bec209ca',
+    alt: 'A smiling young professional working on a laptop in an office in Lagos, Nigeria.',
+  },
 } satisfies Record<string, CareerPhotoSource>;
