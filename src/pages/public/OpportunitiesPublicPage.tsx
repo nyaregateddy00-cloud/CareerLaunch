@@ -7,10 +7,13 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { mockStorage } from '../../lib/mockStorage';
 import { getCachedPublishedOpportunities, getPublishedOpportunities, invalidatePublishedOpportunitiesCache } from '../../lib/opportunities';
 import { Opportunity } from '../../types';
-import { Search } from 'lucide-react';
+import { Search, Sparkles } from 'lucide-react';
 import { Footer } from '../../components/layout/Footer';
+import { useAuth } from '../../context/AuthContext';
+import { matchOpportunityToProfile, rankOpportunitiesForProfile } from '../../lib/opportunities';
 
 export const OpportunitiesPublicPage: React.FC = () => {
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialType = searchParams.get('type') || 'All';
 
@@ -24,6 +27,7 @@ export const OpportunitiesPublicPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(() => getCachedPublishedOpportunities() === null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [showBestMatches, setShowBestMatches] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -52,7 +56,7 @@ export const OpportunitiesPublicPage: React.FC = () => {
   }, [retryCount]);
 
   const filteredOpportunities = useMemo(() => {
-    return allOpportunities.filter((opp) => {
+    const filtered = allOpportunities.filter((opp) => {
       if (opp.status !== 'published') return false;
 
       if (searchQuery.trim()) {
@@ -70,7 +74,12 @@ export const OpportunitiesPublicPage: React.FC = () => {
 
       return true;
     });
-  }, [allOpportunities, searchQuery, selectedType, selectedWorkMode, selectedExp]);
+    return showBestMatches && user ? rankOpportunitiesForProfile(filtered, user) : filtered;
+  }, [allOpportunities, searchQuery, selectedType, selectedWorkMode, selectedExp, showBestMatches, user]);
+
+  const opportunityMatches = useMemo(() => new Map(
+    allOpportunities.map((opportunity) => [opportunity.id, matchOpportunityToProfile(opportunity, user)])
+  ), [allOpportunities, user]);
 
   const handleToggleSave = (id: string) => {
     mockStorage.toggleSaveOpportunity(id);
@@ -120,6 +129,21 @@ export const OpportunitiesPublicPage: React.FC = () => {
           totalCount={filteredOpportunities.length}
         />
 
+        {user && (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <button
+              type="button"
+              aria-pressed={showBestMatches}
+              onClick={() => setShowBestMatches((enabled) => !enabled)}
+              className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors ${showBestMatches ? 'border-brand-green-500 bg-brand-green-50 text-brand-green-800 dark:bg-brand-green-950/50 dark:text-brand-green-300' : 'border-slate-200 bg-white text-slate-600 hover:border-brand-green-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`}
+            >
+              <Sparkles className="h-4 w-4" />
+              {showBestMatches ? 'Showing best matches' : 'Sort by profile match'}
+            </button>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Match scores use your saved skills, profile details, and location.</p>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3" role="status" aria-label="Loading opportunities">
             {[0, 1, 2].map((item) => (
@@ -140,6 +164,7 @@ export const OpportunitiesPublicPage: React.FC = () => {
               <OpportunityCard
                 key={opp.id}
                 opportunity={opp}
+                matchScore={opportunityMatches.get(opp.id)?.score}
                 isSaved={savedOppIds.includes(opp.id)}
                 onToggleSave={handleToggleSave}
                 onSelect={(o) => setSelectedOpp(o)}

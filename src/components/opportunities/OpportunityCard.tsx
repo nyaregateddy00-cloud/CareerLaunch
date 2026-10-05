@@ -7,6 +7,7 @@ import { formatDate } from '../../lib/utils';
 interface OpportunityCardProps {
   opportunity: Opportunity;
   isSaved?: boolean;
+  matchScore?: number;
   onToggleSave?: (id: string) => void;
   onSelect: (opportunity: Opportunity) => void;
 }
@@ -14,6 +15,7 @@ interface OpportunityCardProps {
 export const OpportunityCard: React.FC<OpportunityCardProps> = ({
   opportunity,
   isSaved = false,
+  matchScore,
   onToggleSave,
   onSelect,
 }) => {
@@ -49,6 +51,9 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
               <Badge variant="outline" size="sm">
                 {opportunity.workMode}
               </Badge>
+            )}
+            {typeof matchScore === 'number' && (
+              <Badge variant="green" size="sm">{matchScore}% match</Badge>
             )}
           </div>
 

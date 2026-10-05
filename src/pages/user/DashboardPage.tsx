@@ -22,23 +22,30 @@ import { OpportunityDetailModal } from '../../components/opportunities/Opportuni
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { formatDate } from '../../lib/utils';
+import { getPublishedOpportunities, matchOpportunityToProfile, rankOpportunitiesForProfile } from '../../lib/opportunities';
 
 export const DashboardPage: React.FC = () => {
   const { user, authNotice } = useAuth();
   const [applications, setApplications] = useState<JobApplication[]>(() => mockStorage.getApplications());
   const [savedOppIds, setSavedOppIds] = useState<string[]>(() => mockStorage.getSavedOpportunityIds());
-  const [recommendedOpps, setRecommendedOpps] = useState<Opportunity[]>(() => mockStorage.getOpportunities().filter((opportunity) => opportunity.status === 'published').slice(0, 2));
+  const [publishedOpps, setPublishedOpps] = useState<Opportunity[]>(() => mockStorage.getOpportunities().filter((opportunity) => opportunity.status === 'published'));
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [workspaceSaveError, setWorkspaceSaveError] = useState<string | null>(null);
+
+  const loadOpportunities = () => {
+    void getPublishedOpportunities().then(setPublishedOpps).catch((error: unknown) => {
+      console.error('Could not load published opportunities:', error);
+    });
+  };
+
+  useEffect(() => { loadOpportunities(); }, []);
 
   useEffect(() => {
     const handleStorage = (event: Event) => {
       const key = (event as CustomEvent<{ key?: string }>).detail?.key;
       if (!key || key === 'careerlaunch_applications') setApplications(mockStorage.getApplications());
       if (!key || key === 'careerlaunch_saved_opp_ids') setSavedOppIds(mockStorage.getSavedOpportunityIds());
-      if (!key || key === 'careerlaunch_opportunities') {
-        setRecommendedOpps(mockStorage.getOpportunities().filter((opportunity) => opportunity.status === 'published').slice(0, 2));
-      }
+      if (!key || key === 'careerlaunch_opportunities') loadOpportunities();
     };
     window.addEventListener('careerlaunch_storage_change', handleStorage);
     return () => window.removeEventListener('careerlaunch_storage_change', handleStorage);
@@ -67,12 +74,15 @@ export const DashboardPage: React.FC = () => {
 
   const upcomingDeadlines = useMemo(() => {
     const now = Date.now();
-    return mockStorage
-      .getOpportunities()
+    return publishedOpps
       .filter((o) => o.status === 'published' && o.deadline && new Date(o.deadline).getTime() >= now)
       .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
       .slice(0, 2);
-  }, []);
+  }, [publishedOpps]);
+
+  const recommendedOpps = useMemo(() => user
+    ? rankOpportunitiesForProfile(publishedOpps, user).slice(0, 2)
+    : publishedOpps.slice(0, 2), [publishedOpps, user]);
 
   if (!user) return null;
 
@@ -208,6 +218,7 @@ export const DashboardPage: React.FC = () => {
                 <OpportunityCard
                   key={opp.id}
                   opportunity={opp}
+                  matchScore={user ? matchOpportunityToProfile(opp, user)?.score : undefined}
                   isSaved={savedOppIds.includes(opp.id)}
                   onToggleSave={handleToggleSave}
                   onSelect={(o) => setSelectedOpp(o)}

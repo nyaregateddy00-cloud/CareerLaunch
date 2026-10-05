@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Briefcase, Plus, Search, Trash2, Edit2, CheckCircle2, Building2 } from 'lucide-react';
-import { mockStorage } from '../../lib/mockStorage';
+import { deleteOpportunity, getAdminOpportunities, saveOpportunity } from '../../lib/opportunities';
 import { Opportunity, OpportunityType, WorkMode, ExperienceLevel } from '../../types';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
@@ -10,10 +10,11 @@ import { Input, Textarea } from '../../components/common/Input';
 import { formatDate } from '../../lib/utils';
 
 export const AdminOpportunitiesPage: React.FC = () => {
-  const [opportunities, setOpportunities] = useState<Opportunity[]>(() => mockStorage.getOpportunities());
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOpp, setEditingOpp] = useState<Opportunity | null>(null);
   const [search, setSearch] = useState('');
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Form states
   const [title, setTitle] = useState('');
@@ -27,9 +28,16 @@ export const AdminOpportunitiesPage: React.FC = () => {
   const [description, setDescription] = useState('');
   const [applicationUrl, setApplicationUrl] = useState('');
 
-  const loadData = () => {
-    setOpportunities(mockStorage.getOpportunities());
+  const loadData = async () => {
+    try {
+      setOpportunities(await getAdminOpportunities());
+      setLoadError(null);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Could not load opportunity listings.');
+    }
   };
+
+  useEffect(() => { void loadData(); }, []);
 
   const openAddModal = () => {
     setEditingOpp(null);
@@ -61,7 +69,7 @@ export const AdminOpportunitiesPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !company) return;
 
@@ -86,15 +94,24 @@ export const AdminOpportunitiesPage: React.FC = () => {
       createdAt: editingOpp?.createdAt || new Date().toISOString(),
     };
 
-    mockStorage.saveOpportunity(oppToSave);
-    loadData();
-    setIsModalOpen(false);
+    try {
+      const saved = await saveOpportunity(oppToSave);
+      setOpportunities((current) => [saved, ...current.filter((item) => item.id !== saved.id)]);
+      setLoadError(null);
+      setIsModalOpen(false);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Could not save the opportunity. Check the Supabase admin policy and schema.');
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this opportunity?')) {
-      mockStorage.deleteOpportunity(id);
-      loadData();
+      try {
+        await deleteOpportunity(id);
+        setOpportunities((current) => current.filter((opportunity) => opportunity.id !== id));
+      } catch (error) {
+        setLoadError(error instanceof Error ? error.message : 'Could not delete the opportunity.');
+      }
     }
   };
 
@@ -121,6 +138,8 @@ export const AdminOpportunitiesPage: React.FC = () => {
           Post New Opportunity
         </Button>
       </div>
+
+      {loadError && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">{loadError}</p>}
 
       {/* Search Filter */}
       <div className="relative w-full sm:w-80">
