@@ -15,19 +15,17 @@ export const ProfileStrengthCard: React.FC<ProfileStrengthCardProps> = ({ user }
     const exp = mockStorage.getExperience().filter((e) => e.userId === user.id);
     const skills = mockStorage.getUserSkills().filter((s) => s.userId === user.id);
     const projects = mockStorage.getProjects().filter((p) => p.userId === user.id);
-    const portfolio = mockStorage.getPortfolio();
-
     const { score } = calculateProfileStrength(user, skills, exp, edu, projects);
 
     const items = [
       {
-        label: 'Add university / college education',
-        completed: edu.length > 0,
+        label: 'Add your profile headline and a short bio',
+        completed: Boolean(user.headline.trim() && user.bio.trim()),
         link: '/profile',
       },
       {
-        label: 'List your attachment or work experience',
-        completed: exp.length > 0,
+        label: 'Add your location and contact details',
+        completed: Boolean(user.location.trim() && user.phone?.trim()),
         link: '/profile',
       },
       {
@@ -36,19 +34,15 @@ export const ProfileStrengthCard: React.FC<ProfileStrengthCardProps> = ({ user }
         link: '/skills',
       },
       {
-        label: 'Showcase at least 1 project with demo or GitHub link',
-        completed: projects.length > 0,
+        label: 'Add your education history',
+        completed: edu.length > 0,
         link: '/profile',
       },
+      { label: 'Add your work or attachment experience', completed: exp.length > 0, link: '/profile' },
       {
-        label: 'Generate your professional CV in the CV Builder',
-        completed: Boolean(user.headline && user.headline.length > 5),
-        link: '/cv-builder',
-      },
-      {
-        label: 'Publish your shareable public portfolio (/u/username)',
-        completed: Boolean(portfolio.isPublished),
-        link: '/portfolio-builder',
+        label: 'Add at least one project to your profile',
+        completed: projects.length > 0,
+        link: '/profile',
       },
     ];
 
@@ -72,11 +66,11 @@ export const ProfileStrengthCard: React.FC<ProfileStrengthCardProps> = ({ user }
           </div>
 
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
-            Career profile: <span className="text-brand-green-400">{strengthScore}% complete</span>
+            Career profile score: <span className="text-brand-green-400">{strengthScore}/100</span>
           </h2>
 
           <p className="text-xs sm:text-sm text-brand-blue-200 leading-relaxed">
-            A complete profile makes it easier to present your experience, skills, and work in one place.
+            Platform-generated profile completeness indicator based on information saved here. It is not an employment prediction.
           </p>
 
           <div className="w-full bg-brand-blue-800/80 rounded-full h-3 overflow-hidden mt-3">

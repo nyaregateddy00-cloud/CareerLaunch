@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Settings,
   Sun,
@@ -26,20 +26,42 @@ import { isSupabaseConfigured } from '../../lib/supabase';
 
 export const SettingsPage: React.FC = () => {
   const { theme, setTheme } = useTheme();
-  const { user } = useAuth();
+  const { user, resetPassword } = useAuth();
   const { showToast } = useToast();
 
-  const [currency, setCurrency] = useState('KES');
+  const [currency, setCurrency] = useState<'KES' | 'USD' | 'RWF' | 'NGN'>('KES');
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [interviewReminders, setInterviewReminders] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(false);
+  const [shareCareerContext, setShareCareerContext] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
+
+  useEffect(() => {
+    const preferences = mockStorage.getPreferences();
+    setCurrency(preferences.currency);
+    setEmailAlerts(preferences.emailAlerts);
+    setInterviewReminders(preferences.interviewReminders);
+    setWeeklyDigest(preferences.weeklyDigest);
+    setShareCareerContext(preferences.shareCareerContext);
+    setTheme(preferences.appearance);
+  }, [user?.id, setTheme]);
 
   const handleSavePreferences = (e: React.FormEvent) => {
     e.preventDefault();
+    mockStorage.setPreferences({ currency, emailAlerts, interviewReminders, weeklyDigest, appearance: theme, shareCareerContext });
     showToast('Platform preferences updated successfully', 'success');
   };
 
+  const handlePasswordReset = async () => {
+    if (!user?.email || resetBusy) return;
+    setResetBusy(true);
+    const sent = await resetPassword(user.email);
+    setResetBusy(false);
+    showToast(sent ? 'If an account exists for that address, a password reset link is on its way.' : 'Password recovery needs working Supabase authentication. Please try again later.', sent ? 'success' : 'error');
+  };
+
   const handleResetData = () => {
+    if (isSupabaseConfigured) return;
     if (confirm('Reset all demo data back to default initial state?')) {
       mockStorage.resetAll();
     }
@@ -79,17 +101,25 @@ export const SettingsPage: React.FC = () => {
             <Button
               size="sm"
               variant="outline"
-              onClick={() =>
-                showToast(
-                  'Password recovery is not connected yet. Please contact support to regain access.',
-                  'info'
-                )
-              }
+              onClick={handlePasswordReset}
+              disabled={resetBusy || !isSupabaseConfigured}
             >
-              Reset Password
+              {resetBusy ? 'Sending…' : 'Email password reset link'}
             </Button>
           </div>
         </div>
+      </Card>
+
+      <Card className="p-6 sm:p-8 space-y-3">
+        <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">AI Career Coach privacy</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-500">By default, your saved profile, CV, skills, applications, and opportunities stay out of AI requests. Turn on this option to send relevant career context to the configured AI provider when you chat or request interview feedback.</p>
+        </div>
+        <label className="flex items-start gap-3 text-xs text-slate-700 dark:text-slate-300">
+          <input type="checkbox" checked={shareCareerContext} onChange={(event) => setShareCareerContext(event.target.checked)} className="mt-0.5" />
+          <span>Allow CareerLaunch Coach to use my career context in AI requests.</span>
+        </label>
+        <Button type="button" size="sm" variant="secondary" onClick={() => { const prefs = mockStorage.getPreferences(); mockStorage.setPreferences({ ...prefs, shareCareerContext, currency, emailAlerts, interviewReminders, weeklyDigest, appearance: theme }); showToast('AI privacy preference saved', 'success'); }}>Save AI privacy preference</Button>
       </Card>
 
       {/* Appearance & Theme */}
@@ -141,7 +171,7 @@ export const SettingsPage: React.FC = () => {
             Regional & Notification Preferences
           </h3>
           <p className="text-xs text-slate-500">
-            Set default currency formats and notification alerts.
+              Set your currency display and notification preferences. Email delivery depends on the platform notification service being configured.
           </p>
         </div>
 
@@ -149,7 +179,7 @@ export const SettingsPage: React.FC = () => {
           <Select
             label="Primary Currency Display"
             value={currency}
-            onChange={(e) => setCurrency(e.target.value)}
+            onChange={(e) => setCurrency(e.target.value as typeof currency)}
             options={[
               { value: 'KES', label: 'Kenya Shillings (KES)' },
               { value: 'USD', label: 'US Dollars (USD)' },
@@ -195,7 +225,7 @@ export const SettingsPage: React.FC = () => {
                 className="w-4 h-4 rounded text-brand-blue-900 focus:ring-brand-blue-500"
               />
               <span className="text-xs text-slate-700 dark:text-slate-300">
-                Weekly career digest and tech job market trends
+                Weekly career digest preference (delivery requires a notification service)
               </span>
             </label>
           </div>
@@ -208,8 +238,8 @@ export const SettingsPage: React.FC = () => {
         </form>
       </Card>
 
-      {/* Reset & Storage Tools */}
-      <Card className="p-6 sm:p-8 space-y-4 border-rose-200 dark:border-rose-900/40">
+      {/* Destructive preview-only reset; never expose it to a Supabase workspace. */}
+      {!isSupabaseConfigured && <Card className="p-6 sm:p-8 space-y-4 border-rose-200 dark:border-rose-900/40">
         <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
           <h3 className="text-base font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
             <RefreshCw className="w-5 h-5" />
@@ -226,7 +256,7 @@ export const SettingsPage: React.FC = () => {
             Reset All Data to Factory Default
           </Button>
         </div>
-      </Card>
+      </Card>}
     </div>
   );
 };

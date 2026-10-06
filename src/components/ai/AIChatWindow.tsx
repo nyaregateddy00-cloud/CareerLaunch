@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../common/Button';
 import { aiService, AIChatMessage } from '../../lib/aiService';
+import { getPublishedOpportunities } from '../../lib/opportunities';
 import { mockStorage } from '../../lib/mockStorage';
 
 interface Message {
@@ -105,13 +106,9 @@ const INITIAL_MESSAGES: Message[] = [
   {
     id: 'msg-1',
     sender: 'assistant',
-    text: `Hello! I'm **CareerLaunch AI**, your dedicated career advisor focused on African tech ecosystems and global remote opportunities.
+    text: `Hello! I'm **CareerLaunch Coach**. I can help you think through your career direction, improve application materials using facts you provide, plan skill-building steps, and practice interview answers.
 
-I can help you with:
-• **CV & Resume Reviews**: Tailor your CV specifically for roles at Safaricom, Equity Group, Microsoft ADC, or Andela.
-• **Custom Cover Letters**: Generate high-converting cover letters highlighting your local projects (e.g. M-Pesa integrations, agricultural tech).
-• **Interview Simulation**: Practice technical & STAR behavioral questions with tailored feedback.
-• **Skill Gap Advice**: Find out exactly which technologies to master next for high-paying opportunities.
+I use the profile information you choose to share in this chat. I won't invent experience, qualifications, job openings, or market statistics. For opportunity details, always confirm information with the original listing.
 
 What would you like to work on today?`,
     timestamp: 'Just now',
@@ -120,26 +117,26 @@ What would you like to work on today?`,
 
 const PROMPT_SUGGESTIONS = [
   {
-    title: 'Review CV for Safaricom',
-    prompt: 'Review my CV summary and experience to apply for the Graduate Software Engineer role at Safaricom PLC.',
+    title: 'Improve my CV summary',
+    prompt: 'Help me improve my CV summary using only the experience and skills I provide. Ask me for any missing information instead of inventing details.',
   },
   {
-    title: 'Cover Letter for Andela',
-    prompt: 'Draft a compelling cover letter for the Junior Frontend Engineer role at Andela, highlighting my React and TypeScript projects.',
+    title: 'Plan a cover letter',
+    prompt: 'Help me plan a cover letter for a role I am applying to. Ask what the listing requires and what relevant evidence I can share.',
   },
   {
     title: 'Simulate Tech Interview',
-    prompt: 'Simulate a 3-question technical interview for an entry-level software developer in Nairobi.',
+    prompt: 'Practice a role-specific interview question. Ask me for the role and level, then give one question at a time.',
   },
   {
-    title: 'Nairobi Market Skills 2026',
-    prompt: 'What are the top 5 high-demand engineering skills in East Africa right now, and how should I learn them?',
+    title: 'Choose what to learn next',
+    prompt: 'Based on my current skills and career goal, suggest a practical next learning step. State when you need more information.',
   },
 ];
 
 export const AIChatWindow: React.FC = () => {
   const { user } = useAuth();
-  const isAIConfigured = aiService.isConfigured();
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
 
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [inputText, setInputText] = useState('');
@@ -154,6 +151,12 @@ export const AIChatWindow: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping]);
+
+  useEffect(() => {
+    let active = true;
+    aiService.checkAvailability().then((available) => { if (active) setAiAvailable(available); });
+    return () => { active = false; };
+  }, []);
 
   const handleSend = async (textToSend?: string) => {
     const prompt = textToSend || inputText;
@@ -170,21 +173,6 @@ export const AIChatWindow: React.FC = () => {
     setInputText('');
     setIsTyping(true);
 
-    if (!isAIConfigured) {
-      // Honest unconfigured state
-      setTimeout(() => {
-        const noticeMessage: Message = {
-          id: `msg-${Date.now() + 1}`,
-          sender: 'system',
-          text: 'CareerLaunch AI is temporarily unavailable. Please try again shortly.',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        };
-        setMessages((prev) => [...prev, noticeMessage]);
-        setIsTyping(false);
-      }, 500);
-      return;
-    }
-
     try {
       const skillRecords = mockStorage.getUserSkills();
       const skills = skillRecords.map((skill) => skill.skillName);
@@ -194,8 +182,9 @@ export const AIChatWindow: React.FC = () => {
       const certificationRecords = mockStorage.getCertifications();
       const languageRecords = mockStorage.getLanguages();
       const applicationRecords = mockStorage.getApplications();
+      const shareCareerContext = mockStorage.getPreferences().shareCareerContext;
       const savedOpportunityIds = new Set(mockStorage.getSavedOpportunityIds());
-      const allOpportunities = mockStorage.getOpportunities();
+      const allOpportunities = shareCareerContext ? await getPublishedOpportunities() : [];
       const cv = mockStorage.getCV();
       const portfolio = mockStorage.getPortfolio();
       const availableOpportunities = allOpportunities
@@ -263,12 +252,12 @@ export const AIChatWindow: React.FC = () => {
           timestamp: m.timestamp,
         }));
 
-      const res = await aiService.sendMessage(prompt, history, undefined, {
+      const res = await aiService.sendMessage(prompt, history, undefined, shareCareerContext ? {
         fullName: user?.fullName,
         headline: user?.headline,
         skills,
         careerContext,
-      });
+      } : undefined);
 
       const aiMessage: Message = {
         id: `msg-${Date.now() + 1}`,
@@ -343,12 +332,12 @@ export const AIChatWindow: React.FC = () => {
       </div>
 
       {/* Honest Status Banner when API Key is not set */}
-      {!isAIConfigured && (
+      {aiAvailable === false && (
         <div className="px-6 py-3 bg-amber-50/80 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-900/50 flex items-center justify-between text-xs text-amber-800 dark:text-amber-300">
           <div className="flex items-center gap-2.5">
             <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
             <span>
-              <strong>Preview Mode:</strong> Configure a server-side AI endpoint to enable live responses.
+              <strong>AI is not configured:</strong> Add the server-only AI provider settings in Vercel to enable coach responses.
             </span>
           </div>
         </div>

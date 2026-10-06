@@ -27,10 +27,10 @@ export const AboutPage: React.FC = () => {
           <div className="relative z-10 max-w-2xl space-y-4">
             <h2 className="text-2xl sm:text-3xl font-bold">The Problem We Are Solving</h2>
             <p className="text-sm sm:text-base text-brand-blue-200 leading-relaxed">
-              Every year, over 10 million young Africans enter the labor market. In Kenya alone, hundreds of thousands of university and TVET graduates struggle with fragmented job postings, generic unoptimized CVs, lack of portfolio guidance, and outdated attachment protocols.
+              Students, graduates, and early-career professionals often have to piece together learning, application materials, and opportunity searches across different services. CareerLaunch brings those career-building steps into one workspace.
             </p>
             <p className="text-sm sm:text-base text-brand-blue-200 leading-relaxed">
-              CareerLaunch provides an integrated, AI-guided career tech engine that equips candidates with proof-of-work portfolios, skill gap intelligence, and direct connections to vetted employers across Nairobi, Kigali, Lagos, and remote global markets.
+              CareerLaunch helps people organize skills, learning, projects, CVs, portfolios, and opportunity searches. CareerLaunch AI availability depends on the deployment’s server configuration, and opportunity details should be confirmed with the original source.
             </p>
           </div>
         </div>
@@ -43,7 +43,7 @@ export const AboutPage: React.FC = () => {
             </div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Proof of Work Over Paper</h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              We champion working prototypes, live links, and verified technical competencies rather than static paper credentials.
+              Add projects and links that help explain how you use your skills alongside your CV.
             </p>
           </Card>
 
@@ -51,9 +51,9 @@ export const AboutPage: React.FC = () => {
             <div className="w-12 h-12 rounded-xl bg-brand-green-50 dark:bg-brand-green-950 text-brand-green-700 dark:text-brand-green-300 flex items-center justify-center">
               <Shield className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Transparent & Vetted</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Clear Opportunity Details</h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Every attachment, internship, and job listed on our platform is verified with clear compensation, responsibilities, and zero application fees.
+              Browse published listings and follow the source link to confirm deadlines, requirements, compensation, and application instructions.
             </p>
           </Card>
 
@@ -63,7 +63,7 @@ export const AboutPage: React.FC = () => {
             </div>
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Pan-African & Global Reach</h3>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Starting with Kenya's vibrant tech ecosystem, we expand opportunities across East, West, and Southern Africa, including high-paying remote roles.
+              The catalog can include listings across African locations and remote roles. Availability depends on the listings currently published.
             </p>
           </Card>
         </div>

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { BookOpen, Clock, Tag, ArrowRight, Sparkles, X } from 'lucide-react';
-import { mockStorage } from '../../lib/mockStorage';
+import React, { useEffect, useState } from 'react';
+import { BookOpen, Clock, Tag, ArrowRight, Sparkles, X, Search } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { getCareerResources } from '../../lib/resources';
+import { isSupabaseConfigured } from '../../lib/supabase';
 import { CareerResource } from '../../types';
 import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
@@ -9,15 +11,30 @@ import { Modal } from '../../components/common/Modal';
 import { Footer } from '../../components/layout/Footer';
 
 export const ResourcesPage: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeArticle, setActiveArticle] = useState<CareerResource | null>(null);
+  const [allResources, setAllResources] = useState<CareerResource[]>(() => isSupabaseConfigured ? [] : []);
+  const [loadError, setLoadError] = useState(false);
 
-  const allResources = mockStorage.getResources();
+  useEffect(() => {
+    let active = true;
+    getCareerResources().then((items) => { if (active) setAllResources(items); })
+      .catch(() => { if (active) setLoadError(true); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => { setSearchQuery(searchParams.get('q') || ''); }, [searchParams]);
+
   const categories = ['All', 'Industrial Attachment', 'Interview Prep', 'CV & Portfolio', 'Scholarships', 'Freelancing'];
 
-  const filteredResources = allResources.filter(r =>
-    selectedCategory === 'All' ? true : r.category === selectedCategory
-  );
+  const filteredResources = allResources.filter((resource) => {
+    const matchesCategory = selectedCategory === 'All' || resource.category === selectedCategory;
+    const needle = searchQuery.trim().toLowerCase();
+    const matchesSearch = !needle || [resource.title, resource.summary, resource.category, ...resource.tags].some((value) => value.toLowerCase().includes(needle));
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50 dark:bg-slate-950">
@@ -30,10 +47,16 @@ export const ResourcesPage: React.FC = () => {
           <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             African Career Guides & Playbooks
           </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
-            In-depth strategies written specifically for Kenyan and African university students, graduates, and remote freelancers.
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
+            Practical career guides and learning resources published by CareerLaunch.
           </p>
         </div>
+        <label className="flex max-w-xl items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 dark:border-slate-800 dark:bg-slate-900">
+          <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+          <span className="sr-only">Search learning resources</span>
+          <input value={searchQuery} onChange={(event) => { const value = event.target.value; setSearchQuery(value); const next = new URLSearchParams(searchParams); if (value.trim()) next.set('q', value); else next.delete('q'); setSearchParams(next, { replace: true }); }} className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400" placeholder="Search guides, topics, or tags" />
+        </label>
+        {!isSupabaseConfigured && <p className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl px-4 py-3">Preview library: sample guide content is for local demonstration. Published production guides load from Supabase.</p>}
 
         {/* Category Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
@@ -54,6 +77,8 @@ export const ResourcesPage: React.FC = () => {
 
         {/* Resources Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {loadError && <p role="alert" className="text-sm text-rose-600">We couldn't load resources. Please try again later.</p>}
+          {!loadError && isSupabaseConfigured && allResources.length === 0 && <p className="text-sm text-slate-500">No published career guides are available yet.</p>}
           {filteredResources.map((res) => (
             <Card
               key={res.id}

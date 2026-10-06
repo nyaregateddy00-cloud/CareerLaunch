@@ -1,69 +1,55 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Check, ArrowRight, Zap, Shield, Sparkles } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { Footer } from '../../components/layout/Footer';
 
 export const PricingPage: React.FC = () => {
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-
   const plans = [
     {
       name: 'Free Campus Starter',
-      badge: 'Always Free',
-      description: 'Everything essential for university students and early job seekers.',
-      priceKes: '0',
-      priceUsd: '0',
-      period: 'forever',
+      badge: 'Current tools',
+      description: 'Tools available in the current CareerLaunch deployment.',
+      price: 'Included in preview',
+      period: 'No paid tier',
       features: [
-        'Full access to verified opportunity discovery',
-        'Standard CV Builder with PDF download',
-        'Public shareable portfolio (careerlaunch.co.ke/u/...)',
-        'Kanban application tracker (up to 25 applications)',
-        'Basic Skill Gap analysis',
-        'Access to all public career playbooks & NITA guides',
+        'Browse published opportunity listings and check each source',
+        'Profile, skills, education, and experience workspace',
+        'CV builder with browser print-to-PDF',
+        'Portfolio builder with section-by-section visibility settings',
+        'Application tracker and saved opportunities',
+        'Learning progress for published career resources',
       ],
-      cta: 'Get Started Free',
+      cta: 'Create an account',
       ctaVariant: 'secondary' as const,
       popular: false,
     },
     {
       name: 'Career Accelerator Pro',
-      badge: 'Most Popular',
-      description: 'Supercharge your job search with AI assistance and ATS optimization.',
-      priceKes: billingCycle === 'monthly' ? '950' : '750',
-      priceUsd: billingCycle === 'monthly' ? '8' : '6',
-      period: billingCycle === 'monthly' ? '/ month' : '/ month, billed yearly',
+      badge: 'Concept preview',
+      description: 'A possible paid feature set; subscriptions and entitlements are not implemented.',
+      price: 'KES 950',
+      period: 'Illustrative only',
       features: [
-        'Everything in Free Campus Starter',
-        'Unlimited CareerLaunch AI prompts & CV polish',
-        'AI cover letter generator for African companies',
-        'All 3 premium CV templates with unlimited PDF exports',
-        'Interactive tech & behavioral interview simulation',
-        'Unlimited Kanban application tracking',
-        'Priority opportunity alerts via SMS & Email',
+        'AI career advice when server-side provider settings are configured',
+        'AI feedback for interview practice when configured',
+        'Career roadmap and account activity snapshot',
+        'Personalized application-material feedback using facts you provide',
       ],
-      cta: 'Start 14-Day Free Trial',
+      cta: 'Explore available tools',
       ctaVariant: 'accent' as const,
       popular: true,
     },
     {
       name: 'University & Enterprise',
-      badge: 'Institutions & Hubs',
-      description: 'For university career offices, bootcamps, and hiring employers.',
-      priceKes: 'Custom',
-      priceUsd: 'Custom',
-      period: 'tailored cohorts',
-      features: [
-        'Bulk student onboarding & NITA attachment tracking',
-        'Institutional analytics dashboard & placement rates',
-        'Direct employer job board posting & ATS integration',
-        'Dedicated talent partnership manager in Nairobi',
-        'Custom verified badges for accredited alumni',
-      ],
-      cta: 'Contact Partnerships',
+      badge: 'Future concept',
+      description: 'Institution and recruiter tools are not available in this deployment.',
+      price: 'Not offered',
+      period: 'not available',
+      features: ['No institution or recruiter subscription is currently offered.'],
+      cta: 'View product features',
       ctaVariant: 'primary' as const,
       popular: false,
     },
@@ -73,43 +59,17 @@ export const PricingPage: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-slate-50/50 dark:bg-slate-950">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 flex-1 space-y-12">
         <div className="text-center max-w-2xl mx-auto space-y-3">
-          <Badge variant="green" size="md">Transparent African Pricing</Badge>
+          <Badge variant="green" size="md">Plan preview</Badge>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Simple, Transparent Plans for Every Stage
+            CareerLaunch plan concepts
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Compare the current plan preview. Subscription checkout, payment methods, and plan entitlements are not connected in this deployment.
+            Only the current tools are available. Paid plans, billing, subscriptions, and institutional services are not enabled in this deployment.
           </p>
           <p role="note" className="mx-auto max-w-xl rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
-            Pricing and features are for preview only. Payments are not processed on this page.
+            Pricing and paid-plan features shown here are illustrative only. No payment will be taken through this page.
           </p>
 
-          {/* Monthly / Annual toggle */}
-          <div className="pt-4 flex items-center justify-center gap-3">
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
-                billingCycle === 'monthly'
-                  ? 'bg-brand-blue-900 dark:bg-brand-blue-600 text-white'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              Monthly Billing
-            </button>
-            <button
-              onClick={() => setBillingCycle('annual')}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 ${
-                billingCycle === 'annual'
-                  ? 'bg-brand-blue-900 dark:bg-brand-blue-600 text-white'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <span>Annual Billing</span>
-              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-brand-green-100 text-brand-green-800 dark:bg-brand-green-950 dark:text-brand-green-300">
-                Save 25%
-              </span>
-            </button>
-          </div>
         </div>
 
         {/* Pricing Cards Grid */}
@@ -141,10 +101,10 @@ export const PricingPage: React.FC = () => {
                 <div className="mb-6 pb-6 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
-                      KES {p.priceKes}
+                      {p.price}
                     </span>
                     <span className="text-xs font-semibold text-slate-400">
-                      ({p.priceUsd === 'Custom' ? 'Custom' : `$${p.priceUsd} USD`}) {p.period}
+                      {p.period}
                     </span>
                   </div>
                 </div>
@@ -163,7 +123,7 @@ export const PricingPage: React.FC = () => {
               </div>
 
               <div>
-                <Link to="/register" className="w-full block">
+                <Link to={p.name === 'Free Campus Starter' ? '/register' : '/features'} className="w-full block">
                   <Button variant={p.ctaVariant} size="md" className="w-full">
                     {p.cta}
                   </Button>

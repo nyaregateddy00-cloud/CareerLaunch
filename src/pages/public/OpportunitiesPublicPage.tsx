@@ -16,9 +16,11 @@ export const OpportunitiesPublicPage: React.FC = () => {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialType = searchParams.get('type') || 'All';
+  const initialCountry = searchParams.get('country') || 'All';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>(initialType);
+  const [selectedCountry, setSelectedCountry] = useState<string>(initialCountry);
   const [selectedWorkMode, setSelectedWorkMode] = useState<string>('All');
   const [selectedExp, setSelectedExp] = useState<string>('All');
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
@@ -28,6 +30,11 @@ export const OpportunitiesPublicPage: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
   const [showBestMatches, setShowBestMatches] = useState(false);
+
+  useEffect(() => {
+    setSelectedType(searchParams.get('type') || 'All');
+    setSelectedCountry(searchParams.get('country') || 'All');
+  }, [searchParams]);
 
   useEffect(() => {
     let isActive = true;
@@ -69,26 +76,37 @@ export const OpportunitiesPublicPage: React.FC = () => {
       }
 
       if (selectedType !== 'All' && opp.type !== selectedType) return false;
+      if (selectedCountry !== 'All' && opp.country.toLowerCase() !== selectedCountry.toLowerCase()) return false;
       if (selectedWorkMode !== 'All' && opp.workMode !== selectedWorkMode) return false;
       if (selectedExp !== 'All' && opp.experienceLevel !== selectedExp) return false;
 
       return true;
     });
     return showBestMatches && user ? rankOpportunitiesForProfile(filtered, user) : filtered;
-  }, [allOpportunities, searchQuery, selectedType, selectedWorkMode, selectedExp, showBestMatches, user]);
+  }, [allOpportunities, searchQuery, selectedType, selectedCountry, selectedWorkMode, selectedExp, showBestMatches, user]);
 
   const opportunityMatches = useMemo(() => new Map(
     allOpportunities.map((opportunity) => [opportunity.id, matchOpportunityToProfile(opportunity, user)])
   ), [allOpportunities, user]);
 
   const handleToggleSave = (id: string) => {
+    const isNewlySaved = !savedOppIds.includes(id);
     mockStorage.toggleSaveOpportunity(id);
     setSavedOppIds(mockStorage.getSavedOpportunityIds());
+    const opportunity = allOpportunities.find((item) => item.id === id);
+    if (isNewlySaved && user && opportunity) mockStorage.addNotification({
+      userId: user.id,
+      title: 'Opportunity saved',
+      message: `${opportunity.title} at ${opportunity.company} was added to your saved list. Check the original listing for updates.`,
+      type: 'opportunity',
+      actionUrl: '/saved-opportunities',
+    });
   };
 
   const handleClearFilters = () => {
     setSearchQuery('');
     setSelectedType('All');
+    setSelectedCountry('All');
     setSelectedWorkMode('All');
     setSelectedExp('All');
     setSearchParams({});
@@ -103,13 +121,13 @@ export const OpportunitiesPublicPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50/50 dark:bg-slate-950">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 flex-1 space-y-8">
+      <div className="mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8 py-10 sm:py-16 flex-1 space-y-8">
         <div>
           <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Find Verified Career Opportunities
+            Explore Career Opportunities
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">
-            Explore industrial attachments, graduate developer intakes, pan-African scholarships, and global remote freelance contracts.
+            Browse the listings currently published in CareerLaunch. Confirm eligibility, requirements, deadlines, and application details with each original source.
           </p>
         </div>
 
@@ -119,7 +137,9 @@ export const OpportunitiesPublicPage: React.FC = () => {
           selectedType={selectedType}
           onTypeChange={(t) => {
             setSelectedType(t);
-            setSearchParams(t !== 'All' ? { type: t } : {});
+            const next = new URLSearchParams(searchParams);
+            if (t === 'All') next.delete('type'); else next.set('type', t);
+            setSearchParams(next);
           }}
           selectedWorkMode={selectedWorkMode}
           onWorkModeChange={setSelectedWorkMode}
@@ -127,6 +147,13 @@ export const OpportunitiesPublicPage: React.FC = () => {
           onExpChange={setSelectedExp}
           onClearFilters={handleClearFilters}
           totalCount={filteredOpportunities.length}
+          selectedCountry={selectedCountry}
+          onCountryChange={(country) => {
+            setSelectedCountry(country);
+            const next = new URLSearchParams(searchParams);
+            if (country === 'All') next.delete('country'); else next.set('country', country);
+            setSearchParams(next);
+          }}
         />
 
         {user && (
@@ -138,9 +165,9 @@ export const OpportunitiesPublicPage: React.FC = () => {
               className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition-colors ${showBestMatches ? 'border-brand-green-500 bg-brand-green-50 text-brand-green-800 dark:bg-brand-green-950/50 dark:text-brand-green-300' : 'border-slate-200 bg-white text-slate-600 hover:border-brand-green-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300'}`}
             >
               <Sparkles className="h-4 w-4" />
-              {showBestMatches ? 'Showing best matches' : 'Sort by profile match'}
+              {showBestMatches ? 'Showing profile estimates' : 'Sort by profile estimate'}
             </button>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Match scores use your saved skills, profile details, and location.</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Heuristic text estimates use profile details, recorded skills, and location. They are not employer match scores.</p>
           </div>
         )}
 
@@ -165,6 +192,7 @@ export const OpportunitiesPublicPage: React.FC = () => {
                 key={opp.id}
                 opportunity={opp}
                 matchScore={opportunityMatches.get(opp.id)?.score}
+                matchedSkills={opportunityMatches.get(opp.id)?.matchedSkills}
                 isSaved={savedOppIds.includes(opp.id)}
                 onToggleSave={handleToggleSave}
                 onSelect={(o) => setSelectedOpp(o)}

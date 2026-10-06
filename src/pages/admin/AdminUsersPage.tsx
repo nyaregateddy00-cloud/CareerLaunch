@@ -6,12 +6,27 @@ import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { formatDate } from '../../lib/utils';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 export const AdminUsersPage: React.FC = () => {
-  const [users, setUsers] = useState<UserProfile[]>(() => mockStorage.getAllUsers());
+  const [users, setUsers] = useState<UserProfile[]>(() => isSupabaseConfigured ? [] : mockStorage.getAllUsers());
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('All');
   const [successAlert, setSuccessAlert] = useState('');
+
+  if (isSupabaseConfigured) {
+    return (
+      <div className="space-y-5">
+        <div>
+          <h1 className="flex items-center gap-2.5 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl"><Users className="h-7 w-7 text-brand-blue-700 dark:text-brand-blue-400" />User Management</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">The browser client cannot list or change other accounts under the current Supabase row-level security policies. No cross-user records have been loaded.</p>
+        </div>
+        <Card className="border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+          To enable account administration, connect a trusted server-side admin endpoint that verifies the caller's admin role before reading or changing user records. Do not expose the Supabase service-role key in the browser.
+        </Card>
+      </div>
+    );
+  }
 
   const loadUsers = () => {
     setUsers(mockStorage.getAllUsers());
@@ -47,7 +62,7 @@ export const AdminUsersPage: React.FC = () => {
             User Management ({users.length})
           </h1>
           <p className="text-xs sm:text-sm text-slate-500">
-            View, filter, and manage talent profiles and platform permissions.
+            Local preview records only. Role changes are stored in this browser and do not update Supabase accounts.
           </p>
         </div>
       </div>

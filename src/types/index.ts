@@ -135,6 +135,19 @@ export interface CVDocument {
 
 export type PortfolioTheme = 'modern-navy' | 'emerald-minimal' | 'dark-tech' | 'creative-clean';
 
+export interface PortfolioPublicSections {
+  photo: boolean;
+  headline: boolean;
+  bio: boolean;
+  projects: boolean;
+  experience: boolean;
+  education: boolean;
+  skills: boolean;
+  socialLinks: boolean;
+  location: boolean;
+  email: boolean;
+}
+
 export interface PortfolioConfig {
   id: string;
   userId: string;
@@ -143,6 +156,7 @@ export interface PortfolioConfig {
   bio: string;
   theme: PortfolioTheme;
   isPublished: boolean;
+  publicSections?: PortfolioPublicSections;
   socialLinks: {
     github?: string;
     linkedin?: string;
@@ -163,7 +177,11 @@ export type OpportunityType =
   | 'Freelance' 
   | 'Graduate Program' 
   | 'Remote' 
-  | 'Competition';
+  | 'Competition'
+  | 'Fellowship'
+  | 'Hackathon'
+  | 'Volunteering'
+  | 'Event';
 
 export type WorkMode = 'On-site' | 'Hybrid' | 'Remote';
 
@@ -247,7 +265,7 @@ export interface Notification {
   userId: string;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'opportunity' | 'application';
+  type: 'info' | 'success' | 'warning' | 'opportunity' | 'application' | 'interview' | 'learning' | 'achievement' | 'community' | 'system';
   isRead: boolean;
   actionUrl?: string;
   createdAt: string;
@@ -265,14 +283,21 @@ export interface RoleSkillGap {
   }[];
 }
 
-export interface AdminStats {
-  totalUsers: number;
-  activeOpportunities: number;
-  applicationsTracked: number;
-  totalPortfolios: number;
-  activeSubscriptions: number;
-  weeklyGrowthRate: number;
-  categoryDistribution: { category: string; count: number }[];
-  regionalDistribution: { region: string; count: number }[];
+export type PublicPortfolioProfile = Pick<UserProfile, 'fullName' | 'headline' | 'bio' | 'location' | 'avatarUrl' | 'email' | 'githubUrl' | 'linkedinUrl' | 'twitterUrl' | 'websiteUrl'>;
+
+export interface InterviewPracticeSession {
+  id: string;
+  question: string;
+  answer: string;
+  feedback: string;
+  createdAt: string;
 }
 
+export interface UserPreferences {
+  currency: 'KES' | 'USD' | 'RWF' | 'NGN';
+  emailAlerts: boolean;
+  interviewReminders: boolean;
+  weeklyDigest: boolean;
+  appearance: 'light' | 'dark';
+  shareCareerContext: boolean;
+}

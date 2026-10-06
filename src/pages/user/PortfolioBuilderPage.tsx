@@ -16,6 +16,7 @@ import {
 import { mockStorage } from '../../lib/mockStorage';
 import { useAuth } from '../../context/AuthContext';
 import { PortfolioConfig, PortfolioTheme } from '../../types';
+import { savePortfolioConfig } from '../../lib/portfolio';
 import { Card } from '../../components/common/Card';
 import { Input, Textarea } from '../../components/common/Input';
 import { Button } from '../../components/common/Button';
@@ -26,6 +27,9 @@ export const PortfolioBuilderPage: React.FC = () => {
   const [portfolio, setPortfolio] = useState<PortfolioConfig>(() => mockStorage.getPortfolio());
   const [copied, setCopied] = useState(false);
   const [savedAlert, setSavedAlert] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const projects = mockStorage.getProjects().filter((project) => project.userId === user?.id);
 
   const publicUrl = `/u/${portfolio.slug}`;
 
@@ -35,12 +39,17 @@ export const PortfolioBuilderPage: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    mockStorage.savePortfolio(portfolio);
-    setSavedAlert(true);
-    fireCelebrationConfetti();
-    setTimeout(() => setSavedAlert(false), 2500);
+    setSaving(true); setSaveError('');
+    try {
+      await savePortfolioConfig(portfolio);
+      setSavedAlert(true);
+      fireCelebrationConfetti();
+      setTimeout(() => setSavedAlert(false), 2500);
+    } catch {
+      setSaveError('Portfolio could not be saved. Check your connection, slug availability, and account access.');
+    } finally { setSaving(false); }
   };
 
   const themes: { id: PortfolioTheme; label: string; previewColor: string }[] = [
@@ -76,7 +85,7 @@ export const PortfolioBuilderPage: React.FC = () => {
       {savedAlert && (
         <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-sm font-semibold flex items-center gap-2 animate-in fade-in">
           <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-          Portfolio published and updated successfully!
+          Portfolio settings saved. {portfolio.isPublished ? 'Your selected sections are public.' : 'Your portfolio remains private.'}
         </div>
       )}
 
@@ -84,13 +93,13 @@ export const PortfolioBuilderPage: React.FC = () => {
       <Card className="p-6 bg-gradient-to-r from-brand-blue-900 to-brand-blue-950 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-brand-green-400">
-            Your Live Portfolio Link
+            Your Portfolio URL
           </span>
           <div className="text-sm sm:text-base font-bold text-white mt-0.5">
             {window.location.origin}{publicUrl}
           </div>
           <p className="text-xs text-brand-blue-200 mt-1">
-            Total Recruiter Views: <span className="font-bold text-white">{portfolio.viewCount}</span>
+            Only sections you select below are shown publicly.
           </p>
         </div>
 
@@ -130,11 +139,33 @@ export const PortfolioBuilderPage: React.FC = () => {
                   className="rounded text-brand-green-500 focus:ring-brand-green-500"
                 />
                 <label htmlFor="pub" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Published & Accessible to Recruiters
+                  Published & publicly accessible
                 </label>
               </div>
             </div>
           </div>
+
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs leading-5 text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+            Publishing shares only the sections you select. Do not include confidential, sensitive, or third-party information.
+          </div>
+
+          <fieldset className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+            <legend className="px-1 text-xs font-bold text-slate-800 dark:text-white">Choose public sections</legend>
+            <div className="grid gap-3 pt-2 sm:grid-cols-2">
+              {([
+                ['photo', 'Profile photo'], ['headline', 'Headline'], ['bio', 'About summary'], ['projects', 'Featured projects'], ['experience', 'Work experience'], ['education', 'Education'],
+                ['skills', 'Skills'], ['socialLinks', 'Social links'], ['location', 'Location'], ['email', 'Email contact'],
+              ] as const).map(([key, label]) => <label key={key} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300">
+                <input type="checkbox" checked={Boolean(portfolio.publicSections?.[key])} onChange={(event) => setPortfolio({ ...portfolio, publicSections: { photo: false, headline: false, bio: false, projects: false, experience: false, education: false, skills: false, socialLinks: false, location: false, email: false, ...portfolio.publicSections, [key]: event.target.checked } })} />
+                {label}
+              </label>)}
+            </div>
+          </fieldset>
+
+          {portfolio.publicSections?.projects && <fieldset className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+            <legend className="px-1 text-xs font-bold text-slate-800 dark:text-white">Choose projects to display</legend>
+            {projects.length ? <div className="space-y-2 pt-2">{projects.map((project) => <label key={project.id} className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300"><input type="checkbox" checked={portfolio.featuredProjectIds.includes(project.id)} onChange={(event) => setPortfolio({ ...portfolio, featuredProjectIds: event.target.checked ? [...portfolio.featuredProjectIds, project.id] : portfolio.featuredProjectIds.filter((id) => id !== project.id) })} />{project.title}</label>)}</div> : <p className="pt-2 text-xs text-slate-500">Add projects to your profile before featuring them here.</p>}
+          </fieldset>}
 
           {/* Theme Selector */}
           <div>
@@ -196,14 +227,16 @@ export const PortfolioBuilderPage: React.FC = () => {
               leftIcon={<Linkedin className="w-4 h-4" />}
             />
           </div>
+          {portfolio.publicSections?.email && <Input label="Public contact email" type="email" value={portfolio.socialLinks.email || ''} onChange={(e) => setPortfolio({ ...portfolio, socialLinks: { ...portfolio.socialLinks, email: e.target.value } })} />}
 
           <div className="flex justify-end pt-3 border-t border-slate-100 dark:border-slate-800">
-            <Button type="submit" variant="primary" size="md" leftIcon={<Save className="w-4 h-4" />}>
-              Save & Publish Portfolio
+            <Button type="submit" variant="primary" size="md" disabled={saving} leftIcon={<Save className="w-4 h-4" />}>
+              {saving ? 'Saving…' : 'Save portfolio settings'}
             </Button>
           </div>
         </form>
       </Card>
+      {saveError && <p role="alert" className="text-sm text-rose-600">{saveError}</p>}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   BookOpen,
   Clock,
@@ -21,23 +21,37 @@ import { EmptyState } from '../../components/common/EmptyState';
 import { mockStorage } from '../../lib/mockStorage';
 import { CareerResource } from '../../types';
 import { useToast } from '../../hooks/useToast';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { getCareerResources } from '../../lib/resources';
+import { isSupabaseConfigured } from '../../lib/supabase';
+import { useAuth } from '../../context/AuthContext';
 
 export const LearningPage: React.FC = () => {
+  const { user } = useAuth();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeArticle, setActiveArticle] = useState<CareerResource | null>(null);
-  const [savedResourceIds, setSavedResourceIds] = useLocalStorage<string[]>(
-    'careerlaunch_saved_resources',
-    []
-  );
-  const [completedResourceIds, setCompletedResourceIds] = useLocalStorage<string[]>(
-    'careerlaunch_completed_resources',
-    []
-  );
+  const [savedResourceIds, setSavedResourceIds] = useState<string[]>(() => mockStorage.getSavedResourceIds());
+  const [completedResourceIds, setCompletedResourceIds] = useState<string[]>(() => mockStorage.getCompletedResourceIds());
+  const [allResources, setAllResources] = useState<CareerResource[]>(() => isSupabaseConfigured ? [] : mockStorage.getResources());
+  const [resourceError, setResourceError] = useState(false);
 
-  const allResources = mockStorage.getResources();
+  useEffect(() => {
+    let active = true;
+    getCareerResources().then((items) => { if (active) setAllResources(items); })
+      .catch(() => { if (active) setResourceError(true); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    const syncLearningProgress = (event: Event) => {
+      const key = (event as CustomEvent<{ key?: string }>).detail?.key;
+      if (!key || key === 'careerlaunch_saved_resources') setSavedResourceIds(mockStorage.getSavedResourceIds());
+      if (!key || key === 'careerlaunch_completed_resources') setCompletedResourceIds(mockStorage.getCompletedResourceIds());
+    };
+    window.addEventListener('careerlaunch_storage_change', syncLearningProgress);
+    return () => window.removeEventListener('careerlaunch_storage_change', syncLearningProgress);
+  }, []);
 
   const categories = [
     'All',
@@ -68,10 +82,14 @@ export const LearningPage: React.FC = () => {
     e.stopPropagation();
     const isSaved = savedResourceIds.includes(id);
     if (isSaved) {
-      setSavedResourceIds((prev) => prev.filter((item) => item !== id));
+      const next = savedResourceIds.filter((item) => item !== id);
+      mockStorage.setSavedResourceIds(next);
+      setSavedResourceIds(next);
       showToast('Removed from reading list', 'info');
     } else {
-      setSavedResourceIds((prev) => [...prev, id]);
+      const next = [...savedResourceIds, id];
+      mockStorage.setSavedResourceIds(next);
+      setSavedResourceIds(next);
       showToast('Saved to reading list', 'success');
     }
   };
@@ -79,10 +97,22 @@ export const LearningPage: React.FC = () => {
   const toggleCompleted = (id: string) => {
     const isCompleted = completedResourceIds.includes(id);
     if (isCompleted) {
-      setCompletedResourceIds((prev) => prev.filter((item) => item !== id));
+      const next = completedResourceIds.filter((item) => item !== id);
+      mockStorage.setCompletedResourceIds(next);
+      setCompletedResourceIds(next);
       showToast('Marked as unread', 'info');
     } else {
-      setCompletedResourceIds((prev) => [...prev, id]);
+      const next = [...completedResourceIds, id];
+      mockStorage.setCompletedResourceIds(next);
+      setCompletedResourceIds(next);
+      const resource = allResources.find((item) => item.id === id);
+      if (user && resource) mockStorage.addNotification({
+        userId: user.id,
+        title: 'Learning resource completed',
+        message: `You marked “${resource.title}” complete. Add a project or skill to your profile to show what you learned.`,
+        type: 'learning',
+        actionUrl: '/skills',
+      });
       showToast('Completed reading! Great job.', 'success');
     }
   };
@@ -91,7 +121,7 @@ export const LearningPage: React.FC = () => {
     <div className="space-y-6">
       <PageHeader
         title="Learning & Resources"
-        subtitle="Curated African career playbooks, interview preparation roadmaps, and attachment guides."
+        subtitle="Career guides and learning resources to support your next step."
         breadcrumbs={[{ label: 'Learning & Resources' }]}
         badge={
           <Badge variant="accent" size="sm">
@@ -99,20 +129,20 @@ export const LearningPage: React.FC = () => {
           </Badge>
         }
       />
+      {!isSupabaseConfigured && <p className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl px-4 py-3">Preview library: sample guide content is for local demonstration. Published production guides load from Supabase.</p>}
 
       {/* Featured Learning Highlight Card */}
       <div className="bg-gradient-to-r from-brand-blue-900 to-brand-blue-800 text-white rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-2xl">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-white border border-white/20">
             <Sparkles className="w-3.5 h-3.5 text-brand-green-400" />
-            <span>Recommended for Kenyan Students & Job Seekers</span>
+          <span>Career learning resources</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-            The Comprehensive Kenyan Industrial Attachment Guide (2026)
+            Build skills for your next career step
           </h2>
           <p className="text-sm text-slate-200">
-            How to secure attachments at Safaricom, Equity Group, Twiga, and government ministries.
-            Covers NITA requirements, insurance letters, and cold email templates.
+            Explore practical guides and learning resources published by CareerLaunch.
           </p>
         </div>
         <Button
@@ -127,6 +157,11 @@ export const LearningPage: React.FC = () => {
           Read Playbook
         </Button>
       </div>
+
+      {resourceError && <p role="alert" className="text-sm text-rose-600">We couldn't load learning resources. Please try again later.</p>}
+      {isSupabaseConfigured && allResources.length === 0 && !resourceError && (
+        <p className="text-sm text-slate-500">No published learning resources are available yet.</p>
+      )}
 
       {/* Search and Filter Controls */}
       <div className="flex flex-col sm:flex-row gap-3">

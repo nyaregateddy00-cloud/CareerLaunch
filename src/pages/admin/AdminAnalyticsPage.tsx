@@ -1,175 +1,90 @@
-import React from 'react';
-import { BarChart3, TrendingUp, Users, Globe, Building2, Sparkles, Download } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { BarChart3, Download, Globe, Briefcase, RefreshCw } from 'lucide-react';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
-import { mockStorage } from '../../lib/mockStorage';
+import { Badge } from '../../components/common/Badge';
+import { useAdminOpportunities } from '../../hooks/useAdminOpportunities';
+import { downloadCsv } from '../../lib/csv';
+
+function countBy(values: string[]) {
+  const counts = new Map<string, number>();
+  values.forEach((value) => counts.set(value || 'Unspecified', (counts.get(value || 'Unspecified') || 0) + 1));
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+}
 
 export const AdminAnalyticsPage: React.FC = () => {
-  const stats = mockStorage.getAdminStats();
+  const { opportunities, isLoading, error, reload } = useAdminOpportunities();
+  const published = opportunities.filter((item) => item.status === 'published');
+  const byType = useMemo(() => countBy(published.map((item) => item.type)), [opportunities]);
+  const byCountry = useMemo(() => countBy(published.map((item) => item.country)), [opportunities]);
+  const closingSoon = published.filter((item) => {
+    if (!item.deadline) return false;
+    const remaining = new Date(`${item.deadline}T23:59:59`).getTime() - Date.now();
+    return remaining >= 0 && remaining <= 7 * 24 * 60 * 60 * 1000;
+  });
 
-  const universityStats = [
-    { name: 'University of Nairobi (UoN)', count: 3200, pct: '26%' },
-    { name: 'Jomo Kenyatta University (JKUAT)', count: 2850, pct: '23%' },
-    { name: 'Strathmore University & iLab', count: 2100, pct: '17%' },
-    { name: 'Moringa School Bootcamp', count: 1950, pct: '16%' },
-    { name: 'Kenyatta University (KU)', count: 1400, pct: '11%' },
-    { name: 'USIU-Africa & Others', count: 900, pct: '7%' },
-  ];
+  const exportListings = () => {
+    if (!opportunities.length) return;
+    downloadCsv('careerlaunch-opportunity-listings.csv', [
+      ['Title', 'Company', 'Status', 'Type', 'Country', 'Location', 'Work mode', 'Experience level', 'Deadline', 'Source', 'Application URL', 'Requirements', 'Tags'],
+      ...opportunities.map((item) => [
+        item.title, item.company, item.status, item.type, item.country, item.location, item.workMode,
+        item.experienceLevel, item.deadline, item.source, item.applicationUrl,
+        item.requirements.join(' | '), item.tags.join(' | '),
+      ]),
+    ]);
+  };
 
-  const topSkills = [
-    { skill: 'React & TypeScript', count: '4,820 candidates', demand: 'High' },
-    { skill: 'Python (FastAPI / Pandas)', count: '4,150 candidates', demand: 'High' },
-    { skill: 'Node.js & Express', count: '3,700 candidates', demand: 'High' },
-    { skill: 'SQL & Database Architecture', count: '3,450 candidates', demand: 'Very High' },
-    { skill: 'Figma & Mobile UX Design', count: '2,800 candidates', demand: 'High' },
-    { skill: 'Docker & Cloud Deployment', count: '2,200 candidates', demand: 'Surging' },
-  ];
-
-  const topEmployers = [
-    { company: 'Safaricom PLC', activeRoles: 14, applications: 1840 },
-    { company: 'Equity Group Holdings', activeRoles: 8, applications: 1220 },
-    { company: 'Microsoft ADC Nairobi', activeRoles: 6, applications: 980 },
-    { company: 'Andela Africa', activeRoles: 11, applications: 890 },
-    { company: 'KCB Bank Kenya', activeRoles: 5, applications: 750 },
-  ];
-
-  const handleExportCSV = () => {
-    alert('Exporting Platform Analytics CSV for Q3 2026...');
+  const renderBars = (items: [string, number][]) => {
+    if (!items.length) return <p className="text-sm text-slate-500">Published opportunity data will appear here when listings are available.</p>;
+    const max = Math.max(...items.map(([, count]) => count));
+    return <div className="space-y-4">{items.slice(0, 8).map(([label, count]) => (
+      <div key={label}>
+        <div className="mb-1 flex items-center justify-between gap-3 text-xs"><span className="truncate font-semibold text-slate-700 dark:text-slate-300">{label}</span><span className="shrink-0 font-bold text-slate-900 dark:text-white">{count}</span></div>
+        <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div className="h-full rounded-full bg-brand-green-500" style={{ width: `${Math.max(4, (count / max) * 100)}%` }} /></div>
+      </div>
+    ))}</div>;
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-7">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-            <BarChart3 className="w-7 h-7 text-brand-blue-700 dark:text-brand-blue-400" />
-            Platform Analytics & Regional Intelligence
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500">
-            Real-time analytics across candidate demographics, university talent pipelines, and employer demand.
-          </p>
+          <div className="mb-2"><Badge variant="blue" size="sm">Listing data</Badge></div>
+          <h1 className="flex items-center gap-2.5 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl"><BarChart3 className="h-7 w-7 text-brand-blue-700 dark:text-brand-blue-400" />Opportunity Analytics</h1>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 sm:text-sm">A view of opportunity records available to this admin account. Candidate, application, and employer-demand analytics are not exposed by the current client permissions.</p>
         </div>
-
-        <Button size="sm" variant="secondary" onClick={handleExportCSV} leftIcon={<Download className="w-4 h-4" />}>
-          Export Analytics CSV
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="secondary" onClick={() => void reload()} leftIcon={<RefreshCw className="h-4 w-4" />}>Refresh</Button>
+          <Button size="sm" variant="accent" onClick={exportListings} disabled={isLoading || opportunities.length === 0} leftIcon={<Download className="h-4 w-4" />}>Export listings CSV</Button>
+        </div>
       </div>
 
-      {/* Grid: University Pipeline & Category Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* University Talent Pipeline */}
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">University Talent Pipeline</h3>
-              <p className="text-xs text-slate-500">Candidate representation by higher learning institution</p>
-            </div>
-            <Users className="w-5 h-5 text-brand-blue-700" />
-          </div>
+      {error && <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200" role="alert">{error}</div>}
 
-          <div className="space-y-3">
-            {universityStats.map((uni, idx) => (
-              <div key={idx} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">{uni.name}</span>
-                  <span className="font-bold text-slate-900 dark:text-white">{uni.count.toLocaleString()} ({uni.pct})</span>
-                </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="h-2 rounded-full bg-brand-blue-700 dark:bg-brand-blue-500"
-                    style={{ width: uni.pct }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Category Representation */}
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Talent Discipline Distribution</h3>
-              <p className="text-xs text-slate-500">Professional focus areas across verified candidates</p>
-            </div>
-            <Sparkles className="w-5 h-5 text-brand-green-500" />
-          </div>
-
-          <div className="space-y-3">
-            {stats.categoryDistribution.map((cat, idx) => (
-              <div key={idx} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">{cat.category}</span>
-                  <span className="font-bold text-slate-900 dark:text-white">{cat.count.toLocaleString()}</span>
-                </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="h-2 rounded-full bg-brand-green-500"
-                    style={{ width: `${(cat.count / 4200) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {[
+          { label: 'Published opportunities', value: published.length, icon: Briefcase },
+          { label: 'Countries represented', value: byCountry.length, icon: Globe },
+          { label: 'Closing in the next 7 days', value: closingSoon.length, icon: BarChart3 },
+        ].map((metric) => <Card key={metric.label} className="p-5" aria-busy={isLoading}>
+          <div className="flex items-center justify-between"><p className="text-xs font-bold uppercase tracking-wide text-slate-500">{metric.label}</p><metric.icon className="h-5 w-5 text-brand-green-600 dark:text-brand-green-400" /></div>
+          <p className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white">{isLoading ? '—' : metric.value}</p>
+          <p className="mt-1 text-[11px] text-slate-500">Counted from listing records</p>
+        </Card>)}
       </div>
 
-      {/* Bottom Grid: In-Demand Skills & Top Employers */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* In-Demand Skills */}
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Top Technical Competencies</h3>
-              <p className="text-xs text-slate-500">Most listed skills on candidate CVs</p>
-            </div>
-            <Sparkles className="w-5 h-5 text-purple-500" />
-          </div>
-
-          <div className="space-y-2.5">
-            {topSkills.map((s, idx) => (
-              <div key={idx} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-850 flex items-center justify-between text-xs">
-                <div>
-                  <span className="font-bold text-slate-900 dark:text-white">{s.skill}</span>
-                  <div className="text-[11px] text-slate-400">{s.count}</div>
-                </div>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-brand-green-100 text-brand-green-800 dark:bg-brand-green-950 dark:text-brand-green-300">
-                  {s.demand}
-                </span>
-              </div>
-            ))}
-          </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="space-y-5 p-6">
+          <div className="border-b border-slate-100 pb-3 dark:border-slate-800"><h2 className="font-bold text-slate-900 dark:text-white">Published listings by opportunity type</h2><p className="mt-1 text-xs text-slate-500">Uses the type saved on each published listing.</p></div>
+          {isLoading ? <div className="h-48 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800"/> : renderBars(byType)}
         </Card>
-
-        {/* Top Employers Activity */}
-        <Card className="p-6 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-            <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">Top Hiring Organizations</h3>
-              <p className="text-xs text-slate-500">Application volume by partner employer</p>
-            </div>
-            <Building2 className="w-5 h-5 text-brand-blue-600" />
-          </div>
-
-          <div className="space-y-2.5">
-            {topEmployers.map((emp, idx) => (
-              <div key={idx} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-850 flex items-center justify-between text-xs">
-                <div>
-                  <span className="font-bold text-slate-900 dark:text-white">{emp.company}</span>
-                  <div className="text-[11px] text-slate-400">{emp.activeRoles} active postings</div>
-                </div>
-                <div className="text-right">
-                  <span className="font-extrabold text-brand-blue-700 dark:text-brand-green-400">
-                    {emp.applications.toLocaleString()}
-                  </span>
-                  <div className="text-[10px] text-slate-400">applications received</div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <Card className="space-y-5 p-6">
+          <div className="border-b border-slate-100 pb-3 dark:border-slate-800"><h2 className="font-bold text-slate-900 dark:text-white">Published listings by country</h2><p className="mt-1 text-xs text-slate-500">This is listing coverage, not a measure of total job-market activity.</p></div>
+          {isLoading ? <div className="h-48 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800"/> : renderBars(byCountry)}
         </Card>
       </div>
+      <p className="text-[11px] text-slate-500">Published status reflects the record in CareerLaunch. It does not independently verify that an opportunity is still open or that employer details are current.</p>
     </div>
   );
 };
-

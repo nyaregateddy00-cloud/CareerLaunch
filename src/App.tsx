@@ -8,6 +8,9 @@ import { AdminRoute } from './components/auth/AdminRoute';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { AppLayout } from './components/layout/AppLayout';
 import { PageLoadingState } from './components/common/PageLoadingState';
+import { AppErrorBoundary } from './components/common/AppErrorBoundary';
+
+const routeView = (page: React.ReactNode) => <Suspense fallback={<PageLoadingState />}>{page}</Suspense>;
 
 // Public Pages
 const LandingPage = lazy(() => import('./pages/public/LandingPage').then((module) => ({ default: module.LandingPage })));
@@ -15,6 +18,7 @@ const AboutPage = lazy(() => import('./pages/public/AboutPage').then((module) =>
 const FeaturesPage = lazy(() => import('./pages/public/FeaturesPage').then((module) => ({ default: module.FeaturesPage })));
 const OpportunitiesPublicPage = lazy(() => import('./pages/public/OpportunitiesPublicPage').then((module) => ({ default: module.OpportunitiesPublicPage })));
 const ResourcesPage = lazy(() => import('./pages/public/ResourcesPage').then((module) => ({ default: module.ResourcesPage })));
+const SearchPage = lazy(() => import('./pages/public/SearchPage').then((module) => ({ default: module.SearchPage })));
 const PricingPage = lazy(() => import('./pages/public/PricingPage').then((module) => ({ default: module.PricingPage })));
 const ContactPage = lazy(() => import('./pages/public/ContactPage').then((module) => ({ default: module.ContactPage })));
 const LoginPage = lazy(() => import('./pages/public/LoginPage').then((module) => ({ default: module.LoginPage })));
@@ -25,6 +29,7 @@ const PublicPortfolioPage = lazy(() => import('./pages/public/PublicPortfolioPag
 
 // Authenticated User Pages
 const DashboardPage = lazy(() => import('./pages/user/DashboardPage').then((module) => ({ default: module.DashboardPage })));
+const CareerRoadmapPage = lazy(() => import('./pages/user/CareerRoadmapPage').then((module) => ({ default: module.CareerRoadmapPage })));
 const ProfilePage = lazy(() => import('./pages/user/ProfilePage').then((module) => ({ default: module.ProfilePage })));
 const CVBuilderPage = lazy(() => import('./pages/user/CVBuilderPage').then((module) => ({ default: module.CVBuilderPage })));
 const PortfolioBuilderPage = lazy(() => import('./pages/user/PortfolioBuilderPage').then((module) => ({ default: module.PortfolioBuilderPage })));
@@ -33,6 +38,9 @@ const ApplicationsTrackerPage = lazy(() => import('./pages/user/ApplicationsTrac
 const SkillsPage = lazy(() => import('./pages/user/SkillsPage').then((module) => ({ default: module.SkillsPage })));
 const LearningPage = lazy(() => import('./pages/user/LearningPage').then((module) => ({ default: module.LearningPage })));
 const AICareerAssistantPage = lazy(() => import('./pages/user/AICareerAssistantPage').then((module) => ({ default: module.AICareerAssistantPage })));
+const InterviewArenaPage = lazy(() => import('./pages/user/InterviewArenaPage').then((module) => ({ default: module.InterviewArenaPage })));
+const CareerAnalyticsPage = lazy(() => import('./pages/user/CareerAnalyticsPage').then((module) => ({ default: module.CareerAnalyticsPage })));
+const CommunityPage = lazy(() => import('./pages/user/CommunityPage').then((module) => ({ default: module.CommunityPage })));
 const NotificationsPage = lazy(() => import('./pages/user/NotificationsPage').then((module) => ({ default: module.NotificationsPage })));
 const SettingsPage = lazy(() => import('./pages/user/SettingsPage').then((module) => ({ default: module.SettingsPage })));
 
@@ -46,54 +54,59 @@ const AdminAnalyticsPage = lazy(() => import('./pages/admin/AdminAnalyticsPage')
 
 export function App() {
   return (
+    <AppErrorBoundary>
     <ThemeProvider>
       <AuthProvider>
         <ToastProvider>
           <BrowserRouter>
-          <Suspense fallback={<PageLoadingState />}>
             <Routes>
               {/* Public Layout Routes with Navbar */}
               <Route element={<PublicLayout />}>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/features" element={<FeaturesPage />} />
-                <Route path="/opportunities" element={<OpportunitiesPublicPage />} />
-                <Route path="/resources" element={<ResourcesPage />} />
-                <Route path="/pricing" element={<PricingPage />} />
-                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/" element={routeView(<LandingPage />)} />
+                <Route path="/about" element={routeView(<AboutPage />)} />
+                <Route path="/features" element={routeView(<FeaturesPage />)} />
+                <Route path="/opportunities" element={routeView(<OpportunitiesPublicPage />)} />
+                <Route path="/resources" element={routeView(<ResourcesPage />)} />
+                <Route path="/search" element={routeView(<SearchPage />)} />
+                <Route path="/pricing" element={routeView(<PricingPage />)} />
+                <Route path="/contact" element={routeView(<ContactPage />)} />
               </Route>
 
               {/* Standalone Auth & Public Portfolio Routes */}
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/u/:username" element={<PublicPortfolioPage />} />
+              <Route path="/login" element={routeView(<LoginPage />)} />
+              <Route path="/register" element={routeView(<RegisterPage />)} />
+              <Route path="/forgot-password" element={routeView(<ForgotPasswordPage />)} />
+              <Route path="/reset-password" element={routeView(<ResetPasswordPage />)} />
+              <Route path="/u/:username" element={routeView(<PublicPortfolioPage />)} />
 
               {/* Authenticated User Shell Routes Protected via ProtectedRoute */}
               <Route element={<ProtectedRoute />}>
                 <Route element={<AppLayout />}>
-                  <Route path="/app/opportunities" element={<OpportunitiesPublicPage />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/cv-builder" element={<CVBuilderPage />} />
-                  <Route path="/portfolio-builder" element={<PortfolioBuilderPage />} />
-                  <Route path="/saved-opportunities" element={<SavedOpportunitiesPage />} />
-                  <Route path="/applications" element={<ApplicationsTrackerPage />} />
-                  <Route path="/skills" element={<SkillsPage />} />
-                  <Route path="/learning" element={<LearningPage />} />
-                  <Route path="/ai-assistant" element={<AICareerAssistantPage />} />
-                  <Route path="/notifications" element={<NotificationsPage />} />
-                  <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/app/opportunities" element={routeView(<OpportunitiesPublicPage />)} />
+                  <Route path="/dashboard" element={routeView(<DashboardPage />)} />
+                  <Route path="/career-roadmap" element={routeView(<CareerRoadmapPage />)} />
+                  <Route path="/profile" element={routeView(<ProfilePage />)} />
+                  <Route path="/cv-builder" element={routeView(<CVBuilderPage />)} />
+                  <Route path="/portfolio-builder" element={routeView(<PortfolioBuilderPage />)} />
+                  <Route path="/saved-opportunities" element={routeView(<SavedOpportunitiesPage />)} />
+                  <Route path="/applications" element={routeView(<ApplicationsTrackerPage />)} />
+                  <Route path="/skills" element={routeView(<SkillsPage />)} />
+                  <Route path="/learning" element={routeView(<LearningPage />)} />
+                  <Route path="/ai-assistant" element={routeView(<AICareerAssistantPage />)} />
+                  <Route path="/interview-arena" element={routeView(<InterviewArenaPage />)} />
+                  <Route path="/career-analytics" element={routeView(<CareerAnalyticsPage />)} />
+                  <Route path="/community" element={routeView(<CommunityPage />)} />
+                  <Route path="/notifications" element={routeView(<NotificationsPage />)} />
+                  <Route path="/settings" element={routeView(<SettingsPage />)} />
 
                   {/* Admin Portal Routes Protected via AdminRoute */}
                   <Route element={<AdminRoute />}>
-                    <Route path="/admin" element={<AdminDashboardPage />} />
-                    <Route path="/admin/users" element={<AdminUsersPage />} />
-                    <Route path="/admin/opportunities" element={<AdminOpportunitiesPage />} />
-                    <Route path="/admin/resources" element={<AdminResourcesPage />} />
-                    <Route path="/admin/reports" element={<AdminReportsPage />} />
-                    <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
+                    <Route path="/admin" element={routeView(<AdminDashboardPage />)} />
+                    <Route path="/admin/users" element={routeView(<AdminUsersPage />)} />
+                    <Route path="/admin/opportunities" element={routeView(<AdminOpportunitiesPage />)} />
+                    <Route path="/admin/resources" element={routeView(<AdminResourcesPage />)} />
+                    <Route path="/admin/reports" element={routeView(<AdminReportsPage />)} />
+                    <Route path="/admin/analytics" element={routeView(<AdminAnalyticsPage />)} />
                   </Route>
                 </Route>
               </Route>
@@ -101,11 +114,11 @@ export function App() {
               {/* Catch-all */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-          </Suspense>
           </BrowserRouter>
         </ToastProvider>
       </AuthProvider>
     </ThemeProvider>
+    </AppErrorBoundary>
   );
 }
 

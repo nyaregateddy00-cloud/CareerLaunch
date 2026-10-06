@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Sun,
   Moon,
   Bell,
+  Search,
   Menu,
   X,
   User,
@@ -21,6 +22,8 @@ import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../.
 import { mockStorage } from '../../lib/mockStorage';
 import { BrandLogo } from '../branding/BrandLogo';
 import { prefetchRoute } from '../../lib/routePreload';
+import { isSupabaseConfigured } from '../../lib/supabase';
+import { getInitials } from '../../lib/utils';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, switchUser, isAdmin } = useAuth();
@@ -31,10 +34,18 @@ export const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const unreadNotifications = mockStorage.getNotifications().filter(n => !n.isRead).length;
+  const [unreadNotifications, setUnreadNotifications] = useState(() => mockStorage.getNotifications().filter((item) => !item.isRead).length);
+
+  useEffect(() => {
+    const syncUnreadCount = () => setUnreadNotifications(mockStorage.getNotifications().filter((item) => !item.isRead && (!user || item.userId === user.id)).length);
+    syncUnreadCount();
+    window.addEventListener('careerlaunch_storage_change', syncUnreadCount);
+    return () => window.removeEventListener('careerlaunch_storage_change', syncUnreadCount);
+  }, [user?.id]);
 
   const publicNavLinks = [
     { label: 'Explore Opportunities', path: isAuthenticated ? '/app/opportunities' : '/opportunities' },
+    { label: 'Search CareerLaunch', path: '/search' },
     { label: 'Features', path: '/features' },
     { label: 'Resources & Guides', path: '/resources' },
     { label: 'Pricing', path: '/pricing' },
@@ -42,12 +53,16 @@ export const Navbar: React.FC = () => {
   ];
   const mobileCareerLinks = [
     { label: 'Dashboard', path: '/dashboard' },
+    { label: 'Career Roadmap', path: '/career-roadmap' },
     { label: 'Find Opportunities', path: '/app/opportunities' },
     { label: 'Application Tracker', path: '/applications' },
     { label: 'CV Builder', path: '/cv-builder' },
     { label: 'Portfolio Builder', path: '/portfolio-builder' },
     { label: 'Skills & Gaps', path: '/skills' },
     { label: 'CareerLaunch AI', path: '/ai-assistant' },
+    { label: 'Interview Arena', path: '/interview-arena' },
+    { label: 'Career Analytics', path: '/career-analytics' },
+    { label: 'Community', path: '/community' },
     { label: 'Saved Opportunities', path: '/saved-opportunities' },
     { label: 'Learning & Playbooks', path: '/learning' },
     { label: 'Notifications', path: '/notifications' },
@@ -104,15 +119,21 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Icons & Controls */}
           <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => navigate('/search')}
+              aria-label="Search CareerLaunch"
+              className="hidden rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white sm:inline-flex"
+            ><Search className="h-5 w-5" aria-hidden="true" /></button>
             {/* Demo Role Switcher Badge Dropdown */}
-            <div className="relative">
+            {!isSupabaseConfigured && <div className="relative">
               <button
                 onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
-                className="hidden sm:flex flex-nowrap items-center gap-1.5 whitespace-nowrap text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-brand-green-300 dark:border-brand-green-800 bg-brand-green-50 dark:bg-brand-green-950/40 text-brand-green-800 dark:text-brand-green-300 hover:bg-brand-green-100 transition-colors"
-                title="Switch persona to test different user roles"
+                className="hidden 2xl:flex flex-nowrap items-center gap-1.5 whitespace-nowrap text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-brand-green-300 dark:border-brand-green-800 bg-brand-green-50 dark:bg-brand-green-950/40 text-brand-green-800 dark:text-brand-green-300 hover:bg-brand-green-100 transition-colors"
+                title="Preview workspace: switch between sample personas"
               >
-                <span className="w-2 h-2 rounded-full bg-brand-green-500 animate-pulse"></span>
-                <span>Role: {user ? user.role.replace('_', ' ') : 'Demo'}</span>
+                <span className="w-2 h-2 rounded-full bg-brand-green-500"></span>
+                <span>Preview: {user ? user.role.replace('_', ' ') : 'Demo'}</span>
                 <ChevronDown className="w-3.5 h-3.5 opacity-70" />
               </button>
 
@@ -171,7 +192,7 @@ export const Navbar: React.FC = () => {
                   </button>
                 </div>
               )}
-            </div>
+            </div>}
 
             {/* Dark / Light Mode Toggle */}
             <button
@@ -202,7 +223,7 @@ export const Navbar: React.FC = () => {
                 {/* Dashboard Quick Access Link */}
                 <Link
                   to="/dashboard"
-                  className="hidden md:inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-brand-blue-50 dark:bg-brand-blue-950/50 text-brand-blue-900 dark:text-brand-blue-300 hover:bg-brand-blue-100 transition-colors"
+                  className="hidden xl:inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-brand-blue-50 dark:bg-brand-blue-950/50 text-brand-blue-900 dark:text-brand-blue-300 hover:bg-brand-blue-100 transition-colors"
                 >
                   <Briefcase className="w-3.5 h-3.5" />
                   Dashboard
@@ -214,11 +235,11 @@ export const Navbar: React.FC = () => {
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                     className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   >
-                    <img
-                      src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
-                      alt={user.fullName}
-                      className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
-                    />
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-slate-700" />
+                    ) : (
+                      <span aria-hidden="true" className="grid h-8 w-8 place-items-center rounded-lg border border-brand-blue-100 bg-brand-blue-50 text-[10px] font-bold text-brand-blue-800 dark:border-slate-700 dark:bg-slate-800 dark:text-brand-green-300">{getInitials(user.fullName)}</span>
+                    )}
                     <span className="hidden md:block text-xs font-semibold text-slate-800 dark:text-slate-200 max-w-[100px] truncate">
                       {user.fullName.split(' ')[0]}
                     </span>

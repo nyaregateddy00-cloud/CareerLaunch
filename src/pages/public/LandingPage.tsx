@@ -337,7 +337,7 @@ export const LandingPage: React.FC = () => {
                 Explore Opportunities in Kenya & Africa
               </h3>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Current opportunities published in our verified listings catalog.
+                Published listings from the CareerLaunch catalog. Check the original source for current requirements and deadlines.
               </p>
             </div>
 

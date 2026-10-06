@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Mail } from 'lucide-react';
 import { Button } from '../common/Button';
 import { BrandLogo } from '../branding/BrandLogo';
 
@@ -16,30 +15,13 @@ export const Footer: React.FC = () => {
               <p className="pl-[50px] text-xs font-medium text-slate-500 dark:text-slate-400">Build Your Skills. Launch Your Career.</p>
             </div>
             <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
-              Empowering university students, graduates, freelancers, and ambitious job seekers across Kenya and Africa to build skills, create high-impact CVs, and launch rewarding careers.
+              A career workspace for students, graduates, freelancers, and job seekers building their next step across Africa.
             </p>
-            <div className="flex items-center gap-2 text-xs font-semibold text-brand-blue-900 dark:text-brand-green-400">
-              <span className="w-2 h-2 rounded-full bg-brand-green-500"></span>
-              Headquartered in Nairobi, Kenya • Serving Pan-Africa
-            </div>
-
-            {/* Newsletter input */}
             <div className="pt-2">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-                Weekly Opportunity & Career Alerts
+                Explore the opportunity catalog
               </p>
-              <form onSubmit={(e) => { e.preventDefault(); alert('Subscribed to weekly opportunity alerts!'); }} className="flex gap-2 max-w-sm">
-                <input
-                  type="email"
-                  required
-                  placeholder="Enter your email"
-                  className="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue-500"
-                />
-                <Button size="sm" variant="accent" type="submit">
-                  <Mail className="w-3.5 h-3.5" />
-                  Subscribe
-                </Button>
-              </form>
+              <Link to="/opportunities"><Button size="sm" variant="accent">Browse opportunities</Button></Link>
             </div>
           </div>
 
@@ -64,12 +46,12 @@ export const Footer: React.FC = () => {
               Opportunities
             </h4>
             <ul className="space-y-2.5 text-xs">
-              <li><Link to="/opportunities?type=Attachment" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Industrial Attachments (NITA)</Link></li>
-              <li><Link to="/opportunities?type=Graduate%20Program" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Graduate Programs 2026</Link></li>
-              <li><Link to="/opportunities?type=Job" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Entry & Junior Tech Jobs</Link></li>
-              <li><Link to="/opportunities?type=Scholarship" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">African Scholarships</Link></li>
-              <li><Link to="/opportunities?type=Freelance" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Remote Freelance Gigs</Link></li>
-              <li><Link to="/opportunities?type=Competition" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Hackathons & Grants</Link></li>
+              <li><Link to="/opportunities?type=Attachment" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Attachments</Link></li>
+              <li><Link to="/opportunities?type=Graduate%20Program" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Graduate programs</Link></li>
+              <li><Link to="/opportunities?type=Job" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Jobs</Link></li>
+              <li><Link to="/opportunities?type=Scholarship" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Scholarships</Link></li>
+              <li><Link to="/opportunities?type=Freelance" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Freelance opportunities</Link></li>
+              <li><Link to="/opportunities?type=Hackathon" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Hackathons</Link></li>
             </ul>
           </div>
 
@@ -84,7 +66,6 @@ export const Footer: React.FC = () => {
               <li><Link to="/resources" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Learning Resources</Link></li>
               <li><Link to="/pricing" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Pricing & Plans</Link></li>
               <li><Link to="/contact" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Contact Support</Link></li>
-              <li><span className="text-slate-400 cursor-pointer hover:underline">Privacy & Terms</span></li>
             </ul>
           </div>
         </div>

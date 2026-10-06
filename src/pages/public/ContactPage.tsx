@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send, MessageSquare, Clock } from 'lucide-react';
+import { Mail, Send, MessageSquare, Clock } from 'lucide-react';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { Input, Textarea } from '../../components/common/Input';
@@ -27,7 +27,7 @@ export const ContactPage: React.FC = () => {
             We’d Love to Hear From You
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Have questions about candidate verification, university partnerships, or employer listings? Reach out to our Nairobi team.
+            Have a question about CareerLaunch, its career tools, or an opportunity listing? Send a note to the team.
           </p>
         </div>
 
@@ -36,35 +36,13 @@ export const ContactPage: React.FC = () => {
           <div className="space-y-4">
             <Card className="p-6 space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-blue-50 dark:bg-brand-blue-950 text-brand-blue-700 dark:text-brand-blue-300 flex items-center justify-center">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Headquarters</h4>
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">Westlands, Nairobi, Kenya</p>
-                  <p className="text-xs text-slate-500">The Mirage Towers, 7th Floor</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-brand-green-50 dark:bg-brand-green-950 text-brand-green-700 dark:text-brand-green-300 flex items-center justify-center">
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Direct Inquiries</h4>
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">support@careerlaunch.co.ke</p>
+                  <a className="text-sm font-semibold text-slate-900 hover:underline dark:text-white" href="mailto:support@careerlaunch.co.ke">support@careerlaunch.co.ke</a>
                   <p className="text-xs text-slate-500">partnerships@careerlaunch.co.ke</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 flex items-center justify-center">
-                  <Phone className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Phone & WhatsApp</h4>
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">+254 700 123 456</p>
-                  <p className="text-xs text-slate-500">Mon - Fri: 8:00 AM - 5:00 PM EAT</p>
                 </div>
               </div>
             </Card>
@@ -75,7 +53,7 @@ export const ContactPage: React.FC = () => {
                 Looking for Talent?
               </h4>
               <p className="text-xs text-brand-blue-200 leading-relaxed">
-                Connect directly with qualified university attachments and verified developer candidates for your engineering and corporate intake.
+                Employer matching and candidate-directory tools are not available in this release. Contact us to discuss future integrations.
               </p>
             </Card>
           </div>
@@ -88,7 +66,7 @@ export const ContactPage: React.FC = () => {
                   <div className="w-12 h-12 rounded-full bg-brand-green-100 text-brand-green-600 flex items-center justify-center mx-auto">
                     ✓
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Message Received!</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">Your email draft is ready</h3>
                   <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto">
                     Your email app should open with this message addressed to support. The team won’t receive it until you send it there.
                   </p>

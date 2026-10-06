@@ -232,7 +232,11 @@ CREATE TABLE IF NOT EXISTS public.opportunities (
             'Freelance',
             'Graduate Program',
             'Remote',
-            'Competition'
+            'Competition',
+            'Fellowship',
+            'Hackathon',
+            'Volunteering',
+            'Event'
         )),
     work_mode TEXT DEFAULT 'Hybrid'
         CHECK (work_mode IN (
@@ -717,7 +721,7 @@ BEGIN
     RETURN NEW;
 
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, public;
 
 
 -- Remove existing trigger if it exists

@@ -43,6 +43,18 @@ export function getInitials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+export function safeExternalUrl(value?: string | null): string | undefined {
+  if (!value?.trim()) return undefined;
+  const candidate = /^https?:\/\//i.test(value.trim()) ? value.trim() : `https://${value.trim()}`;
+  try {
+    const url = new URL(candidate);
+    if (!['https:', 'http:'].includes(url.protocol) || !url.hostname || url.username || url.password) return undefined;
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
 export function calculateProfileStrength(
   profile: Partial<UserProfile> | null,
   skills: UserSkill[] = [],

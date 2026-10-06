@@ -8,7 +8,6 @@ import {
   Certification,
   CareerResource,
   Language,
-  AdminStats,
   PortfolioConfig,
   CVDocument,
   Notification,
@@ -198,6 +197,7 @@ export const INITIAL_PORTFOLIO: PortfolioConfig = {
   bio: 'Hi, I am Teddy! I bridge intuitive frontend experiences with robust backend microservices. I am passionate about leveraging software to solve real problems in logistics, financial inclusion, and education in Kenya.',
   theme: 'modern-navy',
   isPublished: true,
+  publicSections: { photo: false, headline: true, bio: true, projects: true, experience: true, education: true, skills: true, socialLinks: true, location: true, email: true },
   socialLinks: {
     github: 'https://github.com/teddymwangi',
     linkedin: 'https://linkedin.com/in/teddymwangi',
@@ -491,29 +491,3 @@ export const INITIAL_SKILL_GAPS: RoleSkillGap[] = [
     ],
   },
 ];
-
-export const INITIAL_ADMIN_STATS: AdminStats = {
-  totalUsers: 14850,
-  activeOpportunities: 342,
-  applicationsTracked: 28910,
-  totalPortfolios: 6140,
-  activeSubscriptions: 1820,
-  weeklyGrowthRate: 14.8,
-  categoryDistribution: [
-    { category: 'Software Engineering', count: 4200 },
-    { category: 'Data & AI', count: 2800 },
-    { category: 'Product Design & UI/UX', count: 2100 },
-    { category: 'Finance & Banking', count: 1950 },
-    { category: 'Digital Marketing & Content', count: 1600 },
-    { category: 'Green Tech & Agritech', count: 1200 },
-    { category: 'Engineering & Construction', count: 1000 },
-  ],
-  regionalDistribution: [
-    { region: 'Kenya (Nairobi, Mombasa, Kisumu, Eldoret)', count: 8900 },
-    { region: 'Nigeria (Lagos, Abuja, Port Harcourt)', count: 2400 },
-    { region: 'Rwanda (Kigali)', count: 1350 },
-    { region: 'Ghana (Accra, Kumasi)', count: 1100 },
-    { region: 'Uganda & Tanzania', count: 1100 },
-  ],
-};
-

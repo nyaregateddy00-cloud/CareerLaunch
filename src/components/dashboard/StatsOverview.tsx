@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, Bookmark, Calendar, Eye } from 'lucide-react';
+import { Layers, Bookmark, Calendar, Trophy } from 'lucide-react';
 import { Card } from '../common/Card';
 import { JobApplication } from '../../types';
 import { formatDate } from '../../lib/utils';
@@ -7,19 +7,20 @@ import { formatDate } from '../../lib/utils';
 interface StatsOverviewProps {
   applications: JobApplication[];
   savedCount: number;
-  portfolioViews: number;
 }
 
 export const StatsOverview: React.FC<StatsOverviewProps> = ({
   applications,
   savedCount,
-  portfolioViews,
 }) => {
-  const activeApplications = applications.filter((a) => a.stage !== 'Rejected').length;
+  const activeApplications = applications.filter((a) => a.stage !== 'Rejected' && a.stage !== 'Withdrawn').length;
   const interviews = applications.filter((a) => a.stage === 'Interview');
   const offers = applications.filter((a) => a.stage === 'Offer').length;
 
-  const nextInterview = interviews.find((a) => a.interviewDate);
+  const now = Date.now();
+  const nextInterview = interviews
+    .filter((application) => application.interviewDate && new Date(application.interviewDate).getTime() >= now)
+    .sort((a, b) => new Date(a.interviewDate!).getTime() - new Date(b.interviewDate!).getTime())[0];
 
   const stats = [
     {
@@ -34,11 +35,11 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
       bgColor: 'bg-brand-blue-50 dark:bg-brand-blue-950/60',
     },
     {
-      label: 'Interviews Scheduled',
+      label: 'Interview-stage Apps',
       value: interviews.length,
       detail: nextInterview
         ? `Next: ${formatDate(nextInterview.interviewDate)} (${nextInterview.company})`
-        : 'None scheduled',
+        : 'No upcoming interview date',
       icon: Calendar,
       color: 'text-brand-green-600 dark:text-brand-green-400',
       bgColor: 'bg-brand-green-50 dark:bg-brand-green-950/60',
@@ -52,12 +53,12 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
       bgColor: 'bg-amber-50 dark:bg-amber-950/60',
     },
     {
-      label: 'Portfolio Views',
-      value: portfolioViews,
-      detail: portfolioViews > 0 ? 'Public profile visibility' : 'Publish portfolio',
-      icon: Eye,
-      color: 'text-cyan-600 dark:text-cyan-400',
-      bgColor: 'bg-cyan-50 dark:bg-cyan-950/60',
+      label: 'Offers',
+      value: offers,
+      detail: offers > 0 ? 'In your application tracker' : 'Keep building your pipeline',
+      icon: Trophy,
+      color: 'text-brand-green-600 dark:text-brand-green-400',
+      bgColor: 'bg-brand-green-50 dark:bg-brand-green-950/60',
     },
   ];
 

@@ -37,7 +37,7 @@ import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { PageHeader } from '../../components/common/PageHeader';
 import { useToast } from '../../hooks/useToast';
-import { formatMonthYear, fireCelebrationConfetti } from '../../lib/utils';
+import { formatMonthYear, fireCelebrationConfetti, safeExternalUrl } from '../../lib/utils';
 
 export const ProfilePage: React.FC = () => {
   const { user, updateProfile } = useAuth();
@@ -584,7 +584,7 @@ export const ProfilePage: React.FC = () => {
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Projects & Proof of Work
               </h3>
-              <p className="text-xs text-slate-500">Live applications, repositories, and case studies</p>
+              <p className="text-xs text-slate-500">Project details and links you choose to add</p>
             </div>
           </div>
           <Button
@@ -628,9 +628,9 @@ export const ProfilePage: React.FC = () => {
                   ))}
                 </div>
               </div>
-              {proj.link && (
+              {safeExternalUrl(proj.link) && (
                 <a
-                  href={proj.link}
+                  href={safeExternalUrl(proj.link)}
                   target="_blank"
                   rel="noreferrer"
                   className="text-xs font-semibold text-brand-blue-700 dark:text-brand-green-400 hover:underline inline-flex items-center gap-1"

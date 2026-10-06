@@ -30,7 +30,7 @@ export const CVPreview: React.FC<CVPreviewProps> = ({
           <div className="flex items-center gap-1.5">
             {[
               { id: 'modern-navy', label: 'Modern Nairobi' },
-              { id: 'executive-classic', label: 'Executive ATS' },
+              { id: 'executive-classic', label: 'Executive Classic' },
               { id: 'clean-minimalist', label: 'Clean Emerald' },
             ].map(tpl => (
               <button
@@ -71,7 +71,7 @@ export const CVPreview: React.FC<CVPreviewProps> = ({
             templateId === 'executive-classic' ? 'text-center border-slate-300' : 'border-slate-200'
           }`}>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-              {personalInfo.fullName || 'Teddy Mwangi'}
+              {personalInfo.fullName || 'Your Name'}
             </h1>
             <p className="text-sm font-semibold text-brand-blue-900 mt-1">
               {personalInfo.headline || 'Full-Stack Software Engineer'}

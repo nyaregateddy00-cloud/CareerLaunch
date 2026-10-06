@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Plus, Trash2, Edit2, Search } from 'lucide-react';
-import { mockStorage } from '../../lib/mockStorage';
+import { deleteCareerResource, getCareerResources, saveCareerResource } from '../../lib/resources';
+import { isSupabaseConfigured } from '../../lib/supabase';
 import { CareerResource, ResourceCategory } from '../../types';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
@@ -18,10 +19,12 @@ export const AdminResourcesPage: React.FC = () => {
   const [summary, setSummary] = useState('');
   const [content, setContent] = useState('');
   const [readTime, setReadTime] = useState('5 min read');
-  const [author, setAuthor] = useState('CareerLaunch Editorial Team');
+  const [author, setAuthor] = useState('');
+  const [error, setError] = useState('');
 
-  const loadData = () => {
-    setResources(mockStorage.getResources());
+  const loadData = async () => {
+    try { setResources(await getCareerResources()); setError(''); }
+    catch { setError('Resources could not be loaded. Check the database connection and your admin access.'); }
   };
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export const AdminResourcesPage: React.FC = () => {
     setSummary('');
     setContent('');
     setReadTime('5 min read');
-    setAuthor('CareerLaunch Editorial Team');
+    setAuthor('');
     setIsModalOpen(true);
   };
 
@@ -50,7 +53,7 @@ export const AdminResourcesPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title) return;
 
@@ -68,15 +71,19 @@ export const AdminResourcesPage: React.FC = () => {
       publishedAt: editingRes?.publishedAt || new Date().toISOString().split('T')[0],
     };
 
-    mockStorage.saveResource(resToSave);
-    loadData();
-    setIsModalOpen(false);
+    try {
+      await saveCareerResource(resToSave);
+      await loadData();
+      setIsModalOpen(false);
+    } catch {
+      setError('The resource could not be saved. Confirm your admin access and try again.');
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Delete this career resource?')) {
-      mockStorage.deleteResource(id);
-      loadData();
+      try { await deleteCareerResource(id); await loadData(); }
+      catch { setError('The resource could not be deleted. Confirm your admin access and try again.'); }
     }
   };
 
@@ -91,12 +98,15 @@ export const AdminResourcesPage: React.FC = () => {
           <p className="text-xs sm:text-sm text-slate-500">
             Create and edit attachment playbooks, interview preparation manuals, and scholarship guides.
           </p>
+          {isSupabaseConfigured && <p className="text-xs text-slate-500 mt-1">Changes publish to the shared resource library and require Supabase admin access.</p>}
         </div>
 
         <Button size="sm" variant="accent" onClick={openAdd} leftIcon={<Plus className="w-4 h-4" />}>
           Add New Article
         </Button>
       </div>
+
+      {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
 
       <Card className="p-0 overflow-hidden shadow-card">
         <div className="overflow-x-auto">
@@ -185,6 +195,7 @@ export const AdminResourcesPage: React.FC = () => {
 
             <Input
               label="Author Name"
+              required
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
             />

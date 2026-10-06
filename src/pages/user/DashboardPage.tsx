@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Calendar,
   Compass,
+  Target,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { mockStorage } from '../../lib/mockStorage';
@@ -75,8 +76,8 @@ export const DashboardPage: React.FC = () => {
   const upcomingDeadlines = useMemo(() => {
     const now = Date.now();
     return publishedOpps
-      .filter((o) => o.status === 'published' && o.deadline && new Date(o.deadline).getTime() >= now)
-      .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
+      .filter((o) => o.status === 'published' && o.deadline && new Date(`${o.deadline}T23:59:59`).getTime() >= now)
+      .sort((a, b) => new Date(`${a.deadline}T23:59:59`).getTime() - new Date(`${b.deadline}T23:59:59`).getTime())
       .slice(0, 2);
   }, [publishedOpps]);
 
@@ -84,12 +85,33 @@ export const DashboardPage: React.FC = () => {
     ? rankOpportunitiesForProfile(publishedOpps, user).slice(0, 2)
     : publishedOpps.slice(0, 2), [publishedOpps, user]);
 
+  const upcomingInterviews = useMemo(() => applications
+    .filter((application) => application.stage === 'Interview' && application.interviewDate && new Date(application.interviewDate).getTime() >= Date.now())
+    .sort((a, b) => new Date(a.interviewDate!).getTime() - new Date(b.interviewDate!).getTime()), [applications]);
+
+  const nextBestAction = useMemo(() => {
+    if (!user) return null;
+    const skills = mockStorage.getUserSkills().filter((item) => item.userId === user.id);
+    const experience = mockStorage.getExperience().filter((item) => item.userId === user.id);
+    const education = mockStorage.getEducation().filter((item) => item.userId === user.id);
+    const projects = mockStorage.getProjects().filter((item) => item.userId === user.id);
+    const cv = mockStorage.getCV();
+    const portfolio = mockStorage.getPortfolio();
+
+    if (!user.headline.trim()) return { title: 'Choose your career focus', detail: 'Add a headline so your profile and opportunity matches reflect the roles you want.', href: '/profile', action: 'Update profile' };
+    if (skills.length < 3) return { title: 'Add skills to your career profile', detail: 'List at least three skills to make your readiness and opportunity matches more useful.', href: '/skills', action: 'Add skills' };
+    if (!education.length) return { title: 'Add your education', detail: 'Include your university, college, bootcamp, or other relevant training.', href: '/profile', action: 'Add education' };
+    if (!experience.length && !projects.length) return { title: 'Add proof of what you can do', detail: 'Start with a project or experience entry that shows how you use your skills.', href: '/profile', action: 'Add experience or project' };
+    if (!cv.content.summary.trim() && !cv.content.experience.length && !cv.content.projects.length) return { title: 'Turn your profile into a CV', detail: 'Build a CV from your saved experience, education, skills, and projects.', href: '/cv-builder', action: 'Build your CV' };
+    if (!portfolio.isPublished) return { title: 'Prepare your shareable portfolio', detail: 'Choose what to showcase and publish when you are ready.', href: '/portfolio-builder', action: 'Review portfolio' };
+    if (!applications.length) return { title: 'Explore opportunities that fit your next step', detail: 'Browse the catalog, check each listing source, and save roles worth pursuing.', href: '/app/opportunities', action: 'Explore opportunities' };
+    if (upcomingInterviews.length) return { title: 'Prepare for your upcoming interview', detail: `You have an interview coming up for ${upcomingInterviews[0].position} at ${upcomingInterviews[0].company}.`, href: '/ai-assistant', action: 'Open interview prep' };
+    return { title: 'Keep your opportunity pipeline moving', detail: 'Review saved listings, follow up on active applications, and update their status as you hear back.', href: '/applications', action: 'Review applications' };
+  }, [user, applications, upcomingInterviews]);
+
   if (!user) return null;
 
   const firstName = user.fullName.split(' ')[0];
-  const upcomingInterviews = applications
-    .filter((a) => a.stage === 'Interview' && a.interviewDate && new Date(a.interviewDate).getTime() >= Date.now())
-    .sort((a, b) => new Date(a.interviewDate!).getTime() - new Date(b.interviewDate!).getTime());
 
   return (
     <div className="space-y-8">
@@ -121,14 +143,37 @@ export const DashboardPage: React.FC = () => {
       {/* Profile Strength Interactive Card */}
       <ProfileStrengthCard user={user} />
 
+      {nextBestAction && (
+        <Card className="p-5 sm:p-6 border-brand-green-200 bg-gradient-to-r from-white to-brand-green-50/70 dark:border-brand-green-900 dark:from-slate-900 dark:to-brand-green-950/30">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3.5">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-green-100 text-brand-green-800 dark:bg-brand-green-900/60 dark:text-brand-green-300">
+                <Target className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-[11px] font-bold uppercase tracking-[.13em] text-brand-green-800 dark:text-brand-green-300">Next best action</p>
+                  <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Based on your saved career details</span>
+                </div>
+                <h2 className="mt-1 text-base font-extrabold text-slate-900 dark:text-white">{nextBestAction.title}</h2>
+                <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-600 dark:text-slate-300">{nextBestAction.detail}</p>
+              </div>
+            </div>
+            <Link to={nextBestAction.href} className="shrink-0">
+              <Button size="sm" variant="accent" rightIcon={<ArrowRight className="h-4 w-4" />}>{nextBestAction.action}</Button>
+            </Link>
+          </div>
+        </Card>
+      )}
+
       {(authNotice || workspaceSaveError) && <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">{workspaceSaveError || authNotice}</p>}
 
       {/* KPI Stats Overview */}
       <StatsOverview
         applications={applications}
         savedCount={savedOppIds.length}
-        portfolioViews={mockStorage.getPortfolio().viewCount || 0}
       />
+
 
       {/* Quick Launchpad Grid (No purple, strict deep blue/green/cyan/amber palette) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -282,7 +327,7 @@ export const DashboardPage: React.FC = () => {
             ) : (
               <div className="text-center py-3 text-xs text-slate-500">
                 <CheckCircle2 className="w-5 h-5 text-brand-green-500 mx-auto mb-1" />
-                No interview deadlines today. Apply to open roles to fill your pipeline!
+                No upcoming interview dates yet. Keep your applications updated as you hear back.
               </div>
             )}
 

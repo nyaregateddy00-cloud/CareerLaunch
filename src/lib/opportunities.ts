@@ -7,6 +7,9 @@ const OPPORTUNITIES_PAGE_SIZE = 500;
 let publishedOpportunitiesCache: Opportunity[] | null = null;
 let publishedOpportunitiesExpiresAt = 0;
 let publishedOpportunitiesRequest: Promise<Opportunity[]> | null = null;
+let adminOpportunitiesCache: Opportunity[] | null = null;
+let adminOpportunitiesExpiresAt = 0;
+let adminOpportunitiesRequest: Promise<Opportunity[]> | null = null;
 
 type OpportunityRow = Record<string, any>;
 
@@ -112,7 +115,20 @@ export async function getPublishedOpportunities(): Promise<Opportunity[]> {
 /** Admin listing source; demo mode keeps using the existing browser-backed storage. */
 export async function getAdminOpportunities(): Promise<Opportunity[]> {
   if (!isSupabaseConfigured) return mockStorage.getOpportunities();
-  return fetchAllOpportunityRows(false);
+  if (adminOpportunitiesCache && Date.now() < adminOpportunitiesExpiresAt) return adminOpportunitiesCache;
+  if (adminOpportunitiesRequest) return adminOpportunitiesRequest;
+  adminOpportunitiesRequest = fetchAllOpportunityRows(false)
+    .then((items) => {
+      adminOpportunitiesCache = items;
+      adminOpportunitiesExpiresAt = Date.now() + OPPORTUNITIES_CACHE_TTL;
+      return items;
+    })
+    .finally(() => { adminOpportunitiesRequest = null; });
+  return adminOpportunitiesRequest;
+}
+
+function invalidateAdminOpportunitiesCache(): void {
+  adminOpportunitiesExpiresAt = 0;
 }
 
 /** Persist admin postings centrally so every user sees the same published catalog. */
@@ -124,6 +140,7 @@ export async function saveOpportunity(opportunity: Opportunity): Promise<Opportu
   const { data, error } = await supabase.from('opportunities').upsert(toOpportunityRow(opportunity)).select('*').single();
   if (error) throw error;
   invalidatePublishedOpportunitiesCache();
+  invalidateAdminOpportunitiesCache();
   return mapOpportunityRow(data as OpportunityRow);
 }
 
@@ -135,6 +152,7 @@ export async function deleteOpportunity(id: string): Promise<void> {
   const { error } = await supabase.from('opportunities').delete().eq('id', id);
   if (error) throw error;
   invalidatePublishedOpportunitiesCache();
+  invalidateAdminOpportunitiesCache();
 }
 
 export interface OpportunityMatch {
@@ -178,9 +196,11 @@ export function matchOpportunityToProfile(opportunity: Opportunity, user: UserPr
   const locationScore = !userLocation || opportunity.workMode === 'Remote' || /remote|anywhere|global/.test(listingLocation)
     ? 15
     : listingLocation.includes(userLocation) || userLocation.includes(listingLocation) ? 15 : 0;
-  const possibleWeight = (skills.length ? 60 : 0) + (uniqueRoleTerms.length ? 25 : 0) + (user.location ? 15 : 0);
+  // Keep the denominator fixed so an incomplete profile cannot receive an
+  // inflated match percentage from a single available signal (for example,
+  // location alone). The visible score reflects all three match dimensions.
   const earned = skillScore + roleScore + (user.location ? locationScore : 0);
-  return { score: Math.max(0, Math.min(100, Math.round((earned / Math.max(possibleWeight, 1)) * 100))), matchedSkills };
+  return { score: Math.max(0, Math.min(100, Math.round(earned))), matchedSkills };
 }
 
 export function rankOpportunitiesForProfile(opportunities: Opportunity[], user: UserProfile | null): Opportunity[] {

@@ -14,7 +14,7 @@ import { formatDate } from '../../lib/utils';
 export const NotificationsPage: React.FC = () => {
   const { showToast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>(() => mockStorage.getNotifications());
-  const [filter, setFilter] = useState<'all' | 'unread' | 'opportunities' | 'applications'>('all');
+  const [filter, setFilter] = useState<'all' | 'unread' | 'opportunities' | 'applications' | 'learning' | 'achievements' | 'community' | 'system'>('all');
 
   const loadData = () => {
     setNotifications(mockStorage.getNotifications());
@@ -44,7 +44,11 @@ export const NotificationsPage: React.FC = () => {
     return notifications.filter((n) => {
       if (filter === 'unread') return !n.isRead;
       if (filter === 'opportunities') return n.type === 'opportunity';
-      if (filter === 'applications') return n.type === 'application';
+      if (filter === 'applications') return n.type === 'application' || n.type === 'interview';
+      if (filter === 'learning') return n.type === 'learning';
+      if (filter === 'achievements') return n.type === 'achievement';
+      if (filter === 'community') return n.type === 'community';
+      if (filter === 'system') return n.type === 'system';
       return true;
     });
   }, [notifications, filter]);
@@ -55,7 +59,7 @@ export const NotificationsPage: React.FC = () => {
     <div className="max-w-4xl mx-auto space-y-6">
       <PageHeader
         title="Notifications"
-        subtitle="Real-time updates on your job applications, matching opportunities, and platform announcements."
+        subtitle="Review notification items saved in your workspace. Live delivery depends on notification services configured for this deployment."
         breadcrumbs={[{ label: 'Notifications' }]}
         badge={
           unreadCount > 0 ? (
@@ -95,8 +99,9 @@ export const NotificationsPage: React.FC = () => {
           {
             id: 'applications',
             label: 'Applications',
-            count: notifications.filter((n) => n.type === 'application').length,
+            count: notifications.filter((n) => n.type === 'application' || n.type === 'interview').length,
           },
+          ...(['learning', 'achievements', 'community', 'system'] as const).map((id) => ({ id, label: id[0].toUpperCase() + id.slice(1), count: notifications.filter((item) => item.type === id).length })),
         ].map((tab) => (
           <button
             key={tab.id}

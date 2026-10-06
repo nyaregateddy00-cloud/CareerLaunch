@@ -26,9 +26,11 @@ const COLUMNS: { id: ApplicationStage; title: string; color: string; border: str
   { id: 'Saved', title: 'Saved', color: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300', border: 'border-t-slate-400' },
   { id: 'Applied', title: 'Applied', color: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300', border: 'border-t-blue-500' },
   { id: 'Shortlisted', title: 'Shortlisted', color: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300', border: 'border-t-indigo-500' },
+  { id: 'Assessment', title: 'Assessment', color: 'bg-violet-50 text-violet-700 dark:bg-violet-950 dark:text-violet-300', border: 'border-t-violet-500' },
   { id: 'Interview', title: 'Interview', color: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300', border: 'border-t-amber-500' },
   { id: 'Offer', title: 'Offer 🎉', color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300', border: 'border-t-brand-green-500' },
-  { id: 'Rejected', title: 'Archived', color: 'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300', border: 'border-t-rose-400' },
+  { id: 'Rejected', title: 'Rejected', color: 'bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-300', border: 'border-t-rose-400' },
+  { id: 'Withdrawn', title: 'Withdrawn', color: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300', border: 'border-t-slate-400' },
 ];
 
 export const ApplicationsTrackerPage: React.FC = () => {
@@ -53,8 +55,16 @@ export const ApplicationsTrackerPage: React.FC = () => {
   }, []);
 
   const handleUpdateStage = (id: string, stage: ApplicationStage) => {
+    const previous = applications.find((item) => item.id === id);
     mockStorage.updateApplicationStage(id, stage);
     loadData();
+    if (previous && previous.stage !== stage && user) mockStorage.addNotification({
+      userId: user.id,
+      title: stage === 'Interview' ? 'Interview stage updated' : 'Application stage updated',
+      message: `${previous.position} at ${previous.company} is now marked “${stage}”.`,
+      type: stage === 'Interview' ? 'interview' : 'application',
+      actionUrl: '/applications',
+    });
     showToast(`Moved application to ${stage}`, 'info');
   };
 
@@ -65,8 +75,16 @@ export const ApplicationsTrackerPage: React.FC = () => {
   };
 
   const handleSaveApplication = (app: JobApplication) => {
+    const isNew = !editingApp;
     mockStorage.saveApplication(app);
     loadData();
+    if (isNew && user) mockStorage.addNotification({
+      userId: user.id,
+      title: 'Application added to your tracker',
+      message: `You can now track ${app.position} at ${app.company} through the next stages.`,
+      type: 'application',
+      actionUrl: '/applications',
+    });
     if (app.stage === 'Offer' || app.stage === 'Interview') {
       fireCelebrationConfetti();
     }
@@ -79,7 +97,7 @@ export const ApplicationsTrackerPage: React.FC = () => {
     return a.company.toLowerCase().includes(q) || a.position.toLowerCase().includes(q);
   });
 
-  const totalActive = applications.filter(a => a.stage !== 'Rejected').length;
+  const totalActive = applications.filter(a => a.stage !== 'Rejected' && a.stage !== 'Withdrawn').length;
   const totalInterviews = applications.filter(a => a.stage === 'Interview').length;
   const totalOffers = applications.filter(a => a.stage === 'Offer').length;
 
@@ -167,7 +185,7 @@ export const ApplicationsTrackerPage: React.FC = () => {
       </div>
 
       {/* Kanban Board Horizontal Scroll Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 overflow-x-auto pb-4">
+      <div className="grid grid-cols-1 gap-4 overflow-x-auto pb-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {COLUMNS.map((col) => {
           const colApps = filteredApps.filter((a) => a.stage === col.id);
           return (

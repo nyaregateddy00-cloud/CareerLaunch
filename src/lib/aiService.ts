@@ -40,6 +40,17 @@ class AIService {
     return Boolean(this.endpoint && this.endpoint.trim() !== '');
   }
 
+  public async checkAvailability(): Promise<boolean> {
+    try {
+      const response = await fetch(this.endpoint!, { method: 'GET', headers: { Accept: 'application/json' } });
+      if (!response.ok) return false;
+      const status = await response.json();
+      return status.configured === true;
+    } catch {
+      return false;
+    }
+  }
+
   public async sendMessage(
     prompt: string,
     history: AIChatMessage[] = [],
@@ -78,16 +89,11 @@ class AIService {
         } catch {
           // Vercel may return a plain text or HTML routing error.
         }
-        const endpointPath = (() => {
-          try { return new URL(this.endpoint!, window.location.origin).pathname; }
-          catch { return 'configured endpoint'; }
-        })();
-        const responseType = response.headers.get('content-type') || 'unknown response type';
-        const detail = responseText.replace(/<[^>]*>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 240);
-        throw new Error(
-          message ||
-          `API error ${response.status} at ${endpointPath} (${responseType})${detail ? `: ${detail}` : ''}`
-        );
+        throw new Error(message || (response.status === 401
+          ? 'Your session has expired. Sign in again to use CareerLaunch Coach.'
+          : response.status === 503
+            ? 'CareerLaunch Coach needs server-side AI configuration. Ask your administrator to configure the provider in Vercel.'
+            : 'CareerLaunch Coach is temporarily unavailable. Please try again later.'));
       }
 
       const data = await response.json();
@@ -99,7 +105,11 @@ class AIService {
         content: generatedText,
       };
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown AI service error';
+      const errorMessage = err instanceof SyntaxError
+        ? 'CareerLaunch Coach is not configured for this deployment.'
+        : err instanceof Error && /sign in|expired/i.test(err.message)
+          ? err.message
+          : 'CareerLaunch Coach is temporarily unavailable. Please try again later.';
       return {
         success: false,
         isConfigured: true,

@@ -8,12 +8,13 @@ import {
   Project,
   Certification,
   CareerResource,
-  AdminStats,
   PortfolioConfig,
   CVDocument,
   Notification,
   RoleSkillGap,
-  Language
+  Language,
+  InterviewPracticeSession,
+  UserPreferences
 } from '../types';
 import {
   INITIAL_USER_TEDDY,
@@ -31,8 +32,6 @@ import {
   INITIAL_SAVED_OPP_IDS,
   INITIAL_RESOURCES,
   INITIAL_NOTIFICATIONS,
-  INITIAL_SKILL_GAPS,
-  INITIAL_ADMIN_STATS
 } from './mockData';
 import { isSupabaseConfigured, supabase } from './supabase';
 
@@ -42,6 +41,12 @@ const STORAGE_KEYS = {
   OPPORTUNITIES: 'careerlaunch_opportunities',
   APPLICATIONS: 'careerlaunch_applications',
   SAVED_OPP_IDS: 'careerlaunch_saved_opp_ids',
+  SAVED_RESOURCES: 'careerlaunch_saved_resources',
+  COMPLETED_RESOURCES: 'careerlaunch_completed_resources',
+  TARGET_ROLE: 'careerlaunch_target_role',
+  TARGET_ROLE_SKILLS: 'careerlaunch_target_role_skills',
+  INTERVIEW_SESSIONS: 'careerlaunch_interview_sessions',
+  PREFERENCES: 'careerlaunch_preferences',
   USER_SKILLS: 'careerlaunch_user_skills',
   EXPERIENCE: 'careerlaunch_experience',
   EDUCATION: 'careerlaunch_education',
@@ -52,13 +57,18 @@ const STORAGE_KEYS = {
   CV: 'careerlaunch_cv',
   RESOURCES: 'careerlaunch_resources',
   NOTIFICATIONS: 'careerlaunch_notifications',
-  ADMIN_STATS: 'careerlaunch_admin_stats',
   THEME: 'careerlaunch_theme',
 };
 
 const CLOUD_WORKSPACE_KEYS = [
   STORAGE_KEYS.APPLICATIONS,
   STORAGE_KEYS.SAVED_OPP_IDS,
+  STORAGE_KEYS.SAVED_RESOURCES,
+  STORAGE_KEYS.COMPLETED_RESOURCES,
+  STORAGE_KEYS.TARGET_ROLE,
+  STORAGE_KEYS.TARGET_ROLE_SKILLS,
+  STORAGE_KEYS.INTERVIEW_SESSIONS,
+  STORAGE_KEYS.PREFERENCES,
   STORAGE_KEYS.USER_SKILLS,
   STORAGE_KEYS.EXPERIENCE,
   STORAGE_KEYS.EDUCATION,
@@ -72,6 +82,11 @@ const CLOUD_WORKSPACE_KEYS = [
 const EMPTY_FOR_NEW_ACCOUNT = new Set([
   STORAGE_KEYS.APPLICATIONS,
   STORAGE_KEYS.SAVED_OPP_IDS,
+  STORAGE_KEYS.SAVED_RESOURCES,
+  STORAGE_KEYS.COMPLETED_RESOURCES,
+  STORAGE_KEYS.TARGET_ROLE,
+  STORAGE_KEYS.TARGET_ROLE_SKILLS,
+  STORAGE_KEYS.INTERVIEW_SESSIONS,
   STORAGE_KEYS.USER_SKILLS,
   STORAGE_KEYS.EXPERIENCE,
   STORAGE_KEYS.EDUCATION,
@@ -82,26 +97,87 @@ const EMPTY_FOR_NEW_ACCOUNT = new Set([
 ]);
 let remoteUserId: string | null = null;
 let hydratingWorkspace = false;
+let pendingWorkspaceTimer: ReturnType<typeof setTimeout> | undefined;
+const pendingWorkspaceChanges = new Map<string, { userId: string; collection: string; before: unknown; after: unknown }>();
+let workspaceWriteChain: Promise<void> = Promise.resolve();
 const storageKeyFor = (key: string, userId = remoteUserId) =>
   userId && CLOUD_WORKSPACE_KEYS.includes(key) ? `${key}:${userId}` : key;
 
-function scheduleWorkspaceSave(userId: string): void {
-  if (!isSupabaseConfigured || hydratingWorkspace) return;
-  queueMicrotask(() => {
-    const payload: Record<string, unknown> = {};
-    for (const key of CLOUD_WORKSPACE_KEYS) {
-      const raw = localStorage.getItem(storageKeyFor(key, userId));
-      if (!raw) continue;
-      try { payload[key] = JSON.parse(raw); } catch { /* Ignore corrupt browser cache entries. */ }
-    }
-    void supabase.from('workspace_snapshots').upsert({
-      user_id: userId,
-      payload,
-      updated_at: new Date().toISOString(),
-    }, { onConflict: 'user_id' }).then(({ error }) => {
-      if (error) window.dispatchEvent(new CustomEvent('careerlaunch_persistence_error', { detail: error.message }));
+function toDatabaseRecords(collection: string, value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => {
+      if (typeof entry === 'string') return entry;
+      if (!entry || typeof entry !== 'object') return {};
+      const row = entry as Record<string, unknown>;
+      const fields: Record<string, string> = {
+        userId: 'user_id', skillName: 'skill_name', category: 'category', proficiencyLevel: 'proficiency_level', yearsOfExperience: 'years_of_experience',
+        employmentType: 'employment_type', startDate: 'start_date', endDate: 'end_date', isCurrent: 'is_current', fieldOfStudy: 'field_of_study',
+        githubLink: 'github_link', imageUrl: 'image_url', isFeatured: 'is_featured', issueDate: 'issue_date', expiryDate: 'expiry_date',
+        credentialUrl: 'credential_url', dateApplied: 'date_applied', opportunityId: 'opportunity_id', followUpDate: 'follow_up_date',
+        interviewDate: 'interview_date', jobUrl: 'job_url', updatedAt: 'updated_at', actionUrl: 'action_url', isRead: 'is_read', createdAt: 'created_at',
+      };
+      return Object.fromEntries(Object.entries(row).map(([key, fieldValue]) => [fields[key] || key, fieldValue]));
     });
-  });
+  }
+  if (!value || typeof value !== 'object') return value;
+  const row = value as Record<string, unknown>;
+  if (collection === STORAGE_KEYS.CV) {
+    return { id: row.id, title: row.title, template_id: row.templateId, content: row.content, is_default: row.isDefault, updated_at: row.updatedAt };
+  }
+  if (collection === STORAGE_KEYS.PORTFOLIO) {
+    return { slug: row.slug, headline: row.headline, bio: row.bio, theme: row.theme, is_published: row.isPublished, social_links: row.socialLinks,
+      featured_project_ids: row.featuredProjectIds, public_sections: row.publicSections };
+  }
+  if (collection === STORAGE_KEYS.PREFERENCES) {
+    return { currency: row.currency, email_alerts: row.emailAlerts, interview_reminders: row.interviewReminders, weekly_digest: row.weeklyDigest,
+      appearance: row.appearance, share_career_context: row.shareCareerContext };
+  }
+  if (collection === STORAGE_KEYS.INTERVIEW_SESSIONS) return toDatabaseRecords(collection, [value]);
+  return value;
+}
+
+function clientKeys(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry) => typeof entry === 'string' ? [entry] :
+    entry && typeof entry === 'object' && typeof (entry as { id?: unknown }).id === 'string' ? [(entry as { id: string }).id] : []);
+}
+
+function scheduleWorkspaceSave(userId: string, collection: string, before: unknown, after: unknown): void {
+  if (!isSupabaseConfigured || hydratingWorkspace) return;
+  const changeKey = `${userId}:${collection}`;
+  const queued = pendingWorkspaceChanges.get(changeKey);
+  pendingWorkspaceChanges.set(changeKey, { userId, collection, before: queued?.before ?? before, after });
+  if (pendingWorkspaceTimer) clearTimeout(pendingWorkspaceTimer);
+  pendingWorkspaceTimer = setTimeout(() => {
+    pendingWorkspaceTimer = undefined;
+    const changes = [...pendingWorkspaceChanges.values()];
+    pendingWorkspaceChanges.clear();
+    workspaceWriteChain = workspaceWriteChain.then(async () => {
+      let normalizedFailure: unknown;
+      for (const change of changes) {
+        const beforeKeys = new Set(clientKeys(change.before));
+        const afterKeys = new Set(clientKeys(change.after));
+        const deleted = [...beforeKeys].filter((id) => !afterKeys.has(id));
+        const { error: recordError } = await supabase.rpc('save_workspace_records', {
+          p_collection: change.collection,
+          p_records: toDatabaseRecords(change.collection, change.after),
+          p_deleted_keys: deleted,
+        });
+        if (recordError) normalizedFailure = recordError;
+      }
+      const payload: Record<string, unknown> = {};
+      for (const key of CLOUD_WORKSPACE_KEYS) {
+        const raw = localStorage.getItem(storageKeyFor(key, userId));
+        if (!raw) continue;
+        try { payload[key] = JSON.parse(raw); } catch { /* Ignore corrupt browser cache entries. */ }
+      }
+      const { error } = await supabase.from('workspace_snapshots').upsert({ user_id: userId, payload, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      if (normalizedFailure) window.dispatchEvent(new CustomEvent('careerlaunch_persistence_error', { detail: normalizedFailure instanceof Error ? normalizedFailure.message : 'Structured workspace sync failed.' }));
+      if (error) throw error;
+    }).catch((error: unknown) => {
+      window.dispatchEvent(new CustomEvent('careerlaunch_persistence_error', { detail: error instanceof Error ? error.message : 'Workspace synchronization failed.' }));
+    });
+  }, 250);
 }
 
 export function setRemoteWorkspaceUser(userId: string | null): void {
@@ -117,13 +193,36 @@ export async function restoreRemoteWorkspace(): Promise<void> {
     .eq('user_id', currentUserId)
     .maybeSingle();
   if (error) throw error;
+  const { data: normalizedData, error: normalizedError } = await supabase.rpc('load_workspace_records');
+  if (normalizedError) window.dispatchEvent(new CustomEvent('careerlaunch_persistence_error', { detail: normalizedError.message }));
   hydratingWorkspace = true;
   try {
     const payload = data?.payload as Record<string, unknown> | undefined;
+    const normalized = normalizedData && typeof normalizedData === 'object' ? normalizedData as Record<string, unknown> : {};
+    const preferNormalized = normalized._normalized_ready === true;
+    const restored: Record<string, unknown> = {};
     for (const key of CLOUD_WORKSPACE_KEYS) {
-      const value = payload?.[key];
-      if (value !== undefined) localStorage.setItem(storageKeyFor(key, currentUserId), JSON.stringify(value));
+      const legacyValue = payload?.[key];
+      const cachedRaw = localStorage.getItem(storageKeyFor(key, currentUserId));
+      let cachedValue: unknown;
+      if (cachedRaw) {
+        try { cachedValue = JSON.parse(cachedRaw); } catch { /* Ignore corrupt browser cache. */ }
+      }
+      const normalizedValue = normalized[key];
+      const normalizedObjectIsEmpty = normalizedValue && typeof normalizedValue === 'object' && !Array.isArray(normalizedValue) && Object.keys(normalizedValue).length === 0;
+      const value = preferNormalized
+        ? normalizedObjectIsEmpty ? legacyValue ?? cachedValue : normalizedValue
+        : legacyValue ?? cachedValue ?? (normalizedObjectIsEmpty ? undefined : normalizedValue);
+      if (value === undefined) continue;
+      restored[key] = value;
+      localStorage.setItem(storageKeyFor(key, currentUserId), JSON.stringify(value));
     }
+    if (!normalizedError && !preferNormalized) {
+      const { error: migrationError } = await supabase.rpc('backfill_workspace_snapshot', { p_payload: { ...payload, ...restored } });
+      if (migrationError) window.dispatchEvent(new CustomEvent('careerlaunch_persistence_error', { detail: migrationError.message }));
+    }
+    const { error: snapshotError } = await supabase.from('workspace_snapshots').upsert({ user_id: currentUserId, payload: { ...payload, ...restored }, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+    if (snapshotError) window.dispatchEvent(new CustomEvent('careerlaunch_persistence_error', { detail: snapshotError.message }));
   } finally {
     hydratingWorkspace = false;
   }
@@ -160,6 +259,7 @@ function getItem<T>(key: string, defaultValue: T): T {
         isPublished: false,
         socialLinks: { email: profile.email },
         featuredProjectIds: [],
+        publicSections: { photo: false, headline: false, bio: false, projects: false, experience: false, education: false, skills: false, socialLinks: false, location: false, email: false },
         viewCount: 0,
       } as T;
     }
@@ -171,9 +271,15 @@ function getItem<T>(key: string, defaultValue: T): T {
 
 function setItem<T>(key: string, value: T): void {
   try {
-    localStorage.setItem(storageKeyFor(key), JSON.stringify(value));
+    const storageKey = storageKeyFor(key);
+    const oldValue = localStorage.getItem(storageKey);
+    let before: unknown = [];
+    if (oldValue) {
+      try { before = JSON.parse(oldValue); } catch { before = []; }
+    }
+    localStorage.setItem(storageKey, JSON.stringify(value));
     window.dispatchEvent(new CustomEvent('careerlaunch_storage_change', { detail: { key } }));
-    if (remoteUserId && CLOUD_WORKSPACE_KEYS.includes(key)) scheduleWorkspaceSave(remoteUserId);
+    if (remoteUserId && CLOUD_WORKSPACE_KEYS.includes(key)) scheduleWorkspaceSave(remoteUserId, key, before, value);
   } catch (e) {
     console.error(`Error saving to localStorage key ${key}`, e);
   }
@@ -243,6 +349,20 @@ export const mockStorage = {
     return !exists;
   },
 
+  // --- LEARNING PROGRESS ---
+  getSavedResourceIds(): string[] {
+    return getItem<string[]>(STORAGE_KEYS.SAVED_RESOURCES, []);
+  },
+  setSavedResourceIds(ids: string[]): void {
+    setItem(STORAGE_KEYS.SAVED_RESOURCES, ids);
+  },
+  getCompletedResourceIds(): string[] {
+    return getItem<string[]>(STORAGE_KEYS.COMPLETED_RESOURCES, []);
+  },
+  setCompletedResourceIds(ids: string[]): void {
+    setItem(STORAGE_KEYS.COMPLETED_RESOURCES, ids);
+  },
+
   // --- APPLICATIONS (KANBAN) ---
   getApplications(): JobApplication[] {
     return getItem<JobApplication[]>(STORAGE_KEYS.APPLICATIONS, INITIAL_APPLICATIONS);
@@ -287,7 +407,35 @@ export const mockStorage = {
     setItem(STORAGE_KEYS.USER_SKILLS, list);
   },
   getSkillGaps(): RoleSkillGap[] {
-    return INITIAL_SKILL_GAPS;
+    return [];
+  },
+  getTargetRole(): string {
+    return getItem<string>(STORAGE_KEYS.TARGET_ROLE, '');
+  },
+  setTargetRole(role: string): void {
+    setItem(STORAGE_KEYS.TARGET_ROLE, role);
+  },
+  getTargetRoleSkills(): string[] {
+    return getItem<string[]>(STORAGE_KEYS.TARGET_ROLE_SKILLS, []);
+  },
+  setTargetRoleSkills(skills: string[]): void {
+    setItem(STORAGE_KEYS.TARGET_ROLE_SKILLS, skills);
+  },
+  getInterviewSessions(): InterviewPracticeSession[] {
+    return getItem<InterviewPracticeSession[]>(STORAGE_KEYS.INTERVIEW_SESSIONS, []);
+  },
+  saveInterviewSession(session: InterviewPracticeSession): void {
+    setItem(STORAGE_KEYS.INTERVIEW_SESSIONS, [session, ...this.getInterviewSessions()].slice(0, 30));
+  },
+  getPreferences(): UserPreferences {
+    return getItem<UserPreferences>(STORAGE_KEYS.PREFERENCES, {
+      currency: 'KES', emailAlerts: true, interviewReminders: true, weeklyDigest: false,
+      appearance: localStorage.getItem(STORAGE_KEYS.THEME) === 'dark' ? 'dark' : 'light',
+      shareCareerContext: false,
+    });
+  },
+  setPreferences(preferences: UserPreferences): void {
+    setItem(STORAGE_KEYS.PREFERENCES, preferences);
   },
 
   // --- WORK EXPERIENCE ---
@@ -424,6 +572,16 @@ export const mockStorage = {
   getNotifications(): Notification[] {
     return getItem<Notification[]>(STORAGE_KEYS.NOTIFICATIONS, INITIAL_NOTIFICATIONS);
   },
+  addNotification(notification: Omit<Notification, 'id' | 'createdAt' | 'isRead'> & Partial<Pick<Notification, 'id' | 'createdAt' | 'isRead'>>): void {
+    const list = this.getNotifications();
+    list.unshift({
+      ...notification,
+      id: notification.id || `notice-${crypto.randomUUID()}`,
+      isRead: notification.isRead ?? false,
+      createdAt: notification.createdAt || new Date().toISOString(),
+    });
+    setItem(STORAGE_KEYS.NOTIFICATIONS, list.slice(0, 100));
+  },
   markNotificationAsRead(id: string): void {
     const list = this.getNotifications().map(n => (n.id === id ? { ...n, isRead: true } : n));
     setItem(STORAGE_KEYS.NOTIFICATIONS, list);
@@ -431,18 +589,6 @@ export const mockStorage = {
   markAllNotificationsAsRead(): void {
     const list = this.getNotifications().map(n => ({ ...n, isRead: true }));
     setItem(STORAGE_KEYS.NOTIFICATIONS, list);
-  },
-
-  // --- ADMIN STATS ---
-  getAdminStats(): AdminStats {
-    const apps = this.getApplications();
-    const opps = this.getOpportunities();
-    const base = getItem<AdminStats>(STORAGE_KEYS.ADMIN_STATS, INITIAL_ADMIN_STATS);
-    return {
-      ...base,
-      activeOpportunities: opps.filter(o => o.status === 'published').length,
-      applicationsTracked: apps.length + 28904,
-    };
   },
 
   // --- RESET ALL TO DEFAULT ---

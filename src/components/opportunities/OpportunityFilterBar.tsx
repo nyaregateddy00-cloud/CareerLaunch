@@ -13,6 +13,8 @@ interface OpportunityFilterBarProps {
   onExpChange: (e: string) => void;
   onClearFilters: () => void;
   totalCount: number;
+  selectedCountry: string;
+  onCountryChange: (country: string) => void;
 }
 
 export const OpportunityFilterBar: React.FC<OpportunityFilterBarProps> = ({
@@ -26,6 +28,8 @@ export const OpportunityFilterBar: React.FC<OpportunityFilterBarProps> = ({
   onExpChange,
   onClearFilters,
   totalCount,
+  selectedCountry,
+  onCountryChange,
 }) => {
   const types: (OpportunityType | 'All')[] = [
     'All',
@@ -36,6 +40,10 @@ export const OpportunityFilterBar: React.FC<OpportunityFilterBarProps> = ({
     'Scholarship',
     'Freelance',
     'Competition',
+    'Fellowship',
+    'Hackathon',
+    'Volunteering',
+    'Event',
   ];
 
   const workModes: (WorkMode | 'All')[] = ['All', 'Hybrid', 'Remote', 'On-site'];
@@ -47,13 +55,14 @@ export const OpportunityFilterBar: React.FC<OpportunityFilterBarProps> = ({
     'Mid Level',
     'Senior Level',
   ];
+  const countries = ['All', 'Egypt', 'Ethiopia', 'Ghana', 'Kenya', 'Nigeria', 'Rwanda', 'South Africa', 'Tanzania', 'Uganda'];
 
-  const hasActiveFilters = searchQuery !== '' || selectedType !== 'All' || selectedWorkMode !== 'All' || selectedExp !== 'All';
+  const hasActiveFilters = searchQuery !== '' || selectedType !== 'All' || selectedWorkMode !== 'All' || selectedExp !== 'All' || selectedCountry !== 'All';
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-card dark:shadow-card-dark space-y-4">
+    <div className="min-w-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-card dark:shadow-card-dark space-y-4">
       {/* Top row: Search input */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center">
+        <div className="flex min-w-0 flex-col sm:flex-row gap-3 items-center">
         <div className="relative flex-1 w-full">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
@@ -90,7 +99,7 @@ export const OpportunityFilterBar: React.FC<OpportunityFilterBarProps> = ({
       </div>
 
       {/* Filter Selectors */}
-      <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
+        <div className="flex min-w-0 flex-col md:flex-row gap-3 items-start md:items-center">
         {/* Type Filter Pills */}
         <div className="w-full overflow-x-auto pb-1 flex items-center gap-1.5 scrollbar-none">
           {types.map((type) => (
@@ -111,6 +120,12 @@ export const OpportunityFilterBar: React.FC<OpportunityFilterBarProps> = ({
 
       {/* Secondary dropdown row for Work Mode and Experience Level */}
       <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800 text-xs">
+        <label className="flex items-center gap-2">
+          <span className="font-semibold text-slate-400">Country:</span>
+          <select aria-label="Filter by country" value={selectedCountry} onChange={(event) => onCountryChange(event.target.value)} className="max-w-[10rem] rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+            {countries.map((country) => <option key={country} value={country}>{country}</option>)}
+          </select>
+        </label>
         <div className="flex items-center gap-2">
           <span className="font-semibold text-slate-400">Work Mode:</span>
           <select

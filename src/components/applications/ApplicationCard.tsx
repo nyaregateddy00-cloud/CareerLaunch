@@ -20,7 +20,7 @@ interface ApplicationCardProps {
   onDelete: (id: string) => void;
 }
 
-const STAGES: ApplicationStage[] = ['Saved', 'Applied', 'Shortlisted', 'Interview', 'Offer', 'Rejected'];
+const STAGES: ApplicationStage[] = ['Saved', 'Applied', 'Shortlisted', 'Assessment', 'Interview', 'Offer', 'Rejected', 'Withdrawn'];
 
 export const ApplicationCard: React.FC<ApplicationCardProps> = ({
   application,
@@ -31,7 +31,7 @@ export const ApplicationCard: React.FC<ApplicationCardProps> = ({
   const currentStageIndex = STAGES.indexOf(application.stage);
 
   const handleNextStage = () => {
-    if (currentStageIndex < STAGES.length - 2) { // don't auto-advance into rejected
+    if (currentStageIndex >= 0 && currentStageIndex < STAGES.length - 2) { // don't auto-advance into a terminal stage
       const nextStage = STAGES[currentStageIndex + 1];
       onUpdateStage(application.id, nextStage);
       if (nextStage === 'Offer' || nextStage === 'Interview') {

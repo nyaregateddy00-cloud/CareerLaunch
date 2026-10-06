@@ -19,14 +19,19 @@ export const AdminOpportunitiesPage: React.FC = () => {
   // Form states
   const [title, setTitle] = useState('');
   const [company, setCompany] = useState('');
-  const [location, setLocation] = useState('Nairobi, Kenya');
+  const [location, setLocation] = useState('');
+  const [country, setCountry] = useState('');
   const [type, setType] = useState<OpportunityType>('Job');
-  const [workMode, setWorkMode] = useState<WorkMode>('Hybrid');
-  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>('Entry Level');
+  const [workMode, setWorkMode] = useState<WorkMode | null>(null);
+  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>('All Levels');
   const [salaryRange, setSalaryRange] = useState('');
   const [deadline, setDeadline] = useState('');
   const [description, setDescription] = useState('');
   const [applicationUrl, setApplicationUrl] = useState('');
+  const [source, setSource] = useState('');
+  const [requirementsText, setRequirementsText] = useState('');
+  const [tagsText, setTagsText] = useState('');
+  const [status, setStatus] = useState<Opportunity['status']>('draft');
 
   const loadData = async () => {
     try {
@@ -43,14 +48,16 @@ export const AdminOpportunitiesPage: React.FC = () => {
     setEditingOpp(null);
     setTitle('');
     setCompany('');
-    setLocation('Nairobi, Kenya');
+    setLocation('');
+    setCountry('');
     setType('Job');
-    setWorkMode('Hybrid');
-    setExperienceLevel('Entry Level');
-    setSalaryRange('KES 120,000 / month');
+    setWorkMode(null);
+    setExperienceLevel('All Levels');
+    setSalaryRange('');
     setDeadline('');
     setDescription('');
     setApplicationUrl('');
+    setSource(''); setRequirementsText(''); setTagsText(''); setStatus('draft');
     setIsModalOpen(true);
   };
 
@@ -59,6 +66,7 @@ export const AdminOpportunitiesPage: React.FC = () => {
     setTitle(opp.title);
     setCompany(opp.company);
     setLocation(opp.location);
+    setCountry(opp.country);
     setType(opp.type);
     setWorkMode(opp.workMode || 'Hybrid');
     setExperienceLevel(opp.experienceLevel);
@@ -66,19 +74,20 @@ export const AdminOpportunitiesPage: React.FC = () => {
     setDeadline(opp.deadline || '');
     setDescription(opp.description);
     setApplicationUrl(opp.applicationUrl || '');
+    setSource(opp.source || ''); setRequirementsText(opp.requirements.join(', ')); setTagsText(opp.tags.join(', ')); setStatus(opp.status);
     setIsModalOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !company) return;
+    if (!title.trim() || !company.trim() || !location.trim() || !country.trim() || !source.trim()) return;
 
     const oppToSave: Opportunity = {
       id: editingOpp?.id || `opp-${Date.now()}`,
       title,
       company,
       location,
-      country: 'Kenya',
+      country,
       type,
       workMode,
       experienceLevel,
@@ -86,11 +95,11 @@ export const AdminOpportunitiesPage: React.FC = () => {
       currency: 'KES',
       deadline: deadline || undefined,
       description,
-      requirements: ['Proven motivation and foundational skills', 'Completed degree or continuing student'],
-      tags: [type, workMode, 'Kenya Tech'],
+      requirements: requirementsText.split(',').map((item) => item.trim()).filter(Boolean),
+      tags: tagsText.split(',').map((item) => item.trim()).filter(Boolean),
       applicationUrl: applicationUrl || undefined,
-      source: 'Admin Verified',
-      status: 'published',
+      source,
+      status,
       createdAt: editingOpp?.createdAt || new Date().toISOString(),
     };
 
@@ -129,9 +138,7 @@ export const AdminOpportunitiesPage: React.FC = () => {
             <Briefcase className="w-7 h-7 text-brand-green-500" />
             Opportunity Management ({opportunities.length})
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500">
-            Publish, edit, and moderate verified corporate roles and attachment intakes.
-          </p>
+          <p className="text-xs sm:text-sm text-slate-500">Manage opportunity listings. Confirm details with the original publisher before changing a draft to published.</p>
         </div>
 
         <Button size="sm" variant="accent" onClick={openAddModal} leftIcon={<Plus className="w-4 h-4" />}>
@@ -241,10 +248,11 @@ export const AdminOpportunitiesPage: React.FC = () => {
             <Input
               label="Location"
               required
-              placeholder="e.g. Nairobi, Kenya"
+              placeholder="City, region, remote, or specify in description"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
+            <Input label="Country" required placeholder="Country where this opportunity is available" value={country} onChange={(e) => setCountry(e.target.value)} />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -264,6 +272,10 @@ export const AdminOpportunitiesPage: React.FC = () => {
                 <option value="Scholarship">Scholarship</option>
                 <option value="Freelance">Freelance</option>
                 <option value="Competition">Competition</option>
+                <option value="Fellowship">Fellowship</option>
+                <option value="Hackathon">Hackathon</option>
+                <option value="Volunteering">Volunteering</option>
+                <option value="Event">Event</option>
               </select>
             </div>
 
@@ -273,9 +285,10 @@ export const AdminOpportunitiesPage: React.FC = () => {
               </label>
               <select
                 value={workMode}
-                onChange={(e) => setWorkMode(e.target.value as WorkMode)}
+                onChange={(e) => setWorkMode((e.target.value || null) as WorkMode | null)}
                 className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-xs focus:outline-none"
               >
+                <option value="">Not specified</option>
                 <option value="Hybrid">Hybrid</option>
                 <option value="Remote">Remote</option>
                 <option value="On-site">On-site</option>
@@ -295,6 +308,7 @@ export const AdminOpportunitiesPage: React.FC = () => {
                 <option value="Entry Level">Entry Level</option>
                 <option value="Mid Level">Mid Level</option>
                 <option value="Senior Level">Senior Level</option>
+                <option value="All Levels">All Levels / Not specified</option>
               </select>
             </div>
           </div>
@@ -321,6 +335,11 @@ export const AdminOpportunitiesPage: React.FC = () => {
             onChange={(e) => setApplicationUrl(e.target.value)}
           />
 
+          <Input label="Original source / publisher" required placeholder="Employer careers page, scholarship provider, event organizer…" value={source} onChange={(e) => setSource(e.target.value)} />
+
+          <Textarea label="Requirements (comma-separated)" rows={2} value={requirementsText} onChange={(e) => setRequirementsText(e.target.value)} placeholder="Enter only requirements stated by the original publisher" />
+          <Input label="Tags (comma-separated)" value={tagsText} onChange={(e) => setTagsText(e.target.value)} placeholder="Optional search tags" />
+
           <Textarea
             label="Description & Responsibilities"
             rows={4}
@@ -329,12 +348,14 @@ export const AdminOpportunitiesPage: React.FC = () => {
             onChange={(e) => setDescription(e.target.value)}
           />
 
+          <div><label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Listing status</label><select value={status} onChange={(event) => setStatus(event.target.value as Opportunity['status'])} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900"><option value="draft">Draft — not visible to candidates</option><option value="published">Published — visible in the catalog</option><option value="closed">Closed</option></select></div>
+
           <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
             <Button type="submit" variant="primary">
-              {editingOpp ? 'Save Changes' : 'Publish Opportunity'}
+              {editingOpp ? 'Save Changes' : status === 'published' ? 'Publish listing' : 'Save draft'}
             </Button>
           </div>
         </form>

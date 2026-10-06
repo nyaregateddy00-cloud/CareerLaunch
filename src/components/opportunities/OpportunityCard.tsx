@@ -2,12 +2,13 @@ import React from 'react';
 import { Bookmark, MapPin, Calendar, Building2, ArrowUpRight } from 'lucide-react';
 import { Opportunity } from '../../types';
 import { Badge } from '../common/Badge';
-import { formatDate } from '../../lib/utils';
+import { formatDate, safeExternalUrl } from '../../lib/utils';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
   isSaved?: boolean;
   matchScore?: number;
+  matchedSkills?: string[];
   onToggleSave?: (id: string) => void;
   onSelect: (opportunity: Opportunity) => void;
 }
@@ -16,6 +17,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
   opportunity,
   isSaved = false,
   matchScore,
+  matchedSkills = [],
   onToggleSave,
   onSelect,
 }) => {
@@ -53,7 +55,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
               </Badge>
             )}
             {typeof matchScore === 'number' && (
-              <Badge variant="green" size="sm">{matchScore}% match</Badge>
+              <Badge variant="green" size="sm">Profile estimate {matchScore}/100</Badge>
             )}
           </div>
 
@@ -76,9 +78,9 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
 
         {/* Company & Title */}
         <div className="flex items-start gap-3.5 mb-3">
-          {opportunity.companyLogo ? (
+          {safeExternalUrl(opportunity.companyLogo) ? (
             <img
-              src={opportunity.companyLogo}
+              src={safeExternalUrl(opportunity.companyLogo)}
               alt={opportunity.company}
               className="w-12 h-12 rounded-xl object-cover border border-slate-200/80 dark:border-slate-700 flex-shrink-0"
             />
@@ -103,6 +105,8 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
           </div>
         </div>
 
+        {typeof matchScore === 'number' && <p className="mb-3 text-[10px] leading-4 text-slate-500">Text-based estimate from your saved profile and listing details; not an employer decision.{matchedSkills.length > 0 ? ` Skill overlap: ${matchedSkills.slice(0, 3).join(', ')}.` : ''}</p>}
+
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5 mb-4">
           {opportunity.tags.slice(0, 3).map((tag, idx) => (
@@ -122,7 +126,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
       {/* Card Footer: Compensation & Deadline */}
       <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
         <div className="font-semibold text-brand-green-700 dark:text-brand-green-400 truncate max-w-[170px]">
-          {opportunity.salaryRange || 'Competitive Stipend'}
+          {opportunity.salaryRange || 'Compensation not listed'}
         </div>
 
         <div className="flex items-center gap-1 text-slate-400 text-[11px]">

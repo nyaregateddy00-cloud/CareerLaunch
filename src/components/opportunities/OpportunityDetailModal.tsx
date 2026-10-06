@@ -5,15 +5,13 @@ import {
   Building2,
   ExternalLink,
   Bookmark,
-  CheckCircle2,
-  Sparkles,
   Layers
 } from 'lucide-react';
 import { Opportunity } from '../../types';
 import { Modal } from '../common/Modal';
 import { Badge } from '../common/Badge';
 import { Button } from '../common/Button';
-import { formatDate, fireCelebrationConfetti } from '../../lib/utils';
+import { formatDate, fireCelebrationConfetti, safeExternalUrl } from '../../lib/utils';
 import { mockStorage } from '../../lib/mockStorage';
 import { useAuth } from '../../context/AuthContext';
 
@@ -103,9 +101,9 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
         {/* Highlights: Compensation, Deadline, Source */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-850/60 border border-slate-100 dark:border-slate-800">
           <div>
-            <div className="text-[11px] font-medium text-slate-400 uppercase">Estimated Compensation</div>
+            <div className="text-[11px] font-medium text-slate-400 uppercase">Compensation</div>
             <div className="text-sm font-bold text-brand-green-600 dark:text-brand-green-400 mt-0.5">
-              {opportunity.salaryRange || 'Competitive Stipend'}
+              {opportunity.salaryRange || 'Not listed'}
             </div>
           </div>
           <div>
@@ -116,9 +114,8 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             </div>
           </div>
           <div>
-            <div className="text-[11px] font-medium text-slate-400 uppercase">Source Verification</div>
+            <div className="text-[11px] font-medium text-slate-400 uppercase">Source</div>
             <div className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-brand-green-500" />
               {opportunity.source}
             </div>
           </div>
@@ -179,9 +176,9 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           </Button>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            {opportunity.applicationUrl && (
+            {safeExternalUrl(opportunity.applicationUrl) && (
               <a
-                href={opportunity.applicationUrl}
+                href={safeExternalUrl(opportunity.applicationUrl)}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full sm:w-auto"

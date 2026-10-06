@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
+  Route,
   Search,
   Kanban,
   FileText,
@@ -17,23 +18,38 @@ import {
   Briefcase,
   BarChart3,
   ArrowUpRight,
-  Bell
+  Bell,
+  Target,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { BrandLogo } from '../branding/BrandLogo';
 import { prefetchRoute } from '../../lib/routePreload';
+import { calculateProfileStrength, getInitials } from '../../lib/utils';
+import { mockStorage } from '../../lib/mockStorage';
 
 export const Sidebar: React.FC = () => {
   const { user, isAdmin } = useAuth();
+  const [workspaceRevision, setWorkspaceRevision] = useState(0);
+
+  useEffect(() => {
+    const refreshProgress = () => setWorkspaceRevision((revision) => revision + 1);
+    window.addEventListener('careerlaunch_storage_change', refreshProgress);
+    return () => window.removeEventListener('careerlaunch_storage_change', refreshProgress);
+  }, []);
 
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { label: 'Career Roadmap', path: '/career-roadmap', icon: Route },
     { label: 'Find Opportunities', path: '/app/opportunities', icon: Search },
     { label: 'Application Tracker', path: '/applications', icon: Kanban },
     { label: 'CV Builder', path: '/cv-builder', icon: FileText },
     { label: 'Portfolio Builder', path: '/portfolio-builder', icon: Globe },
     { label: 'Skills & Gaps', path: '/skills', icon: Sparkles },
     { label: 'CareerLaunch AI', path: '/ai-assistant', icon: Bot, isHighlight: true },
+    { label: 'Interview Arena', path: '/interview-arena', icon: Target },
+    { label: 'Career Analytics', path: '/career-analytics', icon: BarChart3 },
+    { label: 'Community', path: '/community', icon: MessageCircle },
     { label: 'Saved Opportunities', path: '/saved-opportunities', icon: Bookmark },
     { label: 'Learning & Playbooks', path: '/learning', icon: BookOpen },
     { label: 'Notifications', path: '/notifications', icon: Bell },
@@ -49,7 +65,14 @@ export const Sidebar: React.FC = () => {
     { label: 'Platform Analytics', path: '/admin/analytics', icon: BarChart3 },
   ];
 
-  const strength = user?.profileStrength || 75;
+  const strength = useMemo(() => {
+    if (!user) return 0;
+    const skills = mockStorage.getUserSkills().filter((item) => item.userId === user.id);
+    const experience = mockStorage.getExperience().filter((item) => item.userId === user.id);
+    const education = mockStorage.getEducation().filter((item) => item.userId === user.id);
+    const projects = mockStorage.getProjects().filter((item) => item.userId === user.id);
+    return calculateProfileStrength(user, skills, experience, education, projects).score;
+  }, [user, workspaceRevision]);
 
   return (
     <aside className="w-64 flex-shrink-0 hidden md:flex flex-col border-r border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 min-h-[calc(100vh-4rem)] p-4 select-none">
@@ -58,11 +81,17 @@ export const Sidebar: React.FC = () => {
       {user && (
         <div className="mb-5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <img
-              src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
-              alt={user.fullName}
-              className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
-            />
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt=""
+                className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
+              />
+            ) : (
+              <span aria-hidden="true" className="w-10 h-10 rounded-xl border border-brand-blue-100 bg-brand-blue-50 text-brand-blue-800 dark:border-slate-700 dark:bg-slate-800 dark:text-brand-green-300 grid place-items-center text-xs font-bold">
+                {getInitials(user.fullName)}
+              </span>
+            )}
             <div className="min-w-0 flex-1">
               <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">{user.fullName}</h4>
               <p className="text-[11px] text-slate-500 capitalize truncate">{user.role.replace('_', ' ')}</p>
