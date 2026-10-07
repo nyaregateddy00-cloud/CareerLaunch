@@ -181,7 +181,10 @@ export type OpportunityType =
   | 'Fellowship'
   | 'Hackathon'
   | 'Volunteering'
-  | 'Event';
+  | 'Event'
+  | 'Apprenticeship'
+  | 'Training'
+  | 'Entrepreneurship';
 
 export type WorkMode = 'On-site' | 'Hybrid' | 'Remote';
 
@@ -291,6 +294,24 @@ export interface InterviewPracticeSession {
   answer: string;
   feedback: string;
   createdAt: string;
+  sourceUrl?: string;
+  sourceAttributions?: string[];
+  discoveredAt?: string;
+  postedAt?: string;
+  descriptionSummary?: string;
+  lastCheckedAt?: string;
+  verificationStatus?: 'pending' | 'verified' | 'needs_review' | 'expired' | 'rejected';
+  qualityScore?: number;
+  aiProcessedAt?: string;
+  whyThisMatters?: string;
+  reviewNote?: string;
+  educationRequirements?: string[];
+  isRolling?: boolean;
+  region?: string;
+  employmentType?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  updatedAt?: string;
 }
 
 export interface UserPreferences {

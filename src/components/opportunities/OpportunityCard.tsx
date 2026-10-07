@@ -9,6 +9,8 @@ interface OpportunityCardProps {
   isSaved?: boolean;
   matchScore?: number;
   matchedSkills?: string[];
+  matchExplanation?: string;
+  potentialGaps?: string[];
   onToggleSave?: (id: string) => void;
   onSelect: (opportunity: Opportunity) => void;
 }
@@ -18,6 +20,8 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
   isSaved = false,
   matchScore,
   matchedSkills = [],
+  matchExplanation,
+  potentialGaps = [],
   onToggleSave,
   onSelect,
 }) => {
@@ -54,8 +58,14 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
                 {opportunity.workMode}
               </Badge>
             )}
+            {opportunity.verificationStatus === 'verified' && (
+              <Badge variant="green" size="sm">Verified source</Badge>
+            )}
+            {opportunity.aiProcessedAt && (
+              <Badge variant="outline" size="sm">AI processed</Badge>
+            )}
             {typeof matchScore === 'number' && (
-              <Badge variant="green" size="sm">Profile estimate {matchScore}/100</Badge>
+              <Badge variant="green" size="sm">CareerLaunch Match {matchScore}%</Badge>
             )}
           </div>
 
@@ -105,7 +115,8 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
           </div>
         </div>
 
-        {typeof matchScore === 'number' && <p className="mb-3 text-[10px] leading-4 text-slate-500">Text-based estimate from your saved profile and listing details; not an employer decision.{matchedSkills.length > 0 ? ` Skill overlap: ${matchedSkills.slice(0, 3).join(', ')}.` : ''}</p>}
+        {typeof matchScore === 'number' && <p className="mb-3 text-[10px] leading-4 text-slate-500">{matchExplanation || 'Heuristic profile estimate, not an employer decision.'} {!matchedSkills.length && 'Based on saved profile details and listing text.'}</p>}
+        {potentialGaps.length > 0 && <p className="-mt-2 mb-3 text-[10px] leading-4 text-amber-700 dark:text-amber-300">Check against your profile: {potentialGaps[0]}</p>}
 
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5 mb-4">
@@ -139,6 +150,11 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
           <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
         </div>
       </div>
+      <div className="mt-2 flex items-center justify-between gap-2 text-[10px] text-slate-400">
+        <span className="truncate">Source: {opportunity.source || 'Not provided'}</span>
+        <span className="shrink-0">{opportunity.verificationStatus === 'verified' ? 'Verified by staff' : opportunity.aiProcessedAt ? 'AI processed · unverified' : 'Not verified'}</span>
+      </div>
+      {opportunity.postedAt && <p className="mt-1 text-[10px] text-slate-400">Posted {formatDate(opportunity.postedAt)}</p>}
     </div>
   );
 };

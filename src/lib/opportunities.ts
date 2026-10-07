@@ -35,6 +35,24 @@ function mapOpportunityRow(row: OpportunityRow): Opportunity {
     source: row.source ?? 'Employer listing',
     status: row.status as Opportunity['status'],
     createdAt: String(row.created_at ?? new Date().toISOString()),
+    updatedAt: row.updated_at ? String(row.updated_at) : undefined,
+    sourceUrl: row.source_url ?? undefined,
+    sourceAttributions: Array.isArray(row.source_attributions) ? row.source_attributions : [],
+    discoveredAt: row.discovered_at ?? undefined,
+    postedAt: row.posted_at ?? undefined,
+    descriptionSummary: row.description_summary ?? undefined,
+    lastCheckedAt: row.last_checked_at ?? undefined,
+    verificationStatus: row.verification_status ?? undefined,
+    qualityScore: typeof row.quality_score === 'number' ? row.quality_score : undefined,
+    aiProcessedAt: row.ai_processed_at ?? undefined,
+    whyThisMatters: row.why_this_matters ?? undefined,
+    reviewNote: row.review_note ?? undefined,
+    educationRequirements: Array.isArray(row.education_requirements) ? row.education_requirements : [],
+    isRolling: Boolean(row.is_rolling),
+    region: row.region ?? undefined,
+    employmentType: row.employment_type ?? undefined,
+    salaryMin: typeof row.salary_min === 'number' ? row.salary_min : undefined,
+    salaryMax: typeof row.salary_max === 'number' ? row.salary_max : undefined,
   };
 }
 
@@ -59,6 +77,24 @@ function toOpportunityRow(opportunity: Opportunity): OpportunityRow {
     source: opportunity.source,
     status: opportunity.status,
   };
+  if (opportunity.updatedAt !== undefined) row.updated_at = opportunity.updatedAt;
+  if (opportunity.sourceUrl !== undefined) row.source_url = opportunity.sourceUrl;
+  if (opportunity.sourceAttributions !== undefined) row.source_attributions = opportunity.sourceAttributions;
+  if (opportunity.discoveredAt !== undefined) row.discovered_at = opportunity.discoveredAt;
+  if (opportunity.postedAt !== undefined) row.posted_at = opportunity.postedAt;
+  if (opportunity.descriptionSummary !== undefined) row.description_summary = opportunity.descriptionSummary;
+  if (opportunity.lastCheckedAt !== undefined) row.last_checked_at = opportunity.lastCheckedAt;
+  if (opportunity.verificationStatus !== undefined) row.verification_status = opportunity.verificationStatus;
+  if (opportunity.qualityScore !== undefined) row.quality_score = opportunity.qualityScore;
+  if (opportunity.aiProcessedAt !== undefined) row.ai_processed_at = opportunity.aiProcessedAt;
+  if (opportunity.whyThisMatters !== undefined) row.why_this_matters = opportunity.whyThisMatters;
+  if (opportunity.reviewNote !== undefined) row.review_note = opportunity.reviewNote;
+  if (opportunity.educationRequirements !== undefined) row.education_requirements = opportunity.educationRequirements;
+  if (opportunity.isRolling !== undefined) row.is_rolling = opportunity.isRolling;
+  if (opportunity.region !== undefined) row.region = opportunity.region;
+  if (opportunity.employmentType !== undefined) row.employment_type = opportunity.employmentType;
+  if (opportunity.salaryMin !== undefined) row.salary_min = opportunity.salaryMin;
+  if (opportunity.salaryMax !== undefined) row.salary_max = opportunity.salaryMax;
   // New browser-demo IDs are not UUIDs; let PostgreSQL generate a valid id.
   if (!/^opp-\d+$/.test(opportunity.id)) row.id = opportunity.id;
   return row;
@@ -158,6 +194,9 @@ export async function deleteOpportunity(id: string): Promise<void> {
 export interface OpportunityMatch {
   score: number;
   matchedSkills: string[];
+  explanation: string;
+  potentialGaps: string[];
+  breakdown: { skills: number; careerFocus: number; location: number };
 }
 
 const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9+#.]+/g, ' ').trim();
@@ -200,7 +239,23 @@ export function matchOpportunityToProfile(opportunity: Opportunity, user: UserPr
   // inflated match percentage from a single available signal (for example,
   // location alone). The visible score reflects all three match dimensions.
   const earned = skillScore + roleScore + (user.location ? locationScore : 0);
-  return { score: Math.max(0, Math.min(100, Math.round(earned))), matchedSkills };
+  const potentialGaps = opportunity.requirements
+    .filter((requirement) => requirement.length > 4 && !roleText.includes(normalize(requirement)) && !matchedSkills.some((skill) => normalize(requirement).includes(normalize(skill))))
+    .slice(0, 3);
+  const explanation = matchedSkills.length
+    ? `Related skills in your profile: ${matchedSkills.slice(0, 3).join(', ')}.`
+    : roleScore > 0
+      ? 'The role overlaps with your saved headline, education, or experience.'
+      : user.location && locationScore > 0
+        ? 'The listing location or work mode fits the location in your profile.'
+        : 'Add more skills and career details to improve this estimate.';
+  return {
+    score: Math.max(0, Math.min(100, Math.round(earned))),
+    matchedSkills,
+    explanation,
+    potentialGaps,
+    breakdown: { skills: Math.round(skillScore), careerFocus: Math.round(roleScore), location: user.location ? Math.round(locationScore) : 0 },
+  };
 }
 
 export function rankOpportunitiesForProfile(opportunities: Opportunity[], user: UserProfile | null): Opportunity[] {

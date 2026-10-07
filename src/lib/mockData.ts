@@ -55,7 +55,7 @@ export const INITIAL_USER_AMINA: UserProfile = {
 
 export const INITIAL_USER_ADMIN: UserProfile = {
   id: 'usr-admin-003',
-  email: 'admin@careerlaunch.co.ke',
+    email: 'nyaregat@gmail.com',
   fullName: 'Sarah Kipchoge',
   headline: 'Platform Administrator & Talent Partnerships Director',
   bio: 'Overseeing corporate partnerships with tech hubs, universities, and enterprise recruiters across East and West Africa.',

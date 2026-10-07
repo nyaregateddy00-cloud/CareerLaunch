@@ -36,3 +36,29 @@ The Vercel function at `/api/career-ai` verifies the signed-in Supabase session,
 - Community posts/replies require the community foundation migration; reporting and admin hide actions require the later moderation migration. Community text is visible only to signed-in users, and report records are private to their reporter and admins.
 - Pricing is a non-purchasable preview. Subscriptions, checkout, SMS/email delivery, and payment integrations are not enabled. Notification preferences can be saved, but delivery services must be configured separately.
 - Google OAuth requires the external Google Cloud and Supabase settings above; code alone cannot provision OAuth credentials or change those dashboards.
+# Opportunity Intelligence and Career Playbooks
+
+CareerLaunch keeps the existing `opportunities` table and public/admin opportunity pages. The new migration adds source lineage, a deduplication fingerprint, review status, quality metadata, saved searches, playbook progress, source configuration, and sync-run records:
+
+```text
+supabase/migrations/20261007100000_opportunity_intelligence_playbooks.sql
+```
+
+Apply the migration to the existing Supabase project before enabling account-synced playbook progress, saved searches, verification metadata, or the scheduled feed sync. Existing opportunity IDs and application references are retained. New source-fed listings are saved as `draft` and require administrator review before publication. Publishing a listing emits an in-app notification to users whose saved searches match. Email and push delivery are not configured.
+
+## Opportunity feed sync
+
+The server-only endpoint is `GET/POST /api/opportunities/sync`. It supports RSS and Atom feeds through a source adapter, limits each feed to 100 entries and 2 MB, rejects non-HTTPS/private-host feed URLs, uses source ID plus a normalized title/organization/location/deadline fingerprint for deduplication, and isolates failures by source. It expires published dated listings while retaining their records. It does not scrape job boards or bypass access controls.
+
+Configure these server-side variables in Vercel (never use the `VITE_` prefix for secrets):
+
+* `SUPABASE_URL` (or the existing `VITE_SUPABASE_URL`) and `SUPABASE_SERVICE_ROLE_KEY` for the trusted ingestion job.
+* `CRON_SECRET` to authorize Vercel's daily 06:00 UTC schedule. The endpoint also accepts `OPPORTUNITY_SYNC_SECRET` for a manual authenticated POST; the two values may be the same.
+* `OPPORTUNITY_FEEDS_JSON` as a JSON array of permitted feeds. Each object requires `key`, `name`, `url`, `attribution`, and `redistributionPermitted: true`; `country`, `category`, and `enabled` are optional. Do not configure a feed unless its terms permit automated retrieval and display, and only set a country when that scope is explicit.
+* Optional `OPPORTUNITY_AI_ENRICH_LIMIT` (default `0`, maximum `5`) to cap server-side AI enrichment per sync. AI output is separately labelled and does not verify a listing. It uses the existing `CAREER_AI_*` or `GEMINI_*` provider configuration.
+
+No live opportunity source is configured by default. With `OPPORTUNITY_FEEDS_JSON` unset or `[]`, the endpoint reports `liveSourcesConfigured: false`; existing manually managed listings continue to work. A Vercel schedule can be enabled after secrets, the Supabase migration, and at least one permitted source are configured.
+
+## Career Playbooks
+
+The 25 authored, task-based journeys are defined in `src/data/playbooks.ts` and served at `/playbooks` and `/playbooks/:slug` inside the existing authenticated application shell. Progress is stored per user in `user_playbook_progress` (with a browser-local fallback if Supabase is unavailable). “Personalize with CareerLaunch AI” is an explicit, user-initiated call to the existing authenticated `/api/career-ai` endpoint; the user's saved skills and education are sent only for that request. Opportunity links reuse the existing catalog and application tracker.

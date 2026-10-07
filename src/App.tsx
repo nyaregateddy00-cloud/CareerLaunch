@@ -40,6 +40,8 @@ const LearningPage = lazy(() => import('./pages/user/LearningPage').then((module
 const AICareerAssistantPage = lazy(() => import('./pages/user/AICareerAssistantPage').then((module) => ({ default: module.AICareerAssistantPage })));
 const InterviewArenaPage = lazy(() => import('./pages/user/InterviewArenaPage').then((module) => ({ default: module.InterviewArenaPage })));
 const CareerAnalyticsPage = lazy(() => import('./pages/user/CareerAnalyticsPage').then((module) => ({ default: module.CareerAnalyticsPage })));
+const PlaybooksPage = lazy(() => import('./pages/user/PlaybooksPage').then((module) => ({ default: module.PlaybooksPage })));
+const PlaybookDetailPage = lazy(() => import('./pages/user/PlaybookDetailPage').then((module) => ({ default: module.PlaybookDetailPage })));
 const CommunityPage = lazy(() => import('./pages/user/CommunityPage').then((module) => ({ default: module.CommunityPage })));
 const NotificationsPage = lazy(() => import('./pages/user/NotificationsPage').then((module) => ({ default: module.NotificationsPage })));
 const SettingsPage = lazy(() => import('./pages/user/SettingsPage').then((module) => ({ default: module.SettingsPage })));
@@ -95,6 +97,8 @@ export function App() {
                   <Route path="/ai-assistant" element={routeView(<AICareerAssistantPage />)} />
                   <Route path="/interview-arena" element={routeView(<InterviewArenaPage />)} />
                   <Route path="/career-analytics" element={routeView(<CareerAnalyticsPage />)} />
+                  <Route path="/playbooks" element={routeView(<PlaybooksPage />)} />
+                  <Route path="/playbooks/:slug" element={routeView(<PlaybookDetailPage />)} />
                   <Route path="/community" element={routeView(<CommunityPage />)} />
                   <Route path="/notifications" element={routeView(<NotificationsPage />)} />
                   <Route path="/settings" element={routeView(<SettingsPage />)} />

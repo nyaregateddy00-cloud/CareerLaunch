@@ -32,6 +32,7 @@ export const AdminOpportunitiesPage: React.FC = () => {
   const [requirementsText, setRequirementsText] = useState('');
   const [tagsText, setTagsText] = useState('');
   const [status, setStatus] = useState<Opportunity['status']>('draft');
+  const [verificationStatus, setVerificationStatus] = useState<NonNullable<Opportunity['verificationStatus']>>('pending');
 
   const loadData = async () => {
     try {
@@ -57,7 +58,7 @@ export const AdminOpportunitiesPage: React.FC = () => {
     setDeadline('');
     setDescription('');
     setApplicationUrl('');
-    setSource(''); setRequirementsText(''); setTagsText(''); setStatus('draft');
+    setSource(''); setRequirementsText(''); setTagsText(''); setStatus('draft'); setVerificationStatus('pending');
     setIsModalOpen(true);
   };
 
@@ -74,7 +75,7 @@ export const AdminOpportunitiesPage: React.FC = () => {
     setDeadline(opp.deadline || '');
     setDescription(opp.description);
     setApplicationUrl(opp.applicationUrl || '');
-    setSource(opp.source || ''); setRequirementsText(opp.requirements.join(', ')); setTagsText(opp.tags.join(', ')); setStatus(opp.status);
+    setSource(opp.source || ''); setRequirementsText(opp.requirements.join(', ')); setTagsText(opp.tags.join(', ')); setStatus(opp.status); setVerificationStatus(opp.verificationStatus || 'pending');
     setIsModalOpen(true);
   };
 
@@ -101,6 +102,24 @@ export const AdminOpportunitiesPage: React.FC = () => {
       source,
       status,
       createdAt: editingOpp?.createdAt || new Date().toISOString(),
+      ...(editingOpp ? {
+        sourceUrl: editingOpp.sourceUrl,
+        sourceAttributions: editingOpp.sourceAttributions,
+        discoveredAt: editingOpp.discoveredAt,
+        lastCheckedAt: editingOpp.lastCheckedAt,
+        verificationStatus,
+        qualityScore: editingOpp.qualityScore,
+        aiProcessedAt: editingOpp.aiProcessedAt,
+        whyThisMatters: editingOpp.whyThisMatters,
+        reviewNote: editingOpp.reviewNote,
+        educationRequirements: editingOpp.educationRequirements,
+        isRolling: editingOpp.isRolling,
+        region: editingOpp.region,
+        employmentType: editingOpp.employmentType,
+        salaryMin: editingOpp.salaryMin,
+        salaryMax: editingOpp.salaryMax,
+        updatedAt: new Date().toISOString(),
+      } : { verificationStatus }),
     };
 
     try {
@@ -179,7 +198,7 @@ export const AdminOpportunitiesPage: React.FC = () => {
                 <tr key={opp.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-850/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="font-bold text-slate-900 dark:text-white">{opp.title}</div>
-                    <div className="text-[11px] text-slate-400">{opp.location}</div>
+                    <div className="text-[11px] text-slate-400">{opp.location} · {opp.verificationStatus || 'pending review'}</div>
                   </td>
                   <td className="px-6 py-4 font-semibold text-slate-800 dark:text-slate-200">
                     {opp.company}
@@ -349,6 +368,7 @@ export const AdminOpportunitiesPage: React.FC = () => {
           />
 
           <div><label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Listing status</label><select value={status} onChange={(event) => setStatus(event.target.value as Opportunity['status'])} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900"><option value="draft">Draft — not visible to candidates</option><option value="published">Published — visible in the catalog</option><option value="closed">Closed</option></select></div>
+          <div><label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">Source verification</label><select value={verificationStatus} onChange={(event) => setVerificationStatus(event.target.value as NonNullable<Opportunity['verificationStatus']>)} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs dark:border-slate-700 dark:bg-slate-900"><option value="pending">Pending</option><option value="verified">Verified — source checked by staff</option><option value="needs_review">Needs review</option><option value="rejected">Rejected</option><option value="expired">Expired</option></select><p className="mt-1 text-[10px] text-slate-500">AI processing does not verify an employer or listing.</p></div>
 
           <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
             <Button type="button" variant="secondary" onClick={() => setIsModalOpen(false)}>

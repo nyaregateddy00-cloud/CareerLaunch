@@ -110,7 +110,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             <div className="text-[11px] font-medium text-slate-400 uppercase">Application Deadline</div>
             <div className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-0.5 flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5 text-slate-400" />
-              {opportunity.deadline ? formatDate(opportunity.deadline) : 'Rolling Basis'}
+              {opportunity.deadline ? formatDate(opportunity.deadline) : opportunity.isRolling ? 'Rolling basis' : 'Not provided'}
             </div>
           </div>
           <div>
@@ -120,6 +120,15 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
             </div>
           </div>
         </div>
+
+        {(opportunity.whyThisMatters || opportunity.descriptionSummary) && <div className="rounded-xl border border-brand-green-200 bg-brand-green-50/70 p-4 dark:border-brand-green-900 dark:bg-brand-green-950/20"><p className="text-[11px] font-bold uppercase tracking-wider text-brand-green-800 dark:text-brand-green-300">{opportunity.whyThisMatters ? 'Why this may matter' : 'Listing summary'}</p><p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-300">{opportunity.whyThisMatters || opportunity.descriptionSummary}</p><p className="mt-1 text-[10px] text-slate-500">AI assisted summary · source details still need verification</p></div>}
+
+        <p className="text-[11px] leading-5 text-slate-500">
+          {opportunity.verificationStatus === 'verified' ? 'Source checked by CareerLaunch staff.' : 'This listing has not been verified by CareerLaunch staff.'}
+          {opportunity.aiProcessedAt ? ' AI processed is separate from source verification.' : ''}
+          {opportunity.lastCheckedAt ? ` Last checked ${formatDate(opportunity.lastCheckedAt)}.` : ''}
+          {opportunity.sourceAttributions?.length ? ` Also listed by ${opportunity.sourceAttributions.filter((source) => source !== opportunity.source).join(', ') || 'this source'}.` : ''}
+        </p>
 
         {/* Description */}
         <div>
@@ -176,9 +185,9 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
           </Button>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            {safeExternalUrl(opportunity.applicationUrl) && (
+            {safeExternalUrl(opportunity.applicationUrl || opportunity.sourceUrl) && (
               <a
-                href={safeExternalUrl(opportunity.applicationUrl)}
+                href={safeExternalUrl(opportunity.applicationUrl || opportunity.sourceUrl)}
                 target="_blank"
                 rel="noreferrer"
                 className="w-full sm:w-auto"
@@ -189,7 +198,7 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
                   rightIcon={<ExternalLink className="w-4 h-4" />}
                   className="w-full sm:w-auto"
                 >
-                  Apply on Employer Site
+                  {opportunity.applicationUrl ? 'Apply on Employer Site' : 'View Original Source'}
                 </Button>
               </a>
             )}

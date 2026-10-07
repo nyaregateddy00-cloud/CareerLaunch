@@ -12,6 +12,7 @@ import {
   Calendar,
   Compass,
   Target,
+  BookOpen,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { mockStorage } from '../../lib/mockStorage';
@@ -84,6 +85,10 @@ export const DashboardPage: React.FC = () => {
   const recommendedOpps = useMemo(() => user
     ? rankOpportunitiesForProfile(publishedOpps, user).slice(0, 2)
     : publishedOpps.slice(0, 2), [publishedOpps, user]);
+
+  const recommendedMatches = useMemo(() => new Map(
+    recommendedOpps.map((opportunity) => [opportunity.id, matchOpportunityToProfile(opportunity, user)])
+  ), [recommendedOpps, user]);
 
   const upcomingInterviews = useMemo(() => applications
     .filter((application) => application.stage === 'Interview' && application.interviewDate && new Date(application.interviewDate).getTime() >= Date.now())
@@ -238,6 +243,13 @@ export const DashboardPage: React.FC = () => {
         </Link>
       </div>
 
+      <Link to="/playbooks" className="block rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-blue-500">
+        <Card hoverEffect className="flex flex-col gap-4 border border-brand-blue-100 p-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3.5"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-blue-50 text-brand-blue-700 dark:bg-brand-blue-950 dark:text-brand-green-300"><BookOpen className="h-5 w-5" /></span><div><p className="text-[10px] font-bold uppercase tracking-[.13em] text-brand-blue-700 dark:text-brand-green-300">Career Intelligence</p><h2 className="mt-1 text-sm font-bold text-slate-900 dark:text-white">Build momentum with a Career Playbook</h2><p className="mt-1 text-xs text-slate-500">Follow practical tasks, track your progress, and connect your next steps to opportunities.</p></div></div>
+          <span className="inline-flex shrink-0 items-center gap-2 text-xs font-bold text-brand-blue-700 dark:text-brand-green-300">Explore playbooks <ArrowRight className="h-4 w-4" /></span>
+        </Card>
+      </Link>
+
       {/* Main Grid: Left = Recommended Opps, Right = Upcoming Milestones & Deadlines */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recommended Opportunities */}
@@ -263,7 +275,10 @@ export const DashboardPage: React.FC = () => {
                 <OpportunityCard
                   key={opp.id}
                   opportunity={opp}
-                  matchScore={user ? matchOpportunityToProfile(opp, user)?.score : undefined}
+                  matchScore={recommendedMatches.get(opp.id)?.score}
+                  matchedSkills={recommendedMatches.get(opp.id)?.matchedSkills}
+                  matchExplanation={recommendedMatches.get(opp.id)?.explanation}
+                  potentialGaps={recommendedMatches.get(opp.id)?.potentialGaps}
                   isSaved={savedOppIds.includes(opp.id)}
                   onToggleSave={handleToggleSave}
                   onSelect={(o) => setSelectedOpp(o)}

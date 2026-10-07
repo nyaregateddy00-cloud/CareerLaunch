@@ -41,6 +41,7 @@ export const Sidebar: React.FC = () => {
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Career Roadmap', path: '/career-roadmap', icon: Route },
+    { label: 'Career Playbooks', path: '/playbooks', icon: BookOpen },
     { label: 'Find Opportunities', path: '/app/opportunities', icon: Search },
     { label: 'Application Tracker', path: '/applications', icon: Kanban },
     { label: 'CV Builder', path: '/cv-builder', icon: FileText },

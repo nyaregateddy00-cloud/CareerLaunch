@@ -16,5 +16,8 @@
       "source": "/:path((?!api/).*)",
       "destination": "/index.html"
     }
+  ],
+  "crons": [
+    { "path": "/api/opportunities/sync", "schedule": "0 6 * * *" }
   ]
 }

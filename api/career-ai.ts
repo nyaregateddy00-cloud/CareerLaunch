@@ -95,6 +95,15 @@ async function callGemini(prompt: string, history: ChatMessage[], system: string
   return answer;
 }
 
+/** Shared server-side provider bridge for other trusted CareerLaunch jobs. */
+export async function generateCareerCompletion(prompt: string, system: string): Promise<string> {
+  const openAIConfigured = Boolean(process.env.CAREER_AI_API_URL && process.env.CAREER_AI_API_KEY && process.env.CAREER_AI_MODEL);
+  const geminiConfigured = Boolean(process.env.GEMINI_API_KEY);
+  if (openAIConfigured) return callOpenAICompatible(prompt, [], system);
+  if (geminiConfigured) return callGemini(prompt, [], system);
+  throw new Error('CareerLaunch AI provider is not configured.');
+}
+
 export default async function handler(req: ApiRequest, res: ApiResponse): Promise<void> {
   const openAIConfigured = Boolean(process.env.CAREER_AI_API_URL && process.env.CAREER_AI_API_KEY && process.env.CAREER_AI_MODEL);
   const geminiConfigured = Boolean(process.env.GEMINI_API_KEY);

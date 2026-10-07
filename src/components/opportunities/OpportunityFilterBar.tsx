@@ -15,6 +15,7 @@ interface OpportunityFilterBarProps {
   totalCount: number;
   selectedCountry: string;
   onCountryChange: (country: string) => void;
+  additionalCountries?: string[];
 }
 
 export const OpportunityFilterBar: React.FC<OpportunityFilterBarProps> = ({
@@ -30,6 +31,7 @@ export const OpportunityFilterBar: React.FC<OpportunityFilterBarProps> = ({
   totalCount,
   selectedCountry,
   onCountryChange,
+  additionalCountries = [],
 }) => {
   const types: (OpportunityType | 'All')[] = [
     'All',
@@ -44,6 +46,9 @@ export const OpportunityFilterBar: React.FC<OpportunityFilterBarProps> = ({
     'Hackathon',
     'Volunteering',
     'Event',
+    'Apprenticeship',
+    'Training',
+    'Entrepreneurship',
   ];
 
   const workModes: (WorkMode | 'All')[] = ['All', 'Hybrid', 'Remote', 'On-site'];
@@ -54,8 +59,9 @@ export const OpportunityFilterBar: React.FC<OpportunityFilterBarProps> = ({
     'Entry Level',
     'Mid Level',
     'Senior Level',
+    'All Levels',
   ];
-  const countries = ['All', 'Egypt', 'Ethiopia', 'Ghana', 'Kenya', 'Nigeria', 'Rwanda', 'South Africa', 'Tanzania', 'Uganda'];
+  const countries = ['All', ...new Set(['Egypt', 'Ethiopia', 'Ghana', 'Kenya', 'Nigeria', 'Rwanda', 'South Africa', 'Tanzania', 'Uganda', ...additionalCountries].filter((country) => country && country !== 'Not provided'))];
 
   const hasActiveFilters = searchQuery !== '' || selectedType !== 'All' || selectedWorkMode !== 'All' || selectedExp !== 'All' || selectedCountry !== 'All';
 
