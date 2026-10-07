@@ -305,7 +305,7 @@ export const AIChatWindow: React.FC = () => {
               <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                 CareerLaunch AI
               </h3>
-              {isAIConfigured ? (
+              {aiAvailable ? (
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-brand-green-700 dark:text-brand-green-300 bg-brand-green-50 dark:bg-brand-green-950 px-2 py-0.5 rounded-full border border-brand-green-200 dark:border-brand-green-800">
                   <span className="w-1.5 h-1.5 rounded-full bg-brand-green-500 animate-pulse"></span>
                   Active (Gemini)

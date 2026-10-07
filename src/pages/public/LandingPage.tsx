@@ -31,8 +31,11 @@ import { AfricaMap } from '../../components/landing/AfricaMap';
 import { BrandLogo } from '../../components/branding/BrandLogo';
 import { CareerPhoto } from '../../components/landing/CareerPhoto';
 import { careerPhotos } from '../../components/landing/careerPhotos';
+import { HeroMotionBackground } from '../../components/landing/HeroMotionBackground';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 export const LandingPage: React.FC = () => {
+  useScrollReveal();
   const [selectedOpp, setSelectedOpp] = useState<Opportunity | null>(null);
   const [savedOppIds, setSavedOppIds] = useState<string[]>(() => mockStorage.getSavedOpportunityIds());
   const [opportunities, setOpportunities] = useState<Opportunity[]>(() => getCachedPublishedOpportunities() ?? []);
@@ -161,19 +164,20 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-white via-slate-50 to-white py-12 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 sm:py-20 lg:py-24">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-gradient-to-b from-brand-blue-50/70 to-transparent dark:from-brand-blue-950/30" />
+      <section className="landing-hero relative isolate overflow-hidden bg-brand-blue-950 py-12 text-white sm:py-20 lg:py-24">
+        <HeroMotionBackground />
+        <div className="landing-hero-glow pointer-events-none absolute inset-0" aria-hidden="true" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[.92fr_1.08fr] lg:gap-14 lg:px-8">
           <div className="max-w-2xl">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-green-200 bg-brand-green-50 px-3.5 py-2 text-xs font-bold text-brand-green-800 dark:border-brand-green-800 dark:bg-brand-green-950/60 dark:text-brand-green-300">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-green-300/30 bg-brand-green-500/10 px-3.5 py-2 text-xs font-bold text-brand-green-200">
               <span className="h-2 w-2 rounded-full bg-brand-green-500" aria-hidden="true" />
               Made for Africa's next generation of talent
             </div>
-            <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl">
+            <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-6xl">
               Build Your Skills.<br />
-              <span className="text-brand-blue-800 dark:text-brand-blue-300">Launch Your Career.</span>
+              <span className="text-brand-green-300">Launch Your Career.</span>
             </h1>
-            <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg sm:leading-8">
+            <p className="mt-6 max-w-xl text-base leading-7 text-blue-100/90 sm:text-lg sm:leading-8">
               Your journey from learning to meaningful career opportunities starts here. Build your profile, prepare your materials, and find your next step.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -184,10 +188,10 @@ export const LandingPage: React.FC = () => {
                 <Button size="lg" variant="secondary" leftIcon={<Search className="h-5 w-5" />} className="w-full">Explore Opportunities</Button>
               </Link>
             </div>
-            <div className="mt-9 flex flex-wrap gap-x-5 gap-y-3 border-t border-slate-200 pt-6 dark:border-slate-700">
+            <div className="mt-9 flex flex-wrap gap-x-5 gap-y-3 border-t border-white/15 pt-6">
               {['CV builder', 'Skills profile', 'Opportunity catalog', 'Application tracker'].map((label) => (
-                <span key={label} className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 sm:text-sm">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-brand-green-600 dark:text-brand-green-400" />{label}
+                <span key={label} className="inline-flex items-center gap-2 text-xs font-semibold text-blue-50 sm:text-sm">
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-brand-green-300" />{label}
                 </span>
               ))}
             </div>
@@ -222,7 +226,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
       {/* How CareerLaunch Works Section */}
-      <section className="py-20 bg-slate-50/60 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800">
+      <section data-reveal className="py-20 bg-slate-50/60 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 grid items-center gap-6 lg:mb-16 lg:grid-cols-[1fr_20rem] lg:gap-12">
             <div className="max-w-2xl">
@@ -264,7 +268,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Pan-African focus */}
-      <section className="py-16 sm:py-20">
+      <section data-reveal className="py-16 sm:py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-9 max-w-2xl">
             <p className="mb-2 text-xs font-bold uppercase tracking-[.14em] text-brand-green-700 dark:text-brand-green-400">Opportunities across borders</p>
@@ -281,7 +285,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
       {/* Career Tools Showcase */}
-      <section className="py-20">
+      <section data-reveal className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-16">
             <h2 className="text-xs font-bold uppercase tracking-wider text-brand-green-600 dark:text-brand-green-400 mb-2">
@@ -326,7 +330,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Opportunity Discovery Preview */}
-      <section className="py-20 bg-slate-50/60 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800">
+      <section data-reveal className="py-20 bg-slate-50/60 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <div>
@@ -363,7 +367,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Product workspace preview */}
-      <section className="py-20 bg-slate-50/60 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800">
+      <section data-reveal className="py-20 bg-slate-50/60 dark:bg-slate-900/40 border-y border-slate-200/80 dark:border-slate-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <Card className="p-6 sm:p-10">
             <div className="grid min-w-0 items-center gap-8 lg:grid-cols-2">
@@ -379,7 +383,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
       {/* FAQ Accordion */}
-      <section className="py-20 bg-slate-50/60 dark:bg-slate-900/40 border-t border-slate-200/80 dark:border-slate-800">
+      <section data-reveal className="py-20 bg-slate-50/60 dark:bg-slate-900/40 border-t border-slate-200/80 dark:border-slate-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
@@ -415,7 +419,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* Final Call to Action */}
-      <section className="py-20 bg-gradient-to-br from-brand-blue-900 via-brand-blue-950 to-slate-950 text-white relative overflow-hidden">
+      <section data-reveal className="py-20 bg-gradient-to-br from-brand-blue-900 via-brand-blue-950 to-slate-950 text-white relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6">
           <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
             Ready to launch your career trajectory?

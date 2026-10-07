@@ -8,8 +8,58 @@
     scroll-behavior: smooth;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  }
+}
+
+.landing-hero-glow {
+  background:
+    linear-gradient(90deg, rgba(5, 20, 42, 0.94) 0%, rgba(5, 20, 42, 0.82) 48%, rgba(5, 20, 42, 0.68) 100%),
+    linear-gradient(0deg, rgba(5, 20, 42, 0.48), rgba(5, 20, 42, 0.2));
+}
+
+.landing-hero-video {
+  opacity: 0.5;
+  transform: scale(1.015);
+  animation: landing-hero-drift 28s ease-in-out infinite alternate;
+}
+
+.motion-ready [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+}
+
+.motion-ready [data-reveal].is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition: opacity 650ms ease, transform 650ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@keyframes landing-hero-drift {
+  from { transform: scale(1.015) translate3d(0, 0, 0); }
+  to { transform: scale(1.06) translate3d(-0.5%, 0.4%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-hero-video { animation: none; }
+  .motion-ready [data-reveal],
+  .motion-ready [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .landing-hero-glow {
+    background: linear-gradient(120deg, rgba(5, 20, 42, 0.94), rgba(10, 35, 72, 0.92));
   }
 }
 
