@@ -23,7 +23,6 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { BrandLogo } from '../branding/BrandLogo';
 import { prefetchRoute } from '../../lib/routePreload';
 import { calculateProfileStrength, getInitials } from '../../lib/utils';
 import { mockStorage } from '../../lib/mockStorage';
@@ -77,7 +76,6 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className="w-64 flex-shrink-0 hidden md:flex flex-col border-r border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 min-h-[calc(100vh-4rem)] p-4 select-none">
-      <BrandLogo to="/dashboard" className="mb-5 px-1 py-1" />
       {/* User Mini Card */}
       {user && (
         <div className="mb-5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-800">
