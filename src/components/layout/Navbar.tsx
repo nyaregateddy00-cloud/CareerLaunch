@@ -22,7 +22,7 @@ import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../.
 import { mockStorage } from '../../lib/mockStorage';
 import { BrandLogo } from '../branding/BrandLogo';
 import { prefetchRoute } from '../../lib/routePreload';
-import { isSupabaseConfigured } from '../../lib/supabase';
+import { isDevelopmentDemoMode, isSupabaseConfigured } from '../../lib/supabase';
 import { getInitials } from '../../lib/utils';
 
 export const Navbar: React.FC = () => {
@@ -127,7 +127,7 @@ export const Navbar: React.FC = () => {
               className="hidden rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white sm:inline-flex 2xl:hidden"
             ><Search className="h-5 w-5" aria-hidden="true" /></button>
             {/* Demo Role Switcher Badge Dropdown */}
-            {!isSupabaseConfigured && <div className="relative">
+            {isDevelopmentDemoMode && <div className="relative">
               <button
                 onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
                 className="hidden 2xl:flex flex-nowrap items-center gap-1.5 whitespace-nowrap text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-brand-green-300 dark:border-brand-green-800 bg-brand-green-50 dark:bg-brand-green-950/40 text-brand-green-800 dark:text-brand-green-300 hover:bg-brand-green-100 transition-colors"

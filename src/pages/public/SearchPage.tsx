@@ -11,7 +11,7 @@ import { getPublishedOpportunities } from '../../lib/opportunities';
 import { getCareerResources } from '../../lib/resources';
 import { mockStorage } from '../../lib/mockStorage';
 import { Opportunity, CareerResource } from '../../types';
-import { isSupabaseConfigured } from '../../lib/supabase';
+import { isDevelopmentDemoMode, isSupabaseConfigured } from '../../lib/supabase';
 
 const matches = (query: string, values: Array<string | undefined>) => {
   const needle = query.trim().toLowerCase();
@@ -62,7 +62,8 @@ export const SearchPage: React.FC = () => {
 
   return <div className="mx-auto w-full min-w-0 max-w-5xl space-y-6">
     <PageHeader title="Search CareerLaunch" subtitle="Look across published opportunities, career resources, and your saved skills and projects." breadcrumbs={[{ label: 'Search' }]} />
-    {!isSupabaseConfigured && <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">Local preview mode: learning resources may include sample content.</p>}
+    {isDevelopmentDemoMode && <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">Local preview mode: learning resources may include sample content.</p>}
+    {!isSupabaseConfigured && !isDevelopmentDemoMode && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs text-rose-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-200">Search data is unavailable because this site is not connected to its database.</p>}
     <form onSubmit={onSearch} className="flex flex-col gap-3 sm:flex-row">
       <div className="min-w-0 flex-1"><Input label="Search opportunities, resources, skills, or projects" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Try ‘frontend’, ‘interview’, or a country" /></div>
       <Button type="submit" variant="primary" leftIcon={<Search className="h-4 w-4" />} className="self-end">Search</Button>

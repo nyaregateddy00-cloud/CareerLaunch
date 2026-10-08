@@ -1,5 +1,5 @@
 import { Education, Experience, PortfolioConfig, Project, PublicPortfolioProfile, UserSkill } from '../types';
-import { isSupabaseConfigured, supabase } from './supabase';
+import { isDevelopmentDemoMode, isSupabaseConfigured, supabase } from './supabase';
 import { mockStorage } from './mockStorage';
 
 export interface PublicPortfolioData {
@@ -11,10 +11,11 @@ export interface PublicPortfolioData {
 }
 
 export async function savePortfolioConfig(portfolio: PortfolioConfig): Promise<void> {
-  if (!isSupabaseConfigured) {
+  if (!isSupabaseConfigured && isDevelopmentDemoMode) {
     mockStorage.savePortfolio(portfolio);
     return;
   }
+  if (!isSupabaseConfigured) throw new Error('Publishing a portfolio requires Supabase configuration.');
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) throw new Error('Sign in again before saving your portfolio.');
   const { error } = await supabase.from('portfolios').upsert({

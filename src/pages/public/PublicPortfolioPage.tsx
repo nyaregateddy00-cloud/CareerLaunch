@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { PublicPortfolioView } from '../../components/portfolio/PublicPortfolioView';
 import { mockStorage } from '../../lib/mockStorage';
 import { getPublicPortfolio, PublicPortfolioData } from '../../lib/portfolio';
-import { isSupabaseConfigured } from '../../lib/supabase';
+import { isDevelopmentDemoMode, isSupabaseConfigured } from '../../lib/supabase';
 import { INITIAL_USER_TEDDY } from '../../lib/mockData';
 import { safeExternalUrl } from '../../lib/utils';
 
@@ -20,7 +20,7 @@ export const PublicPortfolioPage: React.FC = () => {
       getPublicPortfolio(username || '').then((result) => { if (active) setData(result); })
         .catch(() => { if (active) setError(true); })
         .finally(() => { if (active) setLoading(false); });
-    } else {
+    } else if (isDevelopmentDemoMode) {
       const user = mockStorage.getAllUsers().find((item) => item.fullName.toLowerCase().replace(/\s+/g, '') === username?.toLowerCase());
       const portfolio = mockStorage.getPortfolio();
       if (user?.id === INITIAL_USER_TEDDY.id && portfolio.isPublished && portfolio.slug === username) {
@@ -44,6 +44,8 @@ export const PublicPortfolioPage: React.FC = () => {
           skills: sections?.skills ? mockStorage.getUserSkills().filter((item) => item.userId === user.id) : [],
         });
       }
+    } else {
+      setError(true);
     }
     return () => { active = false; };
   }, [username]);
@@ -52,5 +54,5 @@ export const PublicPortfolioPage: React.FC = () => {
   if (error) return <main role="alert" className="mx-auto max-w-3xl p-8 text-center"><h1 className="text-xl font-bold text-slate-900 dark:text-white">Portfolio unavailable</h1><p className="mt-2 text-sm text-slate-500">We couldn’t load this public portfolio. Confirm the portfolio database migration is applied and try again.</p></main>;
   if (!data) return <main className="mx-auto max-w-3xl p-8 text-center"><h1 className="text-xl font-bold text-slate-900 dark:text-white">This portfolio isn’t public</h1><p className="mt-2 text-sm text-slate-500">The owner may not have published a portfolio with this address.</p></main>;
 
-  return <><div className="bg-amber-50 px-4 py-2 text-center text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">{isSupabaseConfigured ? 'Public portfolio' : 'Local demo preview — sample profile content'}</div><PublicPortfolioView user={data.profile} projects={data.projects} experience={data.experience} education={data.education} skills={data.skills} /></>;
+  return <><div className="bg-amber-50 px-4 py-2 text-center text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">{isDevelopmentDemoMode ? 'Local demo preview — sample profile content' : 'Public portfolio'}</div><PublicPortfolioView user={data.profile} projects={data.projects} experience={data.experience} education={data.education} skills={data.skills} /></>;
 };

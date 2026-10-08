@@ -112,6 +112,8 @@ DROP POLICY IF EXISTS "Admins manage opportunity sources" ON public.opportunity_
 CREATE POLICY "Admins manage opportunity sources" ON public.opportunity_sources
   FOR ALL USING (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin'))
   WITH CHECK (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.opportunity_sources TO authenticated;
+GRANT ALL ON public.opportunity_sources TO service_role;
 
 CREATE TABLE IF NOT EXISTS public.opportunity_sync_runs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -130,6 +132,8 @@ ALTER TABLE public.opportunity_sync_runs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Admins view opportunity sync runs" ON public.opportunity_sync_runs;
 CREATE POLICY "Admins view opportunity sync runs" ON public.opportunity_sync_runs
   FOR SELECT USING (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
+GRANT SELECT ON public.opportunity_sync_runs TO authenticated;
+GRANT ALL ON public.opportunity_sync_runs TO service_role;
 
 CREATE TABLE IF NOT EXISTS public.saved_opportunity_searches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -145,6 +149,7 @@ ALTER TABLE public.saved_opportunity_searches ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users manage own saved opportunity searches" ON public.saved_opportunity_searches;
 CREATE POLICY "Users manage own saved opportunity searches" ON public.saved_opportunity_searches
   FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.saved_opportunity_searches TO authenticated;
 CREATE INDEX IF NOT EXISTS saved_opportunity_searches_user_idx ON public.saved_opportunity_searches(user_id);
 
 CREATE TABLE IF NOT EXISTS public.user_playbook_progress (
@@ -159,6 +164,7 @@ ALTER TABLE public.user_playbook_progress ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users manage own playbook progress" ON public.user_playbook_progress;
 CREATE POLICY "Users manage own playbook progress" ON public.user_playbook_progress
   FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_playbook_progress TO authenticated;
 
 CREATE TABLE IF NOT EXISTS public.playbooks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -184,6 +190,8 @@ DROP POLICY IF EXISTS "Admins manage playbooks" ON public.playbooks;
 CREATE POLICY "Admins manage playbooks" ON public.playbooks FOR ALL
   USING (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin'))
   WITH CHECK (EXISTS (SELECT 1 FROM public.profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
+GRANT SELECT ON public.playbooks TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.playbooks TO authenticated;
 
 -- Seed discoverable metadata. Detailed, reviewed journeys are maintained in src/data/playbooks.ts.
 INSERT INTO public.playbooks(slug,title,description,category,target_audience,estimated_duration,skills)

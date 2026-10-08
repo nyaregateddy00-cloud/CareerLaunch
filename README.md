@@ -5,11 +5,11 @@ CareerLaunch is a React, TypeScript, and Vite career workspace for early-career 
 ## Local development
 
 1. Install Node.js (LTS).
-2. Copy `.env.example` to `.env` and fill in the Supabase project URL and publishable/anon key.
+2. Copy `.env.example` to `.env.local` and fill in the Supabase project URL and publishable key (or the legacy anon key, not both placeholders).
 3. Run `npm install`, then `npm run dev`.
 4. Run `npm run build` before deploying.
 
-Without Supabase configuration the app uses local preview data. Demo passwords are not verified or stored. The local workspace is not synchronized between devices.
+Without Supabase configuration the app uses local preview data only during local development. Demo passwords are not verified or stored, and demo data is not synchronized between devices. Production builds fail closed for account creation and sign-in when Supabase is not configured.
 
 ## Supabase and Google sign-in
 
@@ -19,8 +19,27 @@ The login and registration screens include Google OAuth through Supabase Auth. T
 2. In Supabase, open **Authentication → Providers → Google**, enable the provider, and add the Google client ID and client secret.
 3. Copy the Supabase callback URL displayed on that provider settings page into the Google client's **Authorized redirect URIs**. It normally follows `https://<project-ref>.supabase.co/auth/v1/callback`; use the exact URL Supabase displays.
 4. In Supabase **Authentication → URL Configuration**, set the site URL and allow the dashboard callback for local development (`http://localhost:5173/dashboard`) and your deployed app (`https://your-domain/dashboard`). Add any other exact return URLs you use.
-5. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (or `VITE_SUPABASE_ANON_KEY`) in the local and deployment environments. Never put the Google client secret or an AI provider secret in a `VITE_` variable.
-6. Apply `supabase/schema.sql` to a new Supabase project before allowing sign-ups. For an existing project, apply only the reviewed files under `supabase/migrations/` in timestamp order. They enable safe public portfolio reads, expanded opportunity types, community discussions/moderation, and typed workspace tables/RPCs. Do not blindly rerun the base schema on a live project.
+5. Set `VITE_SUPABASE_URL` and either `VITE_SUPABASE_PUBLISHABLE_KEY` or the legacy `VITE_SUPABASE_ANON_KEY` in local and Vercel environments. These are browser keys protected by RLS. Never put the Google client secret, AI provider secret, or service-role key in a `VITE_` variable.
+6. Set the Supabase **Site URL** and exact allowed redirect URLs for the production domain and local development. Enable email confirmation before public launch and test the full sign-up, confirmation, sign-in, password reset, and sign-out flows. Configure a production SMTP provider for reliable confirmation and reset emails.
+7. Apply `supabase/schema.sql` to a new Supabase project before allowing sign-ups. For an existing project, apply only migrations that are still pending, in timestamp order. Never blindly rerun the base schema on a live project. The current migration set is listed below.
+8. Set Vercel's production `VITE_SUPABASE_URL` and publishable key, then redeploy; Vite embeds these values at build time. Add the server-only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` only if using trusted API endpoints that need them. Keep the service-role key server-side.
+
+The opportunity-intelligence migration also creates the shared-playbook and alert tables. The role-hardening migration installs a database trigger that prevents users from granting themselves admin privileges; apply it to existing projects before public launch. After the intended admin account exists, apply the admin-role migration to grant admin access.
+
+Migrations, in order:
+
+```text
+supabase/migrations/20261006090000_public_portfolio_rpc.sql
+supabase/migrations/20261006100000_expand_opportunity_types.sql
+supabase/migrations/20261006110000_community_foundation.sql
+supabase/migrations/20261006130000_community_moderation.sql
+supabase/migrations/20261006140000_public_portfolio_project_allowlist.sql
+supabase/migrations/20261006150000_normalized_workspace_core.sql
+supabase/migrations/20261007100000_opportunity_intelligence_playbooks.sql
+supabase/migrations/20261007110000_set_careerlaunch_admin.sql
+supabase/migrations/20261008100000_lock_profile_roles.sql
+supabase/migrations/20261008110000_grant_runtime_tables.sql
+```
 
 Google OAuth creates accounts with the default `job_seeker` role. Email/password registration also supports the listed early-career roles. Role selection for Google-created accounts should be completed in a future onboarding step.
 

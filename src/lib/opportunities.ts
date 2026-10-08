@@ -1,5 +1,5 @@
 import { ExperienceLevel, Opportunity, WorkMode, UserProfile } from '../types';
-import { isSupabaseConfigured, supabase } from './supabase';
+import { isDevelopmentDemoMode, isSupabaseConfigured, supabase } from './supabase';
 import { mockStorage } from './mockStorage';
 
 const OPPORTUNITIES_CACHE_TTL = 30_000;
@@ -135,7 +135,10 @@ async function fetchAllOpportunityRows(publishedOnly: boolean): Promise<Opportun
 
 /** Returns every open, published listing, paging through the complete Supabase result set. */
 export async function getPublishedOpportunities(): Promise<Opportunity[]> {
-  if (!isSupabaseConfigured) return keepOpenListings(mockStorage.getOpportunities());
+  if (!isSupabaseConfigured) {
+    if (isDevelopmentDemoMode) return keepOpenListings(mockStorage.getOpportunities());
+    throw new Error('Opportunity listings are unavailable because Supabase is not configured.');
+  }
   if (publishedOpportunitiesCache && Date.now() < publishedOpportunitiesExpiresAt) return publishedOpportunitiesCache;
   if (publishedOpportunitiesRequest) return publishedOpportunitiesRequest;
 
@@ -150,7 +153,10 @@ export async function getPublishedOpportunities(): Promise<Opportunity[]> {
 
 /** Admin listing source; demo mode keeps using the existing browser-backed storage. */
 export async function getAdminOpportunities(): Promise<Opportunity[]> {
-  if (!isSupabaseConfigured) return mockStorage.getOpportunities();
+  if (!isSupabaseConfigured) {
+    if (isDevelopmentDemoMode) return mockStorage.getOpportunities();
+    throw new Error('Opportunity management requires Supabase configuration.');
+  }
   if (adminOpportunitiesCache && Date.now() < adminOpportunitiesExpiresAt) return adminOpportunitiesCache;
   if (adminOpportunitiesRequest) return adminOpportunitiesRequest;
   adminOpportunitiesRequest = fetchAllOpportunityRows(false)
@@ -169,10 +175,11 @@ function invalidateAdminOpportunitiesCache(): void {
 
 /** Persist admin postings centrally so every user sees the same published catalog. */
 export async function saveOpportunity(opportunity: Opportunity): Promise<Opportunity> {
-  if (!isSupabaseConfigured) {
+  if (!isSupabaseConfigured && isDevelopmentDemoMode) {
     mockStorage.saveOpportunity(opportunity);
     return opportunity;
   }
+  if (!isSupabaseConfigured) throw new Error('Saving opportunities requires Supabase configuration.');
   const { data, error } = await supabase.from('opportunities').upsert(toOpportunityRow(opportunity)).select('*').single();
   if (error) throw error;
   invalidatePublishedOpportunitiesCache();
@@ -181,10 +188,11 @@ export async function saveOpportunity(opportunity: Opportunity): Promise<Opportu
 }
 
 export async function deleteOpportunity(id: string): Promise<void> {
-  if (!isSupabaseConfigured) {
+  if (!isSupabaseConfigured && isDevelopmentDemoMode) {
     mockStorage.deleteOpportunity(id);
     return;
   }
+  if (!isSupabaseConfigured) throw new Error('Deleting opportunities requires Supabase configuration.');
   const { error } = await supabase.from('opportunities').delete().eq('id', id);
   if (error) throw error;
   invalidatePublishedOpportunitiesCache();

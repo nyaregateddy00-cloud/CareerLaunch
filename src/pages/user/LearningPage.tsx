@@ -22,7 +22,7 @@ import { mockStorage } from '../../lib/mockStorage';
 import { CareerResource } from '../../types';
 import { useToast } from '../../hooks/useToast';
 import { getCareerResources } from '../../lib/resources';
-import { isSupabaseConfigured } from '../../lib/supabase';
+import { isDevelopmentDemoMode, isSupabaseConfigured } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 
 export const LearningPage: React.FC = () => {
@@ -33,7 +33,7 @@ export const LearningPage: React.FC = () => {
   const [activeArticle, setActiveArticle] = useState<CareerResource | null>(null);
   const [savedResourceIds, setSavedResourceIds] = useState<string[]>(() => mockStorage.getSavedResourceIds());
   const [completedResourceIds, setCompletedResourceIds] = useState<string[]>(() => mockStorage.getCompletedResourceIds());
-  const [allResources, setAllResources] = useState<CareerResource[]>(() => isSupabaseConfigured ? [] : mockStorage.getResources());
+  const [allResources, setAllResources] = useState<CareerResource[]>(() => isDevelopmentDemoMode ? mockStorage.getResources() : []);
   const [resourceError, setResourceError] = useState(false);
 
   useEffect(() => {
@@ -129,7 +129,7 @@ export const LearningPage: React.FC = () => {
           </Badge>
         }
       />
-      {!isSupabaseConfigured && <p className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl px-4 py-3">Preview library: sample guide content is for local demonstration. Published production guides load from Supabase.</p>}
+      {isDevelopmentDemoMode && <p className="text-xs text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl px-4 py-3">Preview library: sample guide content is for local demonstration. Published production guides load from Supabase.</p>}
 
       {/* Featured Learning Highlight Card */}
       <div className="bg-gradient-to-r from-brand-blue-900 to-brand-blue-800 text-white rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -159,6 +159,7 @@ export const LearningPage: React.FC = () => {
       </div>
 
       {resourceError && <p role="alert" className="text-sm text-rose-600">We couldn't load learning resources. Please try again later.</p>}
+      {!isSupabaseConfigured && !isDevelopmentDemoMode && <p role="alert" className="text-sm text-rose-600">Learning resources are temporarily unavailable because this site is not connected to its database.</p>}
       {isSupabaseConfigured && allResources.length === 0 && !resourceError && (
         <p className="text-sm text-slate-500">No published learning resources are available yet.</p>
       )}

@@ -505,7 +505,11 @@ WITH CHECK (auth.uid() = id);
 CREATE OR REPLACE FUNCTION public.prevent_profile_role_change()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.role IS DISTINCT FROM OLD.role AND auth.role() <> 'service_role' THEN
+    IF TG_OP = 'INSERT' THEN
+        IF NEW.role = 'admin' AND auth.role() IS DISTINCT FROM 'service_role' THEN
+            RAISE EXCEPTION 'Administrator profiles can only be created by a trusted server administrator';
+        END IF;
+    ELSIF NEW.role IS DISTINCT FROM OLD.role AND auth.role() IS DISTINCT FROM 'service_role' THEN
         RAISE EXCEPTION 'Profile roles can only be changed by a trusted server administrator';
     END IF;
     RETURN NEW;
@@ -514,7 +518,7 @@ $$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS prevent_profile_role_change ON public.profiles;
 CREATE TRIGGER prevent_profile_role_change
-    BEFORE UPDATE OF role ON public.profiles
+    BEFORE INSERT OR UPDATE OF role ON public.profiles
     FOR EACH ROW EXECUTE FUNCTION public.prevent_profile_role_change();
 
 

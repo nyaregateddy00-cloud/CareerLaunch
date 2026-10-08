@@ -1,14 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;
+const configuredSupabaseUrl = import.meta.env.VITE_SUPABASE_URL?.trim();
+const supabaseUrl = configuredSupabaseUrl && configuredSupabaseUrl.startsWith('https://') && !/your-|placeholder/i.test(configuredSupabaseUrl)
+  ? configuredSupabaseUrl
+  : '';
+const supabasePublishableKey = [
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+].map((key) => key?.trim()).find((key) => Boolean(key) && !/your-|placeholder/i.test(key || '')) || '';
 
 export const isSupabaseConfigured = Boolean(
   supabaseUrl &&
   supabasePublishableKey &&
-  supabaseUrl.startsWith('https://') &&
-  !/your-|placeholder/i.test(supabaseUrl) &&
-  !/your-|placeholder/i.test(supabasePublishableKey)
+  /^https:\/\//i.test(supabaseUrl)
 );
 
 // Local demo identities are for development only. A production deployment must

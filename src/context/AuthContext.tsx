@@ -31,15 +31,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(isSupabaseConfigured);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authNotice, setAuthNotice] = useState<string | null>(null);
-  const profileLoadRequests = useRef(new Map<string, Promise<void>>());
+  const profileLoadRequests = useRef(new Map<string, Promise<boolean>>());
   const activeRemoteUserId = useRef<string | null>(null);
 
-  const loadSupabaseProfile = async (session: Session | null) => {
+  const loadSupabaseProfile = async (session: Session | null): Promise<boolean> => {
     if (!session?.user) {
       activeRemoteUserId.current = null;
       setRemoteWorkspaceUser(null);
       setUser(null);
-      return;
+      return false;
     }
 
     const userId = session.user.id;
@@ -47,28 +47,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const pendingLoad = profileLoadRequests.current.get(userId);
     if (pendingLoad) return pendingLoad;
 
-    const load = (async () => {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
-    if (activeRemoteUserId.current !== userId) return;
-    const row = data as Record<string, unknown> | null;
-    const metadata = session.user.user_metadata || {};
+    const load = (async (): Promise<boolean> => {
+    let data: Record<string, unknown> | null = null;
+    let error: { message: string } | null = null;
+    try {
+      const result = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+      data = result.data as Record<string, unknown> | null;
+      error = result.error;
+    } catch (profileError) {
+      if (activeRemoteUserId.current !== userId) return false;
+      activeRemoteUserId.current = null;
+      setRemoteWorkspaceUser(null);
+      setUser(null);
+      setAuthError(profileError instanceof Error
+        ? `Your account is authenticated, but its CareerLaunch profile could not be loaded. (${profileError.message})`
+        : 'Your account is authenticated, but its CareerLaunch profile could not be loaded.');
+      return false;
+    }
+    if (activeRemoteUserId.current !== userId) return false;
+    if (error || !data) {
+      activeRemoteUserId.current = null;
+      setRemoteWorkspaceUser(null);
+      setUser(null);
+      setAuthError(error
+        ? `Your account is authenticated, but its CareerLaunch profile could not be loaded. Check that the Supabase schema and profile policies are applied. (${error.message})`
+        : 'Your account is authenticated, but no CareerLaunch profile exists yet. Check the Supabase signup profile trigger and retry.');
+      return false;
+    }
+    const row = data;
     const allowedRoles: UserRole[] = ['student', 'graduate', 'job_seeker', 'freelancer', 'career_changer', 'employer'];
-    const requestedRole = metadata.role as UserRole;
+    const role = row.role;
+    if (typeof role !== 'string' || (role !== 'admin' && !allowedRoles.includes(role as UserRole))) {
+      activeRemoteUserId.current = null;
+      setRemoteWorkspaceUser(null);
+      setUser(null);
+      setAuthError('Your CareerLaunch profile has an invalid role. Please contact support.');
+      return false;
+    }
     const profile: UserProfile = {
       id: session.user.id,
       email: session.user.email || '',
-      fullName: String(row?.full_name || metadata.full_name || metadata.name || session.user.email?.split('@')[0] || 'CareerLaunch user'),
-      headline: String(row?.headline || metadata.headline || ''),
+      fullName: String(row.full_name || session.user.email?.split('@')[0] || 'CareerLaunch user'),
+      headline: String(row.headline || ''),
       bio: String(row?.bio || ''),
       location: String(row?.location || ''),
       phone: row?.phone ? String(row.phone) : undefined,
-      avatarUrl: row?.avatar_url ? String(row.avatar_url) : metadata.avatar_url || metadata.picture || undefined,
+      avatarUrl: row?.avatar_url ? String(row.avatar_url) : undefined,
       githubUrl: row?.github_url ? String(row.github_url) : undefined,
       linkedinUrl: row?.linkedin_url ? String(row.linkedin_url) : undefined,
       portfolioUrl: row?.portfolio_url ? String(row.portfolio_url) : undefined,
       twitterUrl: row?.twitter_url ? String(row.twitter_url) : undefined,
       websiteUrl: row?.website_url ? String(row.website_url) : undefined,
-      role: (row?.role === 'admin' || allowedRoles.includes(row?.role as UserRole) ? row?.role : allowedRoles.includes(requestedRole) ? requestedRole : 'job_seeker') as UserRole,
+      role: role as UserRole,
       profileStrength: Number(row?.profile_strength || 0),
       createdAt: String(row?.created_at || session.user.created_at),
       updatedAt: String(row?.updated_at || new Date().toISOString()),
@@ -84,11 +114,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ? `Your account is signed in, but workspace sync is unavailable. Apply the updated Supabase schema to enable it. (${error.message})`
         : 'Your account is signed in, but workspace sync is unavailable. Apply the updated Supabase schema to enable it.');
     }
+    return true;
     })();
 
     profileLoadRequests.current.set(userId, load);
     try {
-      await load;
+      return await load;
     } finally {
       if (profileLoadRequests.current.get(userId) === load) profileLoadRequests.current.delete(userId);
     }
@@ -130,9 +161,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password: password || '' });
       if (error) { setAuthError(error.message); setIsLoading(false); return false; }
-      await loadSupabaseProfile(data.session);
+      const profileLoaded = await loadSupabaseProfile(data.session);
       setIsLoading(false);
-      return Boolean(data.session);
+      return Boolean(data.session) && profileLoaded;
     }
     if (!isDevelopmentDemoMode) {
       setAuthError('Secure sign-in is unavailable because this site is not connected to its authentication service. Please try again later.');
@@ -191,9 +222,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(false);
         return false;
       }
-      await loadSupabaseProfile(data.session);
+      const profileLoaded = await loadSupabaseProfile(data.session);
       setIsLoading(false);
-      return true;
+      return profileLoaded;
     }
     if (!isDevelopmentDemoMode) {
       setAuthError('Secure account creation is unavailable because this site is not connected to its authentication service. Please try again later.');
