@@ -6,7 +6,7 @@ import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Card } from '../../components/common/Card';
 import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../../lib/mockData';
-import { isSupabaseConfigured } from '../../lib/supabase';
+import { isDevelopmentDemoMode, isSupabaseConfigured } from '../../lib/supabase';
 import { BrandLogo } from '../../components/branding/BrandLogo';
 
 export const LoginPage: React.FC = () => {
@@ -46,7 +46,8 @@ export const LoginPage: React.FC = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
         <Card className="p-8 space-y-6">
           <form onSubmit={handleLogin} className="space-y-4">
-            {!isSupabaseConfigured && <p className="rounded-lg bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-800 dark:text-amber-200">Demo mode: signing in with an email opens a local sample account. The password is not checked or stored.</p>}
+            {isDevelopmentDemoMode && <p className="rounded-lg bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-800 dark:text-amber-200">Local development demo: only sample profiles can sign in; passwords are not checked or stored.</p>}
+            {!isSupabaseConfigured && !isDevelopmentDemoMode && <p role="alert" className="rounded-lg bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-800 dark:text-rose-200">Secure sign-in is temporarily unavailable. Please try again later.</p>}
             <Input
               label="Email Address"
               type="email"
@@ -98,7 +99,7 @@ export const LoginPage: React.FC = () => {
           {authError && <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">{authError}</p>}
 
           {/* Quick Demo Personas Login Buttons */}
-          {!isSupabaseConfigured && <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+          {isDevelopmentDemoMode && <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center mb-2">
               Demo profiles (local preview)
             </p>

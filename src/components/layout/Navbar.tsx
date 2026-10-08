@@ -54,6 +54,7 @@ export const Navbar: React.FC = () => {
   const mobileCareerLinks = [
     { label: 'Dashboard', path: '/dashboard' },
     { label: 'Career Roadmap', path: '/career-roadmap' },
+    { label: 'Career Playbooks', path: '/playbooks' },
     { label: 'Find Opportunities', path: '/app/opportunities' },
     { label: 'Application Tracker', path: '/applications' },
     { label: 'CV Builder', path: '/cv-builder' },

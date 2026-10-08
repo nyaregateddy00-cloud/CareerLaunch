@@ -11,6 +11,10 @@ export const isSupabaseConfigured = Boolean(
   !/your-|placeholder/i.test(supabasePublishableKey)
 );
 
+// Local demo identities are for development only. A production deployment must
+// fail closed if its Supabase authentication settings are missing.
+export const isDevelopmentDemoMode = import.meta.env.DEV && !isSupabaseConfigured;
+
 if (!isSupabaseConfigured) {
   console.warn(
     'Supabase is not configured. Check VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in your .env file.'

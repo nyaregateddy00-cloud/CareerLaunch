@@ -6,7 +6,7 @@ import { UserRole } from '../../types';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { Card } from '../../components/common/Card';
-import { isSupabaseConfigured } from '../../lib/supabase';
+import { isDevelopmentDemoMode, isSupabaseConfigured } from '../../lib/supabase';
 import { BrandLogo } from '../../components/branding/BrandLogo';
 
 export const RegisterPage: React.FC = () => {
@@ -44,7 +44,8 @@ export const RegisterPage: React.FC = () => {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
         <Card className="p-8 space-y-6">
           <form onSubmit={handleRegister} className="space-y-4">
-            {!isSupabaseConfigured && <p className="rounded-lg bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-800 dark:text-amber-200">Demo mode: profile data stays in this browser. A real account requires Supabase to be configured.</p>}
+            {isDevelopmentDemoMode && <p className="rounded-lg bg-amber-50 dark:bg-amber-950/40 p-3 text-xs text-amber-800 dark:text-amber-200">Local development demo: profile data stays in this browser and is not a real account.</p>}
+            {!isSupabaseConfigured && !isDevelopmentDemoMode && <p role="alert" className="rounded-lg bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-800 dark:text-rose-200">Secure account creation is temporarily unavailable. Please try again later.</p>}
             <Input
               label="Full Name"
               required

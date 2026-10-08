@@ -3,7 +3,7 @@ import { UserProfile, UserRole } from '../types';
 import { mockStorage, restoreRemoteWorkspace, setRemoteWorkspaceUser } from '../lib/mockStorage';
 import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../lib/mockData';
 import { calculateProfileStrength } from '../lib/utils';
-import { isSupabaseConfigured, supabase } from '../lib/supabase';
+import { isDevelopmentDemoMode, isSupabaseConfigured, supabase } from '../lib/supabase';
 import type { Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -27,7 +27,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<UserProfile | null>(() => isSupabaseConfigured ? null : mockStorage.getCurrentUser());
+  const [user, setUser] = useState<UserProfile | null>(() => isDevelopmentDemoMode ? mockStorage.getCurrentUser() : null);
   const [isLoading, setIsLoading] = useState(isSupabaseConfigured);
   const [authError, setAuthError] = useState<string | null>(null);
   const [authNotice, setAuthNotice] = useState<string | null>(null);
@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    if (isSupabaseConfigured) return;
+    if (!isDevelopmentDemoMode) return;
     const handleStorageChange = (e: Event) => {
       const customEvent = e as CustomEvent<{ key?: string }>;
       if (!customEvent.detail || customEvent.detail.key === 'careerlaunch_current_user') {
@@ -134,6 +134,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
       return Boolean(data.session);
     }
+    if (!isDevelopmentDemoMode) {
+      setAuthError('Secure sign-in is unavailable because this site is not connected to its authentication service. Please try again later.');
+      setIsLoading(false);
+      return false;
+    }
     await new Promise(res => setTimeout(res, 400)); // simulate brief network latency
     const allUsers = mockStorage.getAllUsers();
     const matched = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
@@ -145,23 +150,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return true;
     }
 
-    // If new email entered during login demo, create a profile for them
-    const newUser: UserProfile = {
-      id: `usr-${Date.now()}`,
-      email,
-      fullName: email.split('@')[0].replace('.', ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()),
-      headline: 'Aspiring Professional | CareerLaunch',
-      bio: 'Eager to build technical skills, explore opportunities, and launch my career.',
-      location: 'Nairobi, Kenya',
-      role: 'job_seeker',
-      profileStrength: 45,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    mockStorage.setCurrentUser(newUser);
-    setUser(newUser);
+    setAuthError('No account was found for those details. Create an account first, or check your email and password.');
     setIsLoading(false);
-    return true;
+    return false;
   };
 
   const signInWithGoogle = async (): Promise<boolean> => {
@@ -204,10 +195,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
       return true;
     }
+    if (!isDevelopmentDemoMode) {
+      setAuthError('Secure account creation is unavailable because this site is not connected to its authentication service. Please try again later.');
+      setIsLoading(false);
+      return false;
+    }
     await new Promise(res => setTimeout(res, 400));
+    const normalizedEmail = email.trim().toLowerCase();
+    if (mockStorage.getAllUsers().some(existing => existing.email.trim().toLowerCase() === normalizedEmail)) {
+      setAuthError('An account already exists for that email. Sign in instead.');
+      setIsLoading(false);
+      return false;
+    }
     const newUser: UserProfile = {
       id: `usr-${Date.now()}`,
-      email,
+      email: normalizedEmail,
       fullName,
       headline: headline || `${role === 'student' ? 'University Student' : 'Professional'} | CareerLaunch`,
       bio: `Hello! I am ${fullName}, ready to connect with companies, grow my skills, and build my career.`,
@@ -252,7 +254,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const switchUser = (userId: string) => {
-    if (isSupabaseConfigured) return;
+    if (!isDevelopmentDemoMode) return;
     if (userId === INITIAL_USER_TEDDY.id) {
       mockStorage.setCurrentUser(INITIAL_USER_TEDDY);
       setUser(INITIAL_USER_TEDDY);
