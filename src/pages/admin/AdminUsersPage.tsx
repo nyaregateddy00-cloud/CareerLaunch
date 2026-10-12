@@ -113,7 +113,7 @@ export const AdminUsersPage: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={u.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+                        src={u.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100'}
                         alt={u.fullName}
                         className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
                       />

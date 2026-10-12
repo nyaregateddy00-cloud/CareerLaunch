@@ -47,6 +47,7 @@ export const FeaturesPage: React.FC = () => {
       ],
       icon: Globe,
       link: '/portfolio-builder',
+      photo: careerPhotos.creativeFreelancer,
     },
     {
       title: 'Opportunity Discovery Engine',
@@ -74,6 +75,7 @@ export const FeaturesPage: React.FC = () => {
       ],
       icon: Kanban,
       link: '/applications',
+      photo: careerPhotos.africanTechTeam,
     },
     {
       title: 'Skills & Role Gap Analyzer',
@@ -99,6 +101,7 @@ export const FeaturesPage: React.FC = () => {
       ],
       icon: Bot,
       link: '/ai-assistant',
+      photo: careerPhotos.womenInTechnology,
     },
   ];
 

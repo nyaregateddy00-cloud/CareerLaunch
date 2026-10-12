@@ -24,7 +24,7 @@ export const INITIAL_USER_TEDDY: UserProfile = {
   bio: 'Computer Science graduate from the University of Nairobi with passion for scalable web platforms, financial inclusion APIs, and mobile solutions in East Africa. Seeking full-time or high-impact graduate engineering roles.',
   location: 'Nairobi, Kenya',
   phone: '+254 712 345 678',
-  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300',
+  avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
   role: 'graduate',
   profileStrength: 80,
   githubUrl: 'https://github.com/teddymwangi',

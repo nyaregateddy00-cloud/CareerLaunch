@@ -256,7 +256,7 @@ export const AIChatWindow: React.FC = () => {
                 <img
                   src={
                     user?.avatarUrl ||
-                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'
+                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100'
                   }
                   alt="User"
                   className="w-8 h-8 rounded-xl object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0"

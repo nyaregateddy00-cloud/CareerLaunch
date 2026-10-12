@@ -62,7 +62,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <div className="relative inline-block mb-6">
             <img
-              src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}
+              src={user.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200'}
               alt={user.fullName}
               className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl object-cover border-4 border-white dark:border-slate-800 shadow-xl mx-auto"
             />

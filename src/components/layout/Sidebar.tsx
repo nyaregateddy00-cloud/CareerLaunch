@@ -58,7 +58,7 @@ export const Sidebar: React.FC = () => {
         <div className="mb-5 p-3 rounded-2xl bg-slate-50 dark:bg-[#111111] border border-slate-200/60 dark:border-white/[0.06]">
           <div className="flex items-center gap-3">
             <img
-              src={user.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100'}
+              src={user.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100'}
               alt={user.fullName}
               className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
             />

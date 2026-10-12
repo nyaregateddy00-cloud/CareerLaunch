@@ -218,7 +218,7 @@ export const ProfilePage: React.FC = () => {
             <img
               src={
                 user?.avatarUrl ||
-                'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'
+                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200'
               }
               alt={user?.fullName || 'User Profile'}
               className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-slate-200 dark:border-slate-700 shadow-sm"
