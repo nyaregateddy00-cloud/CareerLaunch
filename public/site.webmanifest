@@ -1,0 +1,21 @@
+{
+  "name": "CareerLaunch",
+  "short_name": "CareerLaunch",
+  "description": "Build your skills. Launch your career.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#123f78",
+  "icons": [
+    {
+      "src": "/careerlaunch-mark-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/careerlaunch-mark-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

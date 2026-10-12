@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="CareerLaunch helps students, graduates, freelancers, and job seekers across Kenya and Africa build skills and take their next career step." />
+    <meta name="theme-color" content="#123f78" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://careerlaunch-eight.vercel.app/" />
+    <meta property="og:title" content="CareerLaunch — Build Your Skills. Launch Your Career." />
+    <meta property="og:description" content="Build your skills, prepare your career materials, and find your next opportunity across Kenya and Africa." />
+    <meta property="og:image" content="https://careerlaunch-eight.vercel.app/careerlaunch-logo.jpeg" />
+    <meta property="og:image:alt" content="CareerLaunch logo and tagline" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CareerLaunch — Build Your Skills. Launch Your Career." />
+    <meta name="twitter:description" content="Build your skills, prepare your career materials, and find your next opportunity across Kenya and Africa." />
+    <meta name="twitter:image" content="https://careerlaunch-eight.vercel.app/careerlaunch-logo.jpeg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/careerlaunch-mark-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/careerlaunch-mark-180.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+    <title>CareerLaunch — Build Your Skills. Launch Your Career.</title>
+    <!-- Blocking theme-restore: prevents flash of wrong theme before React hydrates -->
+    <script>
+      (function() {
+        try {
+          var t = localStorage.getItem('careerlaunch_theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (t === 'dark' || (!t && prefersDark)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch(e) {}
+      })();
+    </script>
+  </head>
+  <body class="bg-white text-slate-900 dark:bg-black dark:text-[#F5F5F5] antialiased selection:bg-brand-green-500 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
