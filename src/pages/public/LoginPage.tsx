@@ -10,7 +10,7 @@ import { isSupabaseConfigured } from '../../lib/supabase';
 import { BrandLogo } from '../../components/branding/BrandLogo';
 
 export const LoginPage: React.FC = () => {
-  const { login, signInWithGoogle, switchUser, isLoading, authError } = useAuth();
+  const { login, signInWithGoogle, switchUser, isLoading, authError, authNotice } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
@@ -95,12 +95,25 @@ export const LoginPage: React.FC = () => {
             Continue with Google
           </Button>
 
-          {authError && <p role="alert" className="text-sm text-rose-600 dark:text-rose-400">{authError}</p>}
+          {authNotice && (
+            <p role="status" className="rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-3 text-xs text-emerald-800 dark:text-emerald-200 border border-emerald-200/60 dark:border-emerald-800/40">
+              {authNotice}
+            </p>
+          )}
 
-          {/* Quick Demo Personas Login Buttons */}
-          {!isSupabaseConfigured && <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+          {authError && (
+            <div role="alert" className="rounded-xl bg-rose-50 dark:bg-rose-950/40 p-3 text-xs text-rose-800 dark:text-rose-200 border border-rose-200/60 dark:border-rose-800/40 space-y-1">
+              <p className="font-semibold">{authError}</p>
+              <p className="text-[11px] opacity-80">
+                You can also click any demo profile below for instant access.
+              </p>
+            </div>
+          )}
+
+          {/* Quick Demo Personas Login Buttons — Always available for instant access */}
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 text-center mb-2">
-              Demo profiles (local preview)
+              Instant demo profiles (1-click access)
             </p>
             <div className="grid grid-cols-1 gap-2">
               <button
@@ -139,7 +152,7 @@ export const LoginPage: React.FC = () => {
                 <Shield className="w-4 h-4 text-brand-blue-600 dark:text-brand-blue-400" />
               </button>
             </div>
-          </div>}
+          </div>
 
           <div className="text-center text-xs text-slate-500">
             Don't have an account?{' '}

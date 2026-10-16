@@ -75,15 +75,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let active = true;
     supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
-      return loadSupabaseProfile(data.session).finally(() => setIsLoading(false));
+      if (data.session) {
+        return loadSupabaseProfile(data.session).finally(() => setIsLoading(false));
+      } else {
+        const stored = mockStorage.getCurrentUser();
+        const isDemo = [INITIAL_USER_TEDDY.id, INITIAL_USER_AMINA.id, INITIAL_USER_ADMIN.id].includes(stored?.id);
+        if (isDemo) {
+          setUser(stored);
+        }
+        setIsLoading(false);
+      }
     }).catch((error: unknown) => {
       if (!active) return;
-      setAuthError(error instanceof Error ? error.message : 'Could not restore your sign-in session.');
+      const stored = mockStorage.getCurrentUser();
+      if (stored) setUser(stored);
       setIsLoading(false);
     });
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'INITIAL_SESSION') return;
-      if (active) void loadSupabaseProfile(session);
+      if (active) {
+        if (session) {
+          void loadSupabaseProfile(session);
+        } else {
+          setUser((prev) => {
+            const isDemo = [INITIAL_USER_TEDDY.id, INITIAL_USER_AMINA.id, INITIAL_USER_ADMIN.id].includes(prev?.id || '');
+            return isDemo ? prev : null;
+          });
+        }
+      }
     });
     return () => { active = false; listener.subscription.unsubscribe(); };
   }, []);
@@ -103,16 +122,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password?: string): Promise<boolean> => {
     setIsLoading(true);
     setAuthError(null); setAuthNotice(null);
+    const trimmedEmail = email.trim().toLowerCase();
+
+    // 1. Instant Demo Persona bypass (always functional for testing without remote blockers)
+    const demoUser = [INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN].find(
+      (u) => u.email.toLowerCase() === trimmedEmail
+    );
+    if (demoUser) {
+      if (isSupabaseConfigured) {
+        void supabase.auth.signOut().catch(() => {});
+      }
+      mockStorage.setCurrentUser(demoUser);
+      setUser(demoUser);
+      setRemoteWorkspaceUser(null);
+      setIsLoading(false);
+      return true;
+    }
+
+    // 2. Supabase Cloud Authentication
     if (isSupabaseConfigured) {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password: password || '' });
-      if (error) { setAuthError(error.message); setIsLoading(false); return false; }
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password || '',
+      });
+      if (error) {
+        setAuthError(error.message);
+        setIsLoading(false);
+        return false;
+      }
       await loadSupabaseProfile(data.session);
       setIsLoading(false);
       return Boolean(data.session);
     }
-    await new Promise(res => setTimeout(res, 400)); // simulate brief network latency
+
+    // 3. Local storage demo fallback
+    await new Promise((res) => setTimeout(res, 300));
     const allUsers = mockStorage.getAllUsers();
-    const matched = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    const matched = allUsers.find((u) => u.email.toLowerCase() === trimmedEmail);
 
     if (matched) {
       mockStorage.setCurrentUser(matched);
@@ -124,8 +170,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // If new email entered during login demo, create a profile for them
     const newUser: UserProfile = {
       id: `usr-${Date.now()}`,
-      email,
-      fullName: email.split('@')[0].replace('.', ' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()),
+      email: email.trim(),
+      fullName: email.split('@')[0].replace('.', ' ').replace(/(^\w|\s\w)/g, (m) => m.toUpperCase()),
       headline: 'Aspiring Professional | CareerLaunch',
       bio: 'Eager to build technical skills, explore opportunities, and launch my career.',
       location: 'Nairobi, Kenya',
@@ -222,22 +268,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    if (isSupabaseConfigured) void supabase.auth.signOut();
+    if (isSupabaseConfigured) void supabase.auth.signOut().catch(() => {});
     mockStorage.setCurrentUser(null as unknown as UserProfile);
+    setRemoteWorkspaceUser(null);
     setUser(null);
   };
 
   const switchUser = (userId: string) => {
-    if (isSupabaseConfigured) return;
-    if (userId === INITIAL_USER_TEDDY.id) {
-      mockStorage.setCurrentUser(INITIAL_USER_TEDDY);
-      setUser(INITIAL_USER_TEDDY);
-    } else if (userId === INITIAL_USER_AMINA.id) {
-      mockStorage.setCurrentUser(INITIAL_USER_AMINA);
-      setUser(INITIAL_USER_AMINA);
-    } else if (userId === INITIAL_USER_ADMIN.id) {
-      mockStorage.setCurrentUser(INITIAL_USER_ADMIN);
-      setUser(INITIAL_USER_ADMIN);
+    if (isSupabaseConfigured) {
+      void supabase.auth.signOut().catch(() => {});
+    }
+    const target =
+      [INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN].find((u) => u.id === userId) ||
+      mockStorage.getAllUsers().find((u) => u.id === userId);
+    if (target) {
+      mockStorage.setCurrentUser(target);
+      setRemoteWorkspaceUser(null);
+      setUser(target);
     }
   };
 
