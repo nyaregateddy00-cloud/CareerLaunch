@@ -116,7 +116,7 @@
 }
 
 /* ============================================================
-   HERO AMBIENT GRADIENT PULSE
+   CINEMATIC AMBIENT & VIDEO OVERLAYS
    ============================================================ */
 @keyframes ambientPulse {
   0%, 100% { opacity: 0.6; transform: scale(1); }
@@ -125,6 +125,30 @@
 
 .hero-ambient {
   animation: ambientPulse 8s ease-in-out infinite;
+}
+
+/* Subtle editorial film glow */
+.editorial-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15), rgba(16, 185, 129, 0.08) 40%, transparent 70%);
+}
+
+.dark .editorial-glow {
+  background: radial-gradient(circle at 50% 0%, rgba(30, 64, 175, 0.22), rgba(6, 78, 59, 0.15) 45%, transparent 75%);
+}
+
+/* Glass panel with refined border */
+.cinematic-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dark .cinematic-glass {
+  background: rgba(10, 10, 10, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ============================================================

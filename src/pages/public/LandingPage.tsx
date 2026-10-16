@@ -183,8 +183,32 @@ export const LandingPage: React.FC = () => {
       {/* ================================================================
           HERO SECTION — Cinematic, editorial, premium
           ================================================================ */}
-      <section className="relative overflow-hidden bg-white dark:bg-black">
-        {/* Ambient background pulse — CSS only, no JS dependency */}
+      <section className="relative overflow-hidden bg-white dark:bg-black editorial-glow">
+        {/* Cinematic ambient background video layer */}
+        <div
+          className="pointer-events-none absolute inset-0 overflow-hidden opacity-20 dark:opacity-25 motion-reduce:hidden"
+          aria-hidden="true"
+        >
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="h-full w-full object-cover object-center filter saturate-50 contrast-125"
+            poster="/careerlaunch-logo.jpeg"
+          >
+            <source
+              src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260729_102822_0e6c87e8-c141-4744-bf32-ad30db296371.mp4"
+              type="video/mp4"
+            />
+          </video>
+          {/* Layered cinematic gradient overlays for pristine readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/80 to-white dark:from-black/95 dark:via-black/85 dark:to-black" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/60 to-transparent dark:from-black/90 dark:via-black/60 dark:to-transparent" />
+        </div>
+
+        {/* Ambient background pulse — CSS only */}
         <div
           className="pointer-events-none absolute -top-64 -right-64 h-[700px] w-[700px] rounded-full bg-brand-blue-50 dark:bg-brand-blue-950/20 blur-3xl hero-ambient"
           aria-hidden="true"
@@ -200,18 +224,16 @@ export const LandingPage: React.FC = () => {
           <div className="max-w-2xl">
             <BrandLogo variant="full" to="/" className="mb-6" imageClassName="w-24 sm:w-28" />
 
-            {/* Africa signal */}
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-green-200 bg-brand-green-50 px-4 py-2 text-xs font-bold text-brand-green-800 dark:border-brand-green-800/60 dark:bg-brand-green-950/50 dark:text-brand-green-300">
+            {/* Africa signal badge */}
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand-green-200/80 bg-brand-green-50/80 px-4 py-2 text-xs font-bold text-brand-green-800 backdrop-blur-sm dark:border-brand-green-800/60 dark:bg-brand-green-950/50 dark:text-brand-green-300">
               <span className="h-2 w-2 rounded-full bg-brand-green-500 animate-pulse" aria-hidden="true" />
-              Made for Africa&apos;s next generation of talent
+              <span>Made for Africa&apos;s next generation of talent</span>
             </div>
 
-            {/* Headline — editorial, strong */}
-            <h1 className="text-[2.75rem] font-extrabold leading-[1.06] tracking-tight text-slate-950 dark:text-[#F5F5F5] sm:text-5xl lg:text-[3.5rem]">
-              Build Your Skills.<br />
-              <span className="text-brand-blue-800 dark:text-brand-blue-400">
-                Launch Your Career.
-              </span>
+            {/* Headline — editorial, strong, combining precision sans with Instrument Serif */}
+            <h1 className="text-[2.75rem] font-extrabold leading-[1.08] tracking-tight text-slate-950 dark:text-[#F5F5F5] sm:text-5xl lg:text-[3.5rem]">
+              Build Your <span className="font-serif italic font-normal tracking-normal text-brand-blue-800 dark:text-brand-blue-300">Skills</span>.<br />
+              Launch Your <span className="font-serif italic font-normal tracking-normal text-brand-green-700 dark:text-brand-green-400">Career</span>.
             </h1>
 
             <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300 sm:text-lg sm:leading-8">
@@ -222,7 +244,7 @@ export const LandingPage: React.FC = () => {
             {/* CTAs */}
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
               <Link to="/register" className="w-full sm:w-auto">
-                <Button size="lg" variant="primary" rightIcon={<ArrowRight className="h-5 w-5" />} className="w-full">
+                <Button size="lg" variant="primary" rightIcon={<ArrowRight className="h-5 w-5" />} className="w-full shadow-lg shadow-brand-blue-900/10 dark:shadow-none">
                   Create a Profile
                 </Button>
               </Link>
@@ -234,7 +256,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Feature pills */}
-            <div className="mt-9 flex flex-wrap gap-x-5 gap-y-3 border-t border-slate-200 pt-6 dark:border-white/[0.08]">
+            <div className="mt-9 flex flex-wrap gap-x-5 gap-y-3 border-t border-slate-200/80 pt-6 dark:border-white/[0.08]">
               {['CV builder', 'Skills profile', 'Opportunity catalog', 'Application tracker'].map((label) => (
                 <span key={label} className="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 sm:text-sm">
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-brand-green-600 dark:text-brand-green-400" />{label}
@@ -246,8 +268,8 @@ export const LandingPage: React.FC = () => {
           {/* ---- Right: Hero product card ---- */}
           <div className="relative mx-auto w-full max-w-xl">
             {/* Decorative background glow */}
-            <div className="absolute -inset-4 rounded-[2.25rem] bg-gradient-to-br from-brand-blue-50 to-brand-green-50/50 dark:from-brand-blue-950/30 dark:to-brand-green-950/20" aria-hidden="true" />
-            <div className="relative rounded-[1.75rem] border border-slate-200/80 bg-white p-5 shadow-hero dark:border-white/[0.09] dark:bg-[#111111] sm:p-7">
+            <div className="absolute -inset-4 rounded-[2.25rem] bg-gradient-to-br from-brand-blue-50/80 to-brand-green-50/50 dark:from-brand-blue-950/30 dark:to-brand-green-950/20 blur-xl" aria-hidden="true" />
+            <div className="relative rounded-[1.75rem] cinematic-glass p-5 shadow-hero dark:border-white/[0.09] dark:bg-[#111111]/90 sm:p-7">
               {/* Hero photograph */}
               <CareerPhoto
                 photo={careerPhotos.nigeriaProfessional}
@@ -275,7 +297,7 @@ export const LandingPage: React.FC = () => {
                   { icon: FileText, title: 'Present your strengths', text: 'Build your CV and portfolio', color: 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300' },
                   { icon: Briefcase, title: 'Find your next opportunity', text: 'Discover roles and track applications', color: 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300' },
                 ].map((item, index) => (
-                  <div key={item.title} className="flex items-center gap-4 rounded-2xl border border-slate-100 p-3.5 dark:border-white/[0.06]">
+                  <div key={item.title} className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white/60 p-3.5 backdrop-blur-xs transition-colors hover:border-slate-200 dark:border-white/[0.06] dark:bg-white/[0.02] dark:hover:border-white/[0.12]">
                     <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${item.color}`}>
                       <item.icon className="h-5 w-5" />
                     </div>
@@ -289,7 +311,7 @@ export const LandingPage: React.FC = () => {
               </div>
 
               {/* Location tag */}
-              <div className="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-3 text-xs font-medium text-slate-600 dark:bg-white/[0.04] dark:text-slate-300">
+              <div className="flex items-center gap-2 rounded-xl bg-slate-50/80 px-4 py-3 text-xs font-medium text-slate-600 dark:bg-white/[0.04] dark:text-slate-300">
                 <MapPin className="h-4 w-4 text-brand-green-600" />
                 Designed for students and professionals across Africa
               </div>
@@ -312,7 +334,7 @@ export const LandingPage: React.FC = () => {
                 Your Career Journey
               </h2>
               <h3 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-[#F5F5F5]">
-                From learning to career growth
+                From learning to <span className="font-serif italic font-normal text-brand-blue-800 dark:text-brand-blue-400">career growth</span>
               </h3>
               <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
                 A clear set of steps to help you prepare, find opportunities, and keep moving forward.
@@ -357,7 +379,7 @@ export const LandingPage: React.FC = () => {
           <div className="mb-9 max-w-2xl">
             <p className="mb-2 text-xs font-bold uppercase tracking-[.14em] text-brand-green-700 dark:text-brand-green-400">Opportunities across borders</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-950 dark:text-[#F5F5F5] sm:text-4xl">
-              Built for Africa. Designed for Opportunity.
+              Built for Africa. <span className="font-serif italic font-normal text-brand-green-700 dark:text-brand-green-400">Designed for Opportunity.</span>
             </h2>
             <p className="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
               Connecting African talent with the skills, opportunities, and resources they need to build successful careers.
@@ -386,7 +408,7 @@ export const LandingPage: React.FC = () => {
               Integrated Suite
             </h2>
             <h3 className="text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-[#F5F5F5]">
-              Purpose-Built Career Tools
+              Purpose-Built <span className="font-serif italic font-normal text-brand-green-700 dark:text-brand-green-400">Career Tools</span>
             </h3>
             <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
               Tools to organize your profile, application materials, and opportunity search.

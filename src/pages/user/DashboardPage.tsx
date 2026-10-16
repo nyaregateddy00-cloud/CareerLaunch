@@ -89,7 +89,7 @@ export const DashboardPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-[#F5F5F5] tracking-tight">
-            {greeting}, {firstName} 👋
+            {greeting}, <span className="font-serif italic font-normal text-brand-blue-700 dark:text-brand-blue-400">{firstName}</span> 👋
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             Build Your Skills. Launch Your Career. Keep growing your proof of work and pipeline.
