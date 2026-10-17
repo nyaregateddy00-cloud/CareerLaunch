@@ -19,6 +19,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../../lib/mockData';
 import { mockStorage } from '../../lib/mockStorage';
+import { isSupabaseConfigured } from '../../lib/supabase';
 import { BrandLogo } from '../branding/BrandLogo';
 
 export const Navbar: React.FC = () => {
@@ -78,74 +79,76 @@ export const Navbar: React.FC = () => {
 
           {/* Right Action Icons & Controls */}
           <div className="flex items-center gap-2.5">
-            {/* Demo Role Switcher Badge Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
-                className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-brand-green-300 dark:border-brand-green-800 bg-brand-green-50 dark:bg-brand-green-950/40 text-brand-green-800 dark:text-brand-green-300 hover:bg-brand-green-100 transition-colors"
-                title="Switch persona to test different user roles"
-              >
-                <span className="w-2 h-2 rounded-full bg-brand-green-500 animate-pulse"></span>
-                <span>Role: {user ? user.role.replace('_', ' ') : 'Demo'}</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-              </button>
-
-              {roleSwitcherOpen && (
-                <div
-                  className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#0f0f0f] rounded-xl shadow-xl border border-slate-200 dark:border-white/[0.08] py-2 z-50 animate-in fade-in zoom-in-95"
-                  onMouseLeave={() => setRoleSwitcherOpen(false)}
+            {/* Demo Role Switcher — only visible in local/demo mode without Supabase */}
+            {!isSupabaseConfigured && (
+              <div className="relative">
+                <button
+                  onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
+                  className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-brand-green-300 dark:border-brand-green-800 bg-brand-green-50 dark:bg-brand-green-950/40 text-brand-green-800 dark:text-brand-green-300 hover:bg-brand-green-100 transition-colors"
+                  title="Switch persona to test different user roles"
                 >
-                  <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-[11px] uppercase tracking-wider font-bold text-slate-400">
-                    Switch Test Persona
+                  <span className="w-2 h-2 rounded-full bg-brand-green-500 animate-pulse"></span>
+                  <span>Role: {user ? user.role.replace('_', ' ') : 'Demo'}</span>
+                  <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+                </button>
+
+                {roleSwitcherOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-64 bg-white dark:bg-[#0f0f0f] rounded-xl shadow-xl border border-slate-200 dark:border-white/[0.08] py-2 z-50 animate-in fade-in zoom-in-95"
+                    onMouseLeave={() => setRoleSwitcherOpen(false)}
+                  >
+                    <div className="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-[11px] uppercase tracking-wider font-bold text-slate-400">
+                      Switch Test Persona
+                    </div>
+                    <button
+                      onClick={() => {
+                        switchUser(INITIAL_USER_TEDDY.id);
+                        setRoleSwitcherOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800"
+                    >
+                      <div>
+                        <div className="font-semibold text-slate-800 dark:text-slate-200">Teddy Mwangi</div>
+                        <div className="text-slate-500 text-[11px]">CS Graduate (Student/Seeker)</div>
+                      </div>
+                      {user?.id === INITIAL_USER_TEDDY.id && (
+                        <span className="text-brand-green-500 font-bold">✓</span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        switchUser(INITIAL_USER_AMINA.id);
+                        setRoleSwitcherOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800"
+                    >
+                      <div>
+                        <div className="font-semibold text-slate-800 dark:text-slate-200">Amina Wanjiku</div>
+                        <div className="text-slate-500 text-[11px]">Senior Designer (Freelancer)</div>
+                      </div>
+                      {user?.id === INITIAL_USER_AMINA.id && (
+                        <span className="text-brand-green-500 font-bold">✓</span>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        switchUser(INITIAL_USER_ADMIN.id);
+                        setRoleSwitcherOpen(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800"
+                    >
+                      <div>
+                        <div className="font-semibold text-slate-800 dark:text-slate-200">Sarah Kipchoge</div>
+                        <div className="text-slate-500 text-[11px]">Platform Administrator</div>
+                      </div>
+                      {user?.id === INITIAL_USER_ADMIN.id && (
+                        <span className="text-brand-green-500 font-bold">✓</span>
+                      )}
+                    </button>
                   </div>
-                  <button
-                    onClick={() => {
-                      switchUser(INITIAL_USER_TEDDY.id);
-                      setRoleSwitcherOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800"
-                  >
-                    <div>
-                      <div className="font-semibold text-slate-800 dark:text-slate-200">Teddy Mwangi</div>
-                      <div className="text-slate-500 text-[11px]">CS Graduate (Student/Seeker)</div>
-                    </div>
-                    {user?.id === INITIAL_USER_TEDDY.id && (
-                      <span className="text-brand-green-500 font-bold">✓</span>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      switchUser(INITIAL_USER_AMINA.id);
-                      setRoleSwitcherOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800"
-                  >
-                    <div>
-                      <div className="font-semibold text-slate-800 dark:text-slate-200">Amina Wanjiku</div>
-                      <div className="text-slate-500 text-[11px]">Senior Designer (Freelancer)</div>
-                    </div>
-                    {user?.id === INITIAL_USER_AMINA.id && (
-                      <span className="text-brand-green-500 font-bold">✓</span>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      switchUser(INITIAL_USER_ADMIN.id);
-                      setRoleSwitcherOpen(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800"
-                  >
-                    <div>
-                      <div className="font-semibold text-slate-800 dark:text-slate-200">Sarah Kipchoge</div>
-                      <div className="text-slate-500 text-[11px]">Platform Administrator</div>
-                    </div>
-                    {user?.id === INITIAL_USER_ADMIN.id && (
-                      <span className="text-brand-green-500 font-bold">✓</span>
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {/* Dark / Light Mode Toggle */}
             <button

@@ -213,17 +213,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAuthError(null); setAuthNotice(null);
     if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signUp({
-        email, password,
-        options: { data: { full_name: fullName, role, headline }, emailRedirectTo: `${window.location.origin}/dashboard` },
+        email,
+        password,
+        options: {
+          data: { full_name: fullName, role, headline: headline || '' },
+          emailRedirectTo: `${window.location.origin}/login`,
+        },
       });
-      if (error) { setAuthError(error.message); setIsLoading(false); return false; }
-      if (!data.session) {
-        setAuthNotice('Check your email to confirm your account, then sign in.');
+      if (error) {
+        // User already registered is a soft error — direct them to login
+        if (error.message.toLowerCase().includes('already registered') || error.message.toLowerCase().includes('already exists')) {
+          setAuthError('An account with this email already exists. Please sign in instead.');
+        } else {
+          setAuthError(error.message);
+        }
         setIsLoading(false);
         return false;
       }
-      await loadSupabaseProfile(data.session);
       setIsLoading(false);
+      // Return true regardless of whether a session exists — email confirmation is expected
       return true;
     }
     await new Promise(res => setTimeout(res, 400));
