@@ -44,7 +44,7 @@ export const SavedOpportunitiesPage: React.FC = () => {
     <div className="space-y-6">
       <PageHeader
         title="Saved Opportunities"
-        subtitle="Opportunities bookmarked for review, customized CV tailoring, and application submission."
+        subtitle="Opportunities you have bookmarked to review, tailor application materials for, and submit."
         breadcrumbs={[{ label: 'Saved Opportunities' }]}
         badge={
           <Badge variant="amber" size="sm">

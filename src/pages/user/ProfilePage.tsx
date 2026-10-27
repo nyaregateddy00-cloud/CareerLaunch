@@ -37,7 +37,7 @@ import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { PageHeader } from '../../components/common/PageHeader';
 import { useToast } from '../../hooks/useToast';
-import { formatMonthYear, fireCelebrationConfetti } from '../../lib/utils';
+import { formatMonthYear } from '../../lib/utils';
 
 export const ProfilePage: React.FC = () => {
   const { user, updateProfile } = useAuth();
@@ -99,7 +99,6 @@ export const ProfilePage: React.FC = () => {
       linkedinUrl,
       twitterUrl,
     });
-    fireCelebrationConfetti();
     showToast('Profile information saved successfully!', 'success');
   };
 
@@ -202,7 +201,7 @@ export const ProfilePage: React.FC = () => {
     <div className="space-y-8">
       <PageHeader
         title="Profile & Professional Identity"
-        subtitle="Manage your personal background, education, work experience, proof of work, and languages."
+        subtitle="Manage your personal background, education, work experience, projects, and languages."
         breadcrumbs={[{ label: 'Profile' }]}
         badge={
           <Badge variant="blue" size="sm">
@@ -576,7 +575,7 @@ export const ProfilePage: React.FC = () => {
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                Projects & Proof of Work
+                Projects & Featured Work
               </h3>
               <p className="text-xs text-slate-500">Live applications, repositories, and case studies</p>
             </div>

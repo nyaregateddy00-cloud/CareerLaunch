@@ -17,7 +17,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
   onToggleSave,
   onSelect,
 }) => {
-  const getTypeVariant = (type: Opportunity['type']): 'blue' | 'green' | 'amber' | 'purple' | 'default' => {
+  const getTypeVariant = (type: Opportunity['type']): 'blue' | 'green' | 'amber' | 'default' => {
     switch (type) {
       case 'Job':
         return 'blue';
@@ -25,7 +25,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
       case 'Attachment':
         return 'green';
       case 'Scholarship':
-        return 'purple';
+        return 'blue';
       case 'Freelance':
         return 'amber';
       default:
@@ -36,7 +36,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
   return (
     <div
       onClick={() => onSelect(opportunity)}
-      className="group relative bg-white dark:bg-[#111111] border border-slate-200 dark:border-white/[0.07] hover:border-brand-blue-500/50 dark:hover:border-brand-blue-500/50 rounded-2xl p-5 shadow-card dark:shadow-card-dark transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover cursor-pointer flex flex-col justify-between"
+      className="group relative bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 rounded-xl p-5 shadow-xs transition-all duration-150 cursor-pointer flex flex-col justify-between"
     >
       <div>
         {/* Top bar: Type badge & Bookmark button */}
@@ -58,12 +58,12 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
             }}
             className={`p-1.5 rounded-lg border transition-colors ${
               isSaved
-                ? 'bg-brand-green-50 dark:bg-brand-green-950/60 border-brand-green-300 text-brand-green-600 dark:text-brand-green-400'
-                : 'border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'bg-brand-green-50 dark:bg-brand-green-950/60 border-brand-green-300 dark:border-brand-green-800 text-brand-green-600 dark:text-brand-green-400'
+                : 'border-slate-200 dark:border-white/10 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-white/[0.06]'
             }`}
             title={isSaved ? 'Remove from saved' : 'Save opportunity'}
           >
-            <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-brand-green-500' : ''}`} />
+            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? 'fill-brand-green-500' : ''}`} />
           </button>
         </div>
 
@@ -73,16 +73,16 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
             <img
               src={opportunity.companyLogo}
               alt={opportunity.company}
-              className="w-12 h-12 rounded-xl object-cover border border-slate-200/80 dark:border-slate-700 flex-shrink-0"
+              className="w-10 h-10 rounded-lg object-cover border border-slate-200/80 dark:border-white/10 shrink-0"
             />
           ) : (
-            <div className="w-12 h-12 rounded-xl bg-brand-blue-50 dark:bg-brand-blue-950 flex items-center justify-center text-brand-blue-700 dark:text-brand-blue-300 border border-slate-200/80 dark:border-slate-700 flex-shrink-0">
-              <Building2 className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-lg bg-brand-blue-50 dark:bg-white/[0.06] flex items-center justify-center text-brand-blue-700 dark:text-brand-blue-300 border border-slate-200/80 dark:border-white/10 shrink-0">
+              <Building2 className="w-5 h-5" />
             </div>
           )}
 
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white group-hover:text-brand-blue-600 dark:group-hover:text-brand-blue-400 transition-colors line-clamp-2">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-brand-blue-700 dark:group-hover:text-brand-green-400 transition-colors line-clamp-2">
               {opportunity.title}
             </h3>
             <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
@@ -101,7 +101,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
           {opportunity.tags.slice(0, 3).map((tag, idx) => (
             <span
               key={idx}
-              className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+              className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-400"
             >
               #{tag}
             </span>
@@ -113,7 +113,7 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
       </div>
 
       {/* Card Footer: Compensation & Deadline */}
-      <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+      <div className="pt-3 border-t border-slate-100 dark:border-white/[0.08] flex items-center justify-between text-xs">
         <div className="font-semibold text-brand-green-700 dark:text-brand-green-400 truncate max-w-[170px]">
           {opportunity.salaryRange || 'Competitive Stipend'}
         </div>
@@ -131,4 +131,3 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
     </div>
   );
 };
-

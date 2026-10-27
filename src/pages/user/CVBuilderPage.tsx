@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Save, CheckCircle2 } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { mockStorage } from '../../lib/mockStorage';
 import { CVData, CVTemplateId } from '../../types';
 import { CVEditor } from '../../components/cv/CVEditor';
@@ -8,7 +8,6 @@ import { Button } from '../../components/common/Button';
 import { PageHeader } from '../../components/common/PageHeader';
 import { Badge } from '../../components/common/Badge';
 import { useToast } from '../../hooks/useToast';
-import { fireCelebrationConfetti } from '../../lib/utils';
 
 export const CVBuilderPage: React.FC = () => {
   const { showToast } = useToast();
@@ -29,8 +28,7 @@ export const CVBuilderPage: React.FC = () => {
     };
     mockStorage.saveCV(updatedDoc);
     setCvDoc(updatedDoc);
-    fireCelebrationConfetti();
-    showToast('CV document saved successfully!', 'success');
+    showToast('CV document saved successfully', 'success');
   };
 
   return (
@@ -39,7 +37,7 @@ export const CVBuilderPage: React.FC = () => {
       <div className="no-print">
         <PageHeader
           title="Interactive CV Builder"
-          subtitle="Real-time live preview and ATS-optimized formatting for Kenyan and multinational employers."
+          subtitle="ATS-optimized formatting and templates for Kenyan and international employers."
           breadcrumbs={[{ label: 'CV Builder' }]}
           badge={
             <Badge variant="blue" size="sm">
@@ -53,7 +51,7 @@ export const CVBuilderPage: React.FC = () => {
               onClick={handleSave}
               leftIcon={<Save className="w-4 h-4" />}
             >
-              Save CV
+              Save Changes
             </Button>
           }
         />
@@ -62,12 +60,12 @@ export const CVBuilderPage: React.FC = () => {
       {/* Split Pane: Left Editor, Right Live Preview */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left: CV Editor Form (hidden on print) */}
-        <div className="no-print lg:col-span-5 h-[800px]">
+        <div className="no-print lg:col-span-5 min-h-[600px] lg:h-[800px]">
           <CVEditor cvData={cvData} onChange={handleDataChange} />
         </div>
 
         {/* Right: Live Formatted Preview (visible on print) */}
-        <div className="lg:col-span-7 h-[800px]">
+        <div className="lg:col-span-7 min-h-[600px] lg:h-[800px]">
           <CVPreview
             cvData={cvData}
             templateId={templateId}

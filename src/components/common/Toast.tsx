@@ -43,15 +43,15 @@ const ToastItem: React.FC<{ toast: ToastMessage; onRemove: (id: string) => void 
   };
 
   const borders = {
-    success: 'border-brand-green-500/30 bg-white dark:bg-slate-900',
-    error: 'border-rose-500/30 bg-white dark:bg-slate-900',
-    warning: 'border-amber-500/30 bg-white dark:bg-slate-900',
-    info: 'border-brand-blue-500/30 bg-white dark:bg-slate-900',
+    success: 'border-brand-green-500/30 bg-white dark:bg-[#111111] dark:border-white/10',
+    error: 'border-rose-500/30 bg-white dark:bg-[#111111] dark:border-white/10',
+    warning: 'border-amber-500/30 bg-white dark:bg-[#111111] dark:border-white/10',
+    info: 'border-brand-blue-500/30 bg-white dark:bg-[#111111] dark:border-white/10',
   };
 
   return (
     <div
-      className={`pointer-events-auto flex items-center justify-between gap-3 p-4 rounded-xl border shadow-lg transition-all transform animate-in fade-in slide-in-from-bottom-3 duration-200 ${borders[toast.type]}`}
+      className={`pointer-events-auto flex items-center justify-between gap-3 p-4 rounded-xl border shadow-lg transition-all transform animate-in fade-in slide-in-from-bottom-2 duration-150 ${borders[toast.type]}`}
     >
       <div className="flex items-center gap-3">
         {icons[toast.type]}

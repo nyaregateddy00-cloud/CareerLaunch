@@ -1,24 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Heart } from 'lucide-react';
+import { Mail, CheckCircle2 } from 'lucide-react';
 import { Button } from '../common/Button';
 import { BrandLogo } from '../branding/BrandLogo';
 
 export const Footer: React.FC = () => {
+  const [subscribed, setSubscribed] = useState(false);
+  const [email, setEmail] = useState('');
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setSubscribed(true);
+    setEmail('');
+  };
+
   return (
-    <footer className="border-t border-slate-200 dark:border-white/[0.06] bg-white dark:bg-black text-slate-600 dark:text-slate-400 transition-colors">
+    <footer className="border-t border-slate-200/80 dark:border-white/[0.08] bg-white dark:bg-black text-slate-600 dark:text-slate-400 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-1">
               <BrandLogo to="/" />
-              <p className="pl-[50px] text-xs font-medium text-slate-500 dark:text-slate-400">Build Your Skills. Launch Your Career.</p>
+              <p className="pl-[50px] text-xs font-semibold text-brand-green-700 dark:text-brand-green-400 tracking-wide">
+                Build Your Skills. Launch Your Career.
+              </p>
             </div>
-            <p className="text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
-              Empowering university students, graduates, freelancers, and ambitious job seekers across Kenya and Africa to build skills, create high-impact CVs, and launch rewarding careers.
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-sm leading-relaxed">
+              CareerLaunch helps people build skills, create stronger career profiles, discover opportunities, and connect with employers across Kenya and the wider African market.
             </p>
-            <div className="flex items-center gap-2 text-xs font-semibold text-brand-blue-900 dark:text-brand-green-400">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
               <span className="w-2 h-2 rounded-full bg-brand-green-500"></span>
               Headquartered in Nairobi, Kenya • Serving Pan-Africa
             </div>
@@ -26,20 +38,29 @@ export const Footer: React.FC = () => {
             {/* Newsletter input */}
             <div className="pt-2">
               <p className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
-                Weekly Opportunity & Career Alerts
+                Weekly Opportunity &amp; Career Updates
               </p>
-              <form onSubmit={(e) => { e.preventDefault(); alert('Subscribed to weekly opportunity alerts!'); }} className="flex gap-2 max-w-sm">
-                <input
-                  type="email"
-                  required
-                  placeholder="Enter your email"
-                  className="flex-1 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue-500"
-                />
-                <Button size="sm" variant="accent" type="submit">
-                  <Mail className="w-3.5 h-3.5" />
-                  Subscribe
-                </Button>
-              </form>
+              {subscribed ? (
+                <div className="flex items-center gap-2 text-xs font-medium text-brand-green-600 dark:text-brand-green-400 bg-brand-green-50 dark:bg-brand-green-950/40 border border-brand-green-200 dark:border-brand-green-800/50 p-2.5 rounded-lg max-w-sm">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  <span>You're subscribed to weekly opportunity alerts.</span>
+                </div>
+              ) : (
+                <form onSubmit={handleSubscribe} className="flex gap-2 max-w-sm">
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="flex-1 rounded-lg border border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-[#111111] px-3 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue-500"
+                  />
+                  <Button size="sm" variant="accent" type="submit">
+                    <Mail className="w-3.5 h-3.5" />
+                    Subscribe
+                  </Button>
+                </form>
+              )}
             </div>
           </div>
 
@@ -66,39 +87,35 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2.5 text-xs">
               <li><Link to="/opportunities?type=Attachment" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Industrial Attachments (NITA)</Link></li>
               <li><Link to="/opportunities?type=Graduate%20Program" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Graduate Programs 2026</Link></li>
-              <li><Link to="/opportunities?type=Job" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Entry & Junior Tech Jobs</Link></li>
+              <li><Link to="/opportunities?type=Job" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Entry &amp; Junior Tech Jobs</Link></li>
               <li><Link to="/opportunities?type=Scholarship" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">African Scholarships</Link></li>
-              <li><Link to="/opportunities?type=Freelance" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Remote Freelance Gigs</Link></li>
-              <li><Link to="/opportunities?type=Competition" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Hackathons & Grants</Link></li>
+              <li><Link to="/opportunities?type=Freelance" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Remote Freelance Contracts</Link></li>
+              <li><Link to="/opportunities?type=Competition" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Hackathons &amp; Challenges</Link></li>
             </ul>
           </div>
 
-          {/* Column: Company & Legal */}
+          {/* Column: Company & Help */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">
-              Company & Help
+              Company &amp; Help
             </h4>
             <ul className="space-y-2.5 text-xs">
               <li><Link to="/about" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">About Us</Link></li>
-              <li><Link to="/features" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Features Overview</Link></li>
+              <li><Link to="/features" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Platform Features</Link></li>
               <li><Link to="/resources" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Learning Resources</Link></li>
-              <li><Link to="/pricing" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Pricing & Plans</Link></li>
+              <li><Link to="/pricing" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Pricing &amp; Plans</Link></li>
               <li><Link to="/contact" className="hover:text-brand-blue-600 dark:hover:text-brand-green-400 transition-colors">Contact Support</Link></li>
-              <li><span className="text-slate-400 cursor-pointer hover:underline">Privacy & Terms</span></li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+        <div className="mt-12 pt-8 border-t border-slate-200 dark:border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <p>© {new Date().getFullYear()} CareerLaunch. “Build Your Skills. Launch Your Career.” All rights reserved.</p>
-          <div className="flex items-center gap-1 text-slate-500">
-            <span>Built with</span>
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
-            <span>for the future of African talent.</span>
-          </div>
+          <p className="text-slate-500 dark:text-slate-500">
+            Connecting African talent with skills and opportunities.
+          </p>
         </div>
       </div>
     </footer>
   );
 };
-

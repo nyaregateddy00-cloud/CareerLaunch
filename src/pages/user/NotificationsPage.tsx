@@ -1,20 +1,20 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Bell, CheckCheck, Clock, ArrowRight, CheckCircle2, Inbox } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Clock, CheckCheck, Inbox, ArrowRight } from 'lucide-react';
 import { mockStorage } from '../../lib/mockStorage';
-import { Notification } from '../../types';
+import { NotificationItem } from '../../types';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { PageHeader } from '../../components/common/PageHeader';
 import { EmptyState } from '../../components/common/EmptyState';
-import { useToast } from '../../hooks/useToast';
 import { formatDate } from '../../lib/utils';
+import { useToast } from '../../hooks/useToast';
 
 export const NotificationsPage: React.FC = () => {
   const { showToast } = useToast();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [filter, setFilter] = useState<'all' | 'unread' | 'opportunities' | 'applications'>('all');
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [filter, setFilter] = useState<'all' | 'unread' | 'application' | 'opportunity'>('all');
 
   const loadData = () => {
     setNotifications(mockStorage.getNotifications());
@@ -27,89 +27,85 @@ export const NotificationsPage: React.FC = () => {
   }, []);
 
   const handleMarkAllRead = () => {
-    mockStorage.markAllNotificationsAsRead();
+    mockStorage.markAllNotificationsRead();
     loadData();
     showToast('All notifications marked as read', 'success');
   };
 
   const handleMarkRead = (id: string) => {
-    mockStorage.markNotificationAsRead(id);
+    mockStorage.markNotificationRead(id);
     loadData();
   };
 
-  const filteredNotifications = useMemo(() => {
-    return notifications.filter((n) => {
-      if (filter === 'unread') return !n.isRead;
-      if (filter === 'opportunities') return n.type === 'opportunity';
-      if (filter === 'applications') return n.type === 'application';
-      return true;
-    });
-  }, [notifications, filter]);
-
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
+  const filteredNotifications = notifications.filter((n) => {
+    if (filter === 'unread') return !n.isRead;
+    if (filter === 'application') return n.type === 'application_update';
+    if (filter === 'opportunity') return n.type === 'opportunity_alert';
+    return true;
+  });
+
+  const filterTabs = [
+    { id: 'all', label: 'All', count: notifications.length },
+    { id: 'unread', label: 'Unread', count: unreadCount },
+    {
+      id: 'application',
+      label: 'Applications',
+      count: notifications.filter((n) => n.type === 'application_update').length,
+    },
+    {
+      id: 'opportunity',
+      label: 'Opportunities',
+      count: notifications.filter((n) => n.type === 'opportunity_alert').length,
+    },
+  ];
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="space-y-6 max-w-4xl mx-auto text-slate-900 dark:text-[#f8fafc]">
       <PageHeader
         title="Notifications"
-        subtitle="Real-time updates on your job applications, matching opportunities, and platform announcements."
+        subtitle="Updates on your applications, matching opportunities, and platform notices."
         breadcrumbs={[{ label: 'Notifications' }]}
         badge={
           unreadCount > 0 ? (
-            <Badge variant="accent" size="sm">
+            <Badge variant="green" size="sm">
               {unreadCount} Unread
             </Badge>
-          ) : (
-            <Badge variant="outline" size="sm">
-              All Caught Up
-            </Badge>
-          )
+          ) : undefined
         }
         action={
           unreadCount > 0 ? (
             <Button
               size="sm"
-              variant="secondary"
+              variant="outline"
               onClick={handleMarkAllRead}
               leftIcon={<CheckCheck className="w-4 h-4" />}
             >
-              Mark All Read
+              Mark all as read
             </Button>
           ) : undefined
         }
       />
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-        {[
-          { id: 'all', label: 'All', count: notifications.length },
-          { id: 'unread', label: 'Unread', count: unreadCount },
-          {
-            id: 'opportunities',
-            label: 'Opportunities',
-            count: notifications.filter((n) => n.type === 'opportunity').length,
-          },
-          {
-            id: 'applications',
-            label: 'Applications',
-            count: notifications.filter((n) => n.type === 'application').length,
-          },
-        ].map((tab) => (
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+        {filterTabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setFilter(tab.id as typeof filter)}
-            className={`text-xs font-semibold px-3.5 py-1.5 rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5 ${
               filter === tab.id
-                ? 'bg-brand-blue-900 dark:bg-brand-blue-600 text-white shadow-sm'
-                : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'bg-brand-blue-900 dark:bg-brand-blue-700 text-white shadow-xs'
+                : 'bg-slate-100 dark:bg-[#111111] border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-white/[0.08]'
             }`}
           >
             <span>{tab.label}</span>
             <span
-              className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+              className={`text-[10px] px-1.5 py-0.5 rounded-full ${
                 filter === tab.id
                   ? 'bg-white/20 text-white'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                  : 'bg-slate-200 dark:bg-white/[0.08] text-slate-600 dark:text-slate-400'
               }`}
             >
               {tab.count}
@@ -123,7 +119,7 @@ export const NotificationsPage: React.FC = () => {
           title="No notifications"
           description={
             filter === 'unread'
-              ? 'You have read all your notifications!'
+              ? 'You have read all your notifications.'
               : 'There are no notifications matching your current filter.'
           }
           icon={<Inbox className="w-10 h-10 text-slate-400" />}
@@ -143,8 +139,8 @@ export const NotificationsPage: React.FC = () => {
               onClick={() => handleMarkRead(n.id)}
               className={`p-5 transition-all cursor-pointer ${
                 !n.isRead
-                  ? 'border-l-4 border-l-brand-green-500 bg-brand-green-50/10 dark:bg-brand-green-950/20'
-                  : 'opacity-85'
+                  ? 'border-l-4 border-l-brand-green-500 bg-brand-green-50/20 dark:bg-brand-green-950/20'
+                  : 'opacity-75'
               }`}
             >
               <div className="flex items-start justify-between gap-4">

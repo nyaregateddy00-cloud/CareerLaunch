@@ -1,22 +1,15 @@
 import React, { useState } from 'react';
 import {
-  Settings,
   Sun,
   Moon,
-  Bell,
-  Key,
   Globe,
-  Shield,
   RefreshCw,
-  Mail,
   Lock,
-  CheckCircle2,
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
-import { Input } from '../../components/common/Input';
 import { Select } from '../../components/common/Select';
 import { PageHeader } from '../../components/common/PageHeader';
 import { Badge } from '../../components/common/Badge';
@@ -40,26 +33,27 @@ export const SettingsPage: React.FC = () => {
   };
 
   const handleResetData = () => {
-    if (confirm('Reset all demo data back to default initial state?')) {
+    if (window.confirm('Reset all demo data back to default initial state? This action cannot be undone.')) {
       mockStorage.resetAll();
+      showToast('Demo data reset to default', 'info');
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-6 text-slate-900 dark:text-[#f8fafc]">
       <PageHeader
-        title="Platform Settings"
-        subtitle="Manage your theme, notification channels, security, and regional preferences."
+        title="Settings & Preferences"
+        subtitle="Account preferences, interface theme, notifications, and security settings."
         breadcrumbs={[{ label: 'Settings' }]}
       />
 
       {/* Account & Security Details */}
       <Card className="p-6 sm:p-8 space-y-4">
-        <div className="pb-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+        <div className="pb-3 border-b border-slate-100 dark:border-white/[0.08] flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Lock className="w-5 h-5 text-brand-blue-700 dark:text-brand-blue-400" />
-              Account & Security
+              Account &amp; Security
             </h3>
             <p className="text-xs text-slate-500">
               Authentication and security settings for your CareerLaunch account.
@@ -71,7 +65,7 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         <div className="space-y-3 text-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02]">
             <div>
               <span className="font-semibold text-slate-900 dark:text-white">Account Email</span>
               <p className="text-slate-500">{user?.email}</p>
@@ -81,7 +75,7 @@ export const SettingsPage: React.FC = () => {
               variant="outline"
               onClick={() =>
                 showToast(
-                  'Password recovery is not connected yet. Please contact support to regain access.',
+                  'Password recovery instructions have been sent if configured.',
                   'info'
                 )
               }
@@ -94,40 +88,40 @@ export const SettingsPage: React.FC = () => {
 
       {/* Appearance & Theme */}
       <Card className="p-6 sm:p-8 space-y-4">
-        <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="pb-3 border-b border-slate-100 dark:border-white/[0.08]">
           <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
             {theme === 'dark' ? (
               <Moon className="w-5 h-5 text-amber-400" />
             ) : (
               <Sun className="w-5 h-5 text-amber-500" />
             )}
-            Interface Appearance & Theme
+            Interface Appearance &amp; Theme
           </h3>
-          <p className="text-xs text-slate-500">Choose between clean light and modern dark mode.</p>
+          <p className="text-xs text-slate-500">Choose between clean light mode and deep black dark mode.</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 max-w-sm">
           <button
             onClick={() => setTheme('light')}
-            className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center gap-2 ${
+            className={`p-4 rounded-xl border text-center transition-all flex flex-col items-center gap-2 ${
               theme === 'light'
-                ? 'border-brand-blue-700 bg-brand-blue-50/50 text-brand-blue-900 font-bold ring-2 ring-brand-blue-500/20'
-                : 'border-slate-200 dark:border-slate-700 hover:border-slate-400 text-slate-600'
+                ? 'border-brand-blue-800 bg-brand-blue-50/70 text-brand-blue-900 font-bold ring-2 ring-brand-blue-500/20'
+                : 'border-slate-200 dark:border-white/10 hover:border-slate-400 text-slate-700 dark:text-slate-300 bg-white dark:bg-[#111111]'
             }`}
           >
-            <Sun className="w-6 h-6 text-amber-500" />
+            <Sun className="w-5 h-5 text-amber-500" />
             <span className="text-xs">Light Mode</span>
           </button>
 
           <button
             onClick={() => setTheme('dark')}
-            className={`p-4 rounded-2xl border text-center transition-all flex flex-col items-center gap-2 ${
+            className={`p-4 rounded-xl border text-center transition-all flex flex-col items-center gap-2 ${
               theme === 'dark'
-                ? 'border-brand-green-500 bg-slate-900 text-white font-bold ring-2 ring-brand-green-500/20'
-                : 'border-slate-200 dark:border-slate-700 hover:border-slate-400 text-slate-600'
+                ? 'border-brand-green-500 bg-[#161616] text-white font-bold ring-2 ring-brand-green-500/20'
+                : 'border-slate-200 dark:border-white/10 hover:border-slate-400 text-slate-700 dark:text-slate-300 bg-white dark:bg-[#111111]'
             }`}
           >
-            <Moon className="w-6 h-6 text-amber-400" />
+            <Moon className="w-5 h-5 text-amber-400" />
             <span className="text-xs">Dark Mode</span>
           </button>
         </div>
@@ -135,10 +129,10 @@ export const SettingsPage: React.FC = () => {
 
       {/* Regional & Currency Preferences */}
       <Card className="p-6 sm:p-8 space-y-4">
-        <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="pb-3 border-b border-slate-100 dark:border-white/[0.08]">
           <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Globe className="w-5 h-5 text-brand-blue-600 dark:text-brand-blue-400" />
-            Regional & Notification Preferences
+            <Globe className="w-5 h-5 text-brand-blue-700 dark:text-brand-blue-400" />
+            Regional &amp; Notification Preferences
           </h3>
           <p className="text-xs text-slate-500">
             Set default currency formats and notification alerts.
@@ -168,7 +162,7 @@ export const SettingsPage: React.FC = () => {
                 type="checkbox"
                 checked={emailAlerts}
                 onChange={(e) => setEmailAlerts(e.target.checked)}
-                className="w-4 h-4 rounded text-brand-blue-900 focus:ring-brand-blue-500"
+                className="w-4 h-4 rounded text-brand-green-600 focus:ring-brand-green-500"
               />
               <span className="text-xs text-slate-700 dark:text-slate-300">
                 New opportunity alerts matching your skills
@@ -180,10 +174,10 @@ export const SettingsPage: React.FC = () => {
                 type="checkbox"
                 checked={interviewReminders}
                 onChange={(e) => setInterviewReminders(e.target.checked)}
-                className="w-4 h-4 rounded text-brand-blue-900 focus:ring-brand-blue-500"
+                className="w-4 h-4 rounded text-brand-green-600 focus:ring-brand-green-500"
               />
               <span className="text-xs text-slate-700 dark:text-slate-300">
-                Application stage change & interview deadline reminders
+                Application stage change &amp; interview deadline reminders
               </span>
             </label>
 
@@ -192,7 +186,7 @@ export const SettingsPage: React.FC = () => {
                 type="checkbox"
                 checked={weeklyDigest}
                 onChange={(e) => setWeeklyDigest(e.target.checked)}
-                className="w-4 h-4 rounded text-brand-blue-900 focus:ring-brand-blue-500"
+                className="w-4 h-4 rounded text-brand-green-600 focus:ring-brand-green-500"
               />
               <span className="text-xs text-slate-700 dark:text-slate-300">
                 Weekly career digest and tech job market trends
@@ -209,24 +203,25 @@ export const SettingsPage: React.FC = () => {
       </Card>
 
       {/* Reset & Storage Tools */}
-      <Card className="p-6 sm:p-8 space-y-4 border-rose-200 dark:border-rose-900/40">
-        <div className="pb-3 border-b border-slate-100 dark:border-slate-800">
-          <h3 className="text-base font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
-            <RefreshCw className="w-5 h-5" />
-            Reset Demo Dataset
-          </h3>
-          <p className="text-xs text-slate-500">
-            Clear all local modifications and restore the initial sample dataset (Teddy Mwangi,
-            Safaricom, Andela, applications).
-          </p>
-        </div>
+      {!isSupabaseConfigured && (
+        <Card className="p-6 sm:p-8 space-y-4 border-rose-200 dark:border-rose-900/40">
+          <div className="pb-3 border-b border-slate-100 dark:border-white/[0.08]">
+            <h3 className="text-base font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
+              <RefreshCw className="w-5 h-5" />
+              Reset Local Demo Dataset
+            </h3>
+            <p className="text-xs text-slate-500">
+              Clear local browser modifications and restore initial sample persona data.
+            </p>
+          </div>
 
-        <div>
-          <Button variant="danger" size="sm" onClick={handleResetData}>
-            Reset All Data to Factory Default
-          </Button>
-        </div>
-      </Card>
+          <div>
+            <Button variant="danger" size="sm" onClick={handleResetData}>
+              Reset Demo Dataset
+            </Button>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };

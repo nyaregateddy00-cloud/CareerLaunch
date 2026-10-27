@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Plus, Trash2, Target, CheckCircle2, AlertCircle, Award } from 'lucide-react';
+import { Plus, Trash2, Target, Award } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { mockStorage } from '../../lib/mockStorage';
 import { UserSkill, SkillCategory, RoleSkillGap } from '../../types';
@@ -65,10 +65,10 @@ export const SkillsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-10 max-w-5xl mx-auto">
+    <div className="space-y-10 max-w-5xl mx-auto text-slate-900 dark:text-[#f8fafc]">
       <PageHeader
-        title="Skills & Role Gap Intelligence"
-        subtitle="Map your competencies and analyze skill gaps against top engineering benchmarks in Africa."
+        title="Skills & Role Gap Analysis"
+        subtitle="Review your competencies and identify skill recommendations for targeted African and international roles."
         breadcrumbs={[{ label: 'Skills' }]}
         badge={
           <Badge variant="blue" size="sm">
@@ -91,10 +91,10 @@ export const SkillsPage: React.FC = () => {
       <div className="space-y-4">
         <div>
           <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <Target className="w-5 h-5 text-brand-green-500" />
+            <Target className="w-5 h-5 text-brand-green-600 dark:text-brand-green-400" />
             Target Role Gap Analysis
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Explore sample role skill profiles. They are not connected to live employer job specifications.
           </p>
         </div>
@@ -110,10 +110,10 @@ export const SkillsPage: React.FC = () => {
       <div className="space-y-6">
         <div>
           <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-            My Verified Skill Stack ({skills.length})
+            My Documented Skills ({skills.length})
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Organized across technical domains, frameworks, and collaboration capabilities
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Your tracked technical tools, frameworks, and core capabilities.
           </p>
         </div>
 
@@ -136,8 +136,8 @@ export const SkillsPage: React.FC = () => {
 
               return (
                 <Card key={cat} className="p-5 space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-white/[0.08]">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       {cat}
                     </h3>
                     <span className="text-xs font-semibold text-slate-400">
@@ -149,7 +149,7 @@ export const SkillsPage: React.FC = () => {
                     {catSkills.map((s) => (
                       <div
                         key={s.id}
-                        className="p-3 rounded-xl bg-slate-50/60 dark:bg-slate-850 border border-slate-200/70 dark:border-slate-800 flex items-center justify-between gap-3 text-xs"
+                        className="p-3 rounded-lg bg-slate-50/70 dark:bg-white/[0.03] border border-slate-200/70 dark:border-white/[0.08] flex items-center justify-between gap-3 text-xs"
                       >
                         <div>
                           <div className="font-bold text-slate-900 dark:text-white">{s.skillName}</div>
@@ -160,7 +160,7 @@ export const SkillsPage: React.FC = () => {
                           {getProficiencyBadge(s.proficiencyLevel)}
                           <button
                             onClick={() => handleDeleteSkill(s.id)}
-                            className="text-slate-400 hover:text-rose-600 p-1 transition-colors"
+                            className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-1 transition-colors"
                             title="Remove skill"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

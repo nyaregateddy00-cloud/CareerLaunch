@@ -8,11 +8,8 @@ import {
   Github,
   Linkedin,
   Twitter,
-  Calendar,
   Sparkles,
-  ArrowRight,
   Briefcase,
-  GraduationCap
 } from 'lucide-react';
 import { UserProfile, Project, Experience, Education, UserSkill } from '../../types';
 import { Button } from '../common/Button';
@@ -34,12 +31,12 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
   skills,
 }) => {
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors selection:bg-brand-green-500 selection:text-white">
+    <div className="min-h-screen bg-white dark:bg-black text-slate-900 dark:text-[#f8fafc] transition-colors selection:bg-brand-green-500 selection:text-white">
       {/* Top Banner Navigation */}
-      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md">
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-black/95 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-brand-blue-900 dark:bg-brand-blue-600 flex items-center justify-center text-white">
+            <div className="w-8 h-8 rounded-lg bg-brand-blue-900 dark:bg-brand-blue-700 flex items-center justify-center text-white">
               <Rocket className="w-4 h-4 text-brand-green-400" />
             </div>
             <span className="text-base font-bold tracking-tight text-brand-blue-900 dark:text-white">
@@ -58,55 +55,55 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
       </header>
 
       {/* Hero Header */}
-      <section className="py-16 sm:py-24 border-b border-slate-200/80 dark:border-slate-800 bg-gradient-to-b from-white via-slate-50 to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-950">
+      <section className="py-14 sm:py-20 border-b border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-[#0A0A0A]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <div className="relative inline-block mb-6">
+          <div className="relative inline-block mb-5">
             <img
               src={user.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200'}
               alt={user.fullName}
-              className="w-28 h-28 sm:w-36 sm:h-36 rounded-3xl object-cover border-4 border-white dark:border-slate-800 shadow-xl mx-auto"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover border-4 border-white dark:border-[#111111] shadow-md mx-auto"
             />
-            <div className="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-brand-green-500 border-2 border-white dark:border-slate-900 flex items-center justify-center text-white shadow" title="Available for hire">
-              <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+            <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-brand-green-500 border-2 border-white dark:border-[#111111] flex items-center justify-center text-white shadow-xs" title="Available for hire">
+              <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-950 dark:text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             {user.fullName}
           </h1>
 
-          <p className="mt-3 text-base sm:text-xl font-semibold text-brand-blue-900 dark:text-brand-blue-300 max-w-2xl mx-auto">
+          <p className="mt-2 text-base sm:text-lg font-semibold text-brand-blue-800 dark:text-brand-blue-300 max-w-2xl mx-auto">
             {user.headline}
           </p>
 
-          <p className="mt-2 text-xs sm:text-sm text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1.5">
-            <MapPin className="w-4 h-4 text-brand-green-500" />
+          <p className="mt-1.5 text-xs sm:text-sm text-slate-500 dark:text-slate-400 flex items-center justify-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-brand-green-600 dark:text-brand-green-400" />
             {user.location}
           </p>
 
-          <p className="mt-6 text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
             {user.bio}
           </p>
 
           {/* Social Links */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5">
             {user.githubUrl && (
               <a href={user.githubUrl} target="_blank" rel="noreferrer">
-                <Button size="sm" variant="secondary" leftIcon={<Github className="w-4 h-4" />}>
+                <Button size="sm" variant="secondary" leftIcon={<Github className="w-3.5 h-3.5" />}>
                   GitHub
                 </Button>
               </a>
             )}
             {user.linkedinUrl && (
               <a href={user.linkedinUrl} target="_blank" rel="noreferrer">
-                <Button size="sm" variant="secondary" leftIcon={<Linkedin className="w-4 h-4" />}>
+                <Button size="sm" variant="secondary" leftIcon={<Linkedin className="w-3.5 h-3.5" />}>
                   LinkedIn
                 </Button>
               </a>
             )}
             {user.twitterUrl && (
               <a href={user.twitterUrl} target="_blank" rel="noreferrer">
-                <Button size="sm" variant="secondary" leftIcon={<Twitter className="w-4 h-4" />}>
+                <Button size="sm" variant="secondary" leftIcon={<Twitter className="w-3.5 h-3.5" />}>
                   Twitter / X
                 </Button>
               </a>
@@ -116,48 +113,46 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
       </section>
 
       {/* Main Content Area */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-16 space-y-16">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-14 space-y-14">
         {/* Featured Projects Grid */}
         <section>
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                Featured Projects & Proof of Work
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Real software solutions built for African and global users
-              </p>
-            </div>
+          <div className="mb-6">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
+              Featured Projects &amp; Work
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Software solutions and applications built for African and international users
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {projects.map((proj) => (
               <div
                 key={proj.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-card hover:shadow-lg transition-all flex flex-col justify-between"
+                className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/10 rounded-xl overflow-hidden shadow-xs hover:border-slate-300 dark:hover:border-white/20 transition-all flex flex-col justify-between"
               >
                 {proj.imageUrl && (
-                  <div className="h-48 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                  <div className="h-44 w-full overflow-hidden bg-slate-100 dark:bg-white/[0.04]">
                     <img
                       src={proj.imageUrl}
                       alt={proj.title}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                 )}
-                <div className="p-6 flex-1 flex flex-col justify-between">
+                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-2">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1.5">
                       {proj.title}
                     </h3>
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
                       {proj.description}
                     </p>
-                    <div className="flex flex-wrap gap-1.5 mb-6">
+                    <div className="flex flex-wrap gap-1.5 mb-5">
                       {proj.tags.map((t, idx) => (
                         <span
                           key={idx}
-                          className="text-[11px] font-semibold px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+                          className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300"
                         >
                           {t}
                         </span>
@@ -165,7 +160,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2.5 pt-3 border-t border-slate-100 dark:border-white/[0.08]">
                     {proj.link && (
                       <a href={proj.link} target="_blank" rel="noreferrer">
                         <Button size="sm" variant="accent" rightIcon={<ExternalLink className="w-3.5 h-3.5" />}>
@@ -189,28 +184,28 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
 
         {/* Experience Timeline */}
         <section>
-          <div className="mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Briefcase className="w-6 h-6 text-brand-green-500" />
-              Work Experience & Attachments
+          <div className="mb-6">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-brand-green-600 dark:text-brand-green-400" />
+              Work Experience &amp; Attachments
             </h2>
           </div>
 
-          <div className="space-y-6 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+          <div className="space-y-4 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200 dark:before:bg-white/10">
             {experience.map((exp) => (
-              <div key={exp.id} className="relative pl-10">
-                <span className="absolute left-2.5 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-brand-green-500 bg-white dark:bg-slate-900" />
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-card">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2">
-                    <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                      {exp.position} <span className="text-brand-blue-700 dark:text-brand-blue-400 font-semibold">@ {exp.company}</span>
+              <div key={exp.id} className="relative pl-9">
+                <span className="absolute left-2 top-2 w-3 h-3 rounded-full border-2 border-brand-green-500 bg-white dark:bg-black" />
+                <div className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/10 p-5 rounded-xl shadow-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                      {exp.position} <span className="text-brand-blue-800 dark:text-brand-blue-400 font-semibold">@ {exp.company}</span>
                     </h3>
-                    <span className="text-xs font-semibold text-slate-400">
+                    <span className="text-xs text-slate-400">
                       {formatMonthYear(exp.startDate)} – {exp.isCurrent ? 'Present' : formatMonthYear(exp.endDate)}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-500 mb-3">{exp.location} • {exp.employmentType}</div>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
+                  <div className="text-[11px] text-slate-500 mb-2.5">{exp.location} • {exp.employmentType}</div>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed whitespace-pre-line">
                     {exp.description}
                   </p>
                 </div>
@@ -220,35 +215,35 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
         </section>
 
         {/* Skills & Competencies */}
-        <section className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-card">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-brand-green-500" />
-            Skills & Technical Stack
+        <section className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/10 rounded-xl p-6 sm:p-7 shadow-xs">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-brand-green-600 dark:text-brand-green-400" />
+            Skills &amp; Technical Capabilities
           </h2>
-          <div className="flex flex-wrap gap-2.5">
+          <div className="flex flex-wrap gap-2">
             {skills.map((s) => (
               <span
                 key={s.id}
-                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-brand-blue-50 dark:bg-brand-blue-950/60 text-brand-blue-900 dark:text-brand-blue-300 border border-brand-blue-100 dark:border-brand-blue-900/60"
+                className="px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 dark:bg-white/[0.06] text-slate-800 dark:text-slate-200 border border-slate-200/60 dark:border-white/10"
               >
-                {s.skillName} • <span className="opacity-70 text-[10px]">{s.proficiencyLevel}</span>
+                {s.skillName} • <span className="opacity-70 text-[11px]">{s.proficiencyLevel}</span>
               </span>
             ))}
           </div>
         </section>
 
-        {/* Final CTA Contact Box */}
-        <section className="text-center py-12 px-6 rounded-3xl bg-brand-blue-900 text-white shadow-2xl relative overflow-hidden">
-          <div className="relative z-10 max-w-xl mx-auto space-y-4">
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+        {/* Contact CTA */}
+        <section className="text-center py-10 px-6 rounded-xl bg-brand-blue-900 text-white shadow-sm border border-brand-blue-800 dark:bg-[#0c1a30] dark:border-white/10">
+          <div className="max-w-lg mx-auto space-y-3">
+            <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">
               Interested in working together?
             </h2>
-            <p className="text-sm text-brand-blue-200 leading-relaxed">
-              I am open to full-time roles, freelance projects, and graduate engineering programs across Africa and remote global teams.
+            <p className="text-xs sm:text-sm text-brand-blue-100 dark:text-slate-300 leading-relaxed">
+              Available for full-time engineering roles, industrial attachments, and freelance projects.
             </p>
             <div className="pt-2">
               <a href={`mailto:${user.email}`}>
-                <Button size="lg" variant="accent" leftIcon={<Mail className="w-5 h-5" />}>
+                <Button size="md" variant="accent" leftIcon={<Mail className="w-4 h-4" />}>
                   Contact {user.fullName.split(' ')[0]} Directly
                 </Button>
               </a>
@@ -258,10 +253,9 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
       </main>
 
       {/* Mini Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500">
-        Powered by <Link to="/" className="font-bold text-brand-blue-700 dark:text-brand-green-400">CareerLaunch</Link> — Build Your Skills. Launch Your Career.
+      <footer className="border-t border-slate-200/80 dark:border-white/10 py-6 text-center text-xs text-slate-500">
+        Powered by <Link to="/" className="font-semibold text-brand-blue-800 dark:text-brand-green-400">CareerLaunch</Link> — Build Your Skills. Launch Your Career.
       </footer>
     </div>
   );
 };
-

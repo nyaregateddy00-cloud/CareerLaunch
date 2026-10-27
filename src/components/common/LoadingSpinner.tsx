@@ -15,8 +15,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 }) => {
   const ringSize = {
     sm: 'w-5 h-5 border-[1.5px]',
-    md: 'w-7 h-7 border-2',
-    lg: 'w-10 h-10 border-2',
+    md: 'w-6 h-6 border-2',
+    lg: 'w-8 h-8 border-2',
   };
 
   return (
@@ -30,14 +30,14 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         alt="CareerLaunch"
         width={36}
         height={36}
-        className="h-9 w-9 rounded-lg bg-white object-contain shadow-sm ring-1 ring-slate-200 dark:ring-white/10"
+        className="h-8 w-8 rounded-lg bg-white p-0.5 object-contain shadow-xs ring-1 ring-slate-200 dark:ring-white/10"
       />
       <div
         className={`${ringSize[size]} border-brand-green-500 border-t-transparent rounded-full animate-spin`}
         aria-hidden="true"
       />
       {(text || label) && (
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{text || label}</p>
+        <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">{text || label}</p>
       )}
     </div>
   );

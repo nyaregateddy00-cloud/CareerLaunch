@@ -7,9 +7,7 @@ import {
   Sparkles,
   ArrowRight,
   Clock,
-  Briefcase,
   CheckCircle2,
-  Calendar,
   Compass,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -22,6 +20,7 @@ import { OpportunityDetailModal } from '../../components/opportunities/Opportuni
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { formatDate } from '../../lib/utils';
+import { isSupabaseConfigured } from '../../lib/supabase';
 
 export const DashboardPage: React.FC = () => {
   const { user, authNotice } = useAuth();
@@ -34,7 +33,6 @@ export const DashboardPage: React.FC = () => {
   useEffect(() => {
     setApplications(mockStorage.getApplications());
     setSavedOppIds(mockStorage.getSavedOpportunityIds());
-    // Get top 2 published opportunities matching user
     setRecommendedOpps(mockStorage.getOpportunities().filter((opportunity) => opportunity.status === 'published').slice(0, 2));
 
     const handleStorage = () => {
@@ -84,15 +82,15 @@ export const DashboardPage: React.FC = () => {
     .sort((a, b) => new Date(a.interviewDate!).getTime() - new Date(b.interviewDate!).getTime());
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Banner */}
+    <div className="space-y-8 text-slate-900 dark:text-[#f8fafc]">
+      {/* Header Welcome Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-[#F5F5F5] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             {greeting}, <span className="font-serif italic font-normal text-brand-blue-700 dark:text-brand-blue-400">{firstName}</span> 👋
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Build Your Skills. Launch Your Career. Keep growing your proof of work and pipeline.
+            Track your applications, update your CV, and explore verified opportunities.
           </p>
         </div>
 
@@ -110,82 +108,94 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Profile Strength Interactive Card */}
+      {/* Profile Strength Overview */}
       <ProfileStrengthCard user={user} />
 
-      <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
-        Career records are cached in this browser. With Supabase configured and the updated schema applied, they are synchronized to your account for use across devices. Demo mode stays in this browser.
-      </div>
-      {(authNotice || workspaceSaveError) && <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">{workspaceSaveError || authNotice}</p>}
+      {/* Demo storage status only when Supabase is not configured */}
+      {!isSupabaseConfigured && (
+        <div role="status" className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
+          Demo mode active: changes are stored locally in this browser session.
+        </div>
+      )}
+      {(authNotice || workspaceSaveError) && (
+        <p role="alert" className="text-xs text-rose-700 dark:text-rose-400 font-medium">
+          {workspaceSaveError || authNotice}
+        </p>
+      )}
 
-      {/* KPI Stats Overview */}
+      {/* Key Metrics Overview */}
       <StatsOverview
         applications={applications}
         savedCount={savedOppIds.length}
         portfolioViews={mockStorage.getPortfolio().viewCount || 0}
       />
 
-      {/* Quick Launchpad Grid (No purple, strict deep blue/green/cyan/amber palette) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link to="/cv-builder">
-          <Card hoverEffect className="p-5 border-l-4 border-l-brand-blue-700 h-full flex flex-col justify-between">
-            <div>
-              <div className="w-9 h-9 rounded-xl bg-brand-blue-50 dark:bg-brand-blue-950 text-brand-blue-700 dark:text-brand-blue-300 flex items-center justify-center mb-3">
-                <FileText className="w-5 h-5" />
+      {/* Cohesive Quick Launchpad */}
+      <div>
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+          Quick Workspaces
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link to="/cv-builder" className="group">
+            <Card hoverEffect className="p-5 h-full flex flex-col justify-between">
+              <div>
+                <div className="w-9 h-9 rounded-lg bg-brand-blue-50 dark:bg-white/[0.06] text-brand-blue-700 dark:text-brand-blue-300 flex items-center justify-center mb-3">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-brand-blue-700 dark:group-hover:text-brand-green-400 transition-colors">CV Builder</h4>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">Update experience, education, and print your ATS-ready PDF.</p>
               </div>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">CV Builder</h4>
-              <p className="text-xs text-slate-500 mt-1">Edit your CV content and preview the available templates.</p>
-            </div>
-            <div className="mt-4 flex items-center text-xs font-semibold text-brand-blue-700 dark:text-brand-blue-400">
-              Open Builder <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </div>
-          </Card>
-        </Link>
+              <div className="mt-4 flex items-center text-xs font-semibold text-brand-blue-700 dark:text-brand-green-400">
+                Open Builder <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </Card>
+          </Link>
 
-        <Link to="/portfolio-builder">
-          <Card hoverEffect className="p-5 border-l-4 border-l-brand-green-500 h-full flex flex-col justify-between">
-            <div>
-              <div className="w-9 h-9 rounded-xl bg-brand-green-50 dark:bg-brand-green-950 text-brand-green-700 dark:text-brand-green-400 flex items-center justify-center mb-3">
-                <Globe className="w-5 h-5" />
+          <Link to="/portfolio-builder" className="group">
+            <Card hoverEffect className="p-5 h-full flex flex-col justify-between">
+              <div>
+                <div className="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-brand-green-700 dark:text-brand-green-300 flex items-center justify-center mb-3">
+                  <Globe className="w-4 h-4" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-brand-blue-700 dark:group-hover:text-brand-green-400 transition-colors">Shareable Portfolio</h4>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">Publish featured projects and customize your public link.</p>
               </div>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">Shareable Portfolio</h4>
-              <p className="text-xs text-slate-500 mt-1">Edit your portfolio profile and visibility settings.</p>
-            </div>
-            <div className="mt-4 flex items-center text-xs font-semibold text-brand-green-600 dark:text-brand-green-400">
-              View & Edit <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </div>
-          </Card>
-        </Link>
+              <div className="mt-4 flex items-center text-xs font-semibold text-brand-green-700 dark:text-brand-green-400">
+                Manage Portfolio <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </Card>
+          </Link>
 
-        <Link to="/skills">
-          <Card hoverEffect className="p-5 border-l-4 border-l-cyan-600 h-full flex flex-col justify-between">
-            <div>
-              <div className="w-9 h-9 rounded-xl bg-cyan-50 dark:bg-cyan-950 text-cyan-700 dark:text-cyan-300 flex items-center justify-center mb-3">
-                <Sparkles className="w-5 h-5" />
+          <Link to="/skills" className="group">
+            <Card hoverEffect className="p-5 h-full flex flex-col justify-between">
+              <div>
+                <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 flex items-center justify-center mb-3">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-brand-blue-700 dark:group-hover:text-brand-green-400 transition-colors">Skill Gap Analyzer</h4>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">Audit competencies against African market benchmarks.</p>
               </div>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">Skill Gap Analyzer</h4>
-              <p className="text-xs text-slate-500 mt-1">Review your skills and add experience you want to highlight.</p>
-            </div>
-            <div className="mt-4 flex items-center text-xs font-semibold text-cyan-700 dark:text-cyan-400">
-              Check Gaps <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </div>
-          </Card>
-        </Link>
+              <div className="mt-4 flex items-center text-xs font-semibold text-slate-700 dark:text-slate-300">
+                Review Skills <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </Card>
+          </Link>
 
-        <Link to="/ai-assistant">
-          <Card hoverEffect className="p-5 border-l-4 border-l-emerald-500 h-full flex flex-col justify-between">
-            <div>
-              <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center mb-3">
-                <Bot className="w-5 h-5" />
+          <Link to="/ai-assistant" className="group">
+            <Card hoverEffect className="p-5 h-full flex flex-col justify-between">
+              <div>
+                <div className="w-9 h-9 rounded-lg bg-brand-green-50 dark:bg-brand-green-950/50 text-brand-green-700 dark:text-brand-green-300 flex items-center justify-center mb-3">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-brand-blue-700 dark:group-hover:text-brand-green-400 transition-colors">CareerLaunch AI</h4>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">Simulate interviews and refine cover letters for targeted roles.</p>
               </div>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">CareerLaunch AI</h4>
-              <p className="text-xs text-slate-500 mt-1">Open career guidance tools available in this deployment.</p>
-            </div>
-            <div className="mt-4 flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-              Start Session <ArrowRight className="w-3.5 h-3.5 ml-1" />
-            </div>
-          </Card>
-        </Link>
+              <div className="mt-4 flex items-center text-xs font-semibold text-brand-green-700 dark:text-brand-green-400">
+                Start Session <ArrowRight className="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </Card>
+          </Link>
+        </div>
       </div>
 
       {/* Main Grid: Left = Recommended Opps, Right = Upcoming Milestones & Deadlines */}
@@ -194,14 +204,14 @@ export const DashboardPage: React.FC = () => {
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                 Recommended Opportunities
               </h3>
-              <p className="text-xs text-slate-500">From the opportunity catalog. Confirm details with the listing source.</p>
+              <p className="text-xs text-slate-500">Verified openings matching your target career tracks.</p>
             </div>
             <Link
               to="/opportunities"
-              className="text-xs font-bold text-brand-blue-700 dark:text-brand-green-400 hover:underline"
+              className="text-xs font-semibold text-brand-blue-700 dark:text-brand-green-400 hover:underline"
             >
               Browse All
             </Link>
@@ -221,12 +231,12 @@ export const DashboardPage: React.FC = () => {
             </div>
           ) : (
             <Card className="p-8 text-center">
-              <Compass className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+              <Compass className="w-8 h-8 text-slate-400 mx-auto mb-2" />
               <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                No opportunities yet
+                No opportunities saved yet
               </h4>
               <p className="text-xs text-slate-500 mt-1">
-                Explore our full catalog to discover graduate jobs, internships, and attachments.
+                Explore the catalog to discover graduate roles, internships, and attachments.
               </p>
               <Link to="/opportunities" className="inline-block mt-3">
                 <Button size="sm" variant="outline">
@@ -237,10 +247,10 @@ export const DashboardPage: React.FC = () => {
           )}
         </div>
 
-        {/* Right Sidebar: Upcoming Deadlines & Interviews */}
+        {/* Right Column: Upcoming Deadlines & Interviews */}
         <div className="space-y-4">
-          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-            Upcoming Action Items
+          <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+            Upcoming Milestones
           </h3>
 
           <Card className="p-5 space-y-4">
@@ -248,35 +258,35 @@ export const DashboardPage: React.FC = () => {
               upcomingInterviews.map((app) => (
                 <div
                   key={app.id}
-                  className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 space-y-1.5"
+                  className="p-3.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/60 space-y-1.5"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
-                      Technical Interview
+                      Interview Scheduled
                     </span>
-                    <Clock className="w-3.5 h-3.5 text-amber-600 animate-spin" />
+                    <Clock className="w-3.5 h-3.5 text-amber-600" />
                   </div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white">
                     {app.position} at {app.company}
                   </h4>
                   <p className="text-[11px] text-slate-600 dark:text-slate-400">
                     Date:{' '}
-                    <span className="font-semibold text-amber-700 dark:text-amber-300">
+                    <span className="font-semibold text-amber-800 dark:text-amber-300">
                       {formatDate(app.interviewDate)}
                     </span>
                   </p>
                   <Link
                     to="/ai-assistant"
-                    className="text-[11px] font-bold text-brand-blue-700 dark:text-brand-green-400 inline-block hover:underline pt-1"
+                    className="text-[11px] font-semibold text-brand-blue-700 dark:text-brand-green-400 inline-block hover:underline pt-1"
                   >
-                    Open interview preparation →
+                    Open interview prep session →
                   </Link>
                 </div>
               ))
             ) : (
               <div className="text-center py-3 text-xs text-slate-500">
-                <CheckCircle2 className="w-5 h-5 text-brand-green-500 mx-auto mb-1" />
-                No interview deadlines today. Apply to open roles to fill your pipeline!
+                <CheckCircle2 className="w-4 h-4 text-brand-green-500 mx-auto mb-1" />
+                No pending interviews today. Keep applying to fill your pipeline!
               </div>
             )}
 
@@ -284,13 +294,13 @@ export const DashboardPage: React.FC = () => {
             {upcomingDeadlines.map((opp) => (
               <div
                 key={opp.id}
-                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs space-y-1"
+                className="p-3 rounded-lg bg-slate-50 dark:bg-[#0A0A0A] border border-slate-200/80 dark:border-white/10 text-xs space-y-1"
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900 dark:text-white truncate max-w-[180px]">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[170px]">
                     {opp.title}
                   </span>
-                  <span className="text-[10px] font-semibold text-rose-600 dark:text-rose-400">
+                  <span className="text-[10px] font-semibold text-rose-600 dark:text-rose-400 shrink-0">
                     {formatDate(opp.deadline)}
                   </span>
                 </div>
@@ -299,7 +309,7 @@ export const DashboardPage: React.FC = () => {
                   onClick={() => setSelectedOpp(opp)}
                   className="text-[11px] font-semibold text-brand-blue-700 dark:text-brand-green-400 hover:underline inline-block pt-1"
                 >
-                  View details & apply →
+                  View details &amp; apply →
                 </button>
               </div>
             ))}
