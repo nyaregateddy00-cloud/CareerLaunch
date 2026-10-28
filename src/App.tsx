@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
@@ -71,6 +72,14 @@ const FullPageLoader: React.FC = () => (
   </div>
 );
 
+/** Keep the dashboard entry point role-aware while retaining both existing routes. */
+const DashboardEntry: React.FC = () => {
+  const { isAdmin } = useAuth();
+  return isAdmin
+    ? <Navigate to="/admin" replace />
+    : <Suspense fallback={<PageSkeleton />}><DashboardPage /></Suspense>;
+};
+
 export function App() {
   return (
     <ThemeProvider>
@@ -99,7 +108,7 @@ export function App() {
               {/* Authenticated User Shell — skeleton keeps Navbar+Sidebar visible during lazy load */}
               <Route element={<ProtectedRoute />}>
                 <Route element={<AppLayout />}>
-                  <Route path="/dashboard" element={<Suspense fallback={<PageSkeleton />}><DashboardPage /></Suspense>} />
+                  <Route path="/dashboard" element={<DashboardEntry />} />
                   <Route path="/profile" element={<Suspense fallback={<PageSkeleton />}><ProfilePage /></Suspense>} />
                   <Route path="/cv-builder" element={<Suspense fallback={<PageSkeleton />}><CVBuilderPage /></Suspense>} />
                   <Route path="/portfolio-builder" element={<Suspense fallback={<PageSkeleton />}><PortfolioBuilderPage /></Suspense>} />

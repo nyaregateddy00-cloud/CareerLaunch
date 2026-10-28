@@ -82,9 +82,9 @@ export const DashboardPage: React.FC = () => {
     .sort((a, b) => new Date(a.interviewDate!).getTime() - new Date(b.interviewDate!).getTime());
 
   return (
-    <div className="space-y-8 text-slate-900 dark:text-[#f8fafc]">
+    <div className="dashboard-sections space-y-8 text-slate-900 dark:text-[#f8fafc]">
       {/* Header Welcome Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="dashboard-reveal flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             {greeting}, <span className="font-serif italic font-normal text-brand-blue-700 dark:text-brand-blue-400">{firstName}</span> 👋
@@ -109,7 +109,7 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Profile Strength Overview */}
-      <ProfileStrengthCard user={user} />
+      <div className="dashboard-reveal dashboard-reveal-delay-1"><ProfileStrengthCard user={user} /></div>
 
       {/* Demo storage status only when Supabase is not configured */}
       {!isSupabaseConfigured && (
@@ -124,14 +124,16 @@ export const DashboardPage: React.FC = () => {
       )}
 
       {/* Key Metrics Overview */}
-      <StatsOverview
-        applications={applications}
-        savedCount={savedOppIds.length}
-        portfolioViews={mockStorage.getPortfolio().viewCount || 0}
-      />
+      <div className="dashboard-reveal dashboard-reveal-delay-2">
+        <StatsOverview
+          applications={applications}
+          savedCount={savedOppIds.length}
+          portfolioViews={mockStorage.getPortfolio().viewCount || 0}
+        />
+      </div>
 
       {/* Cohesive Quick Launchpad */}
-      <div>
+      <div className="dashboard-reveal dashboard-reveal-delay-3">
         <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
           Quick Workspaces
         </h3>
@@ -199,7 +201,7 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       {/* Main Grid: Left = Recommended Opps, Right = Upcoming Milestones & Deadlines */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="dashboard-reveal dashboard-reveal-delay-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recommended Opportunities */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">

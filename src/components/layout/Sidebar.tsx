@@ -12,7 +12,6 @@ import {
   Bookmark,
   User,
   Settings,
-  Shield,
   Users,
   Briefcase,
   BarChart3,
@@ -20,14 +19,14 @@ import {
   Bell
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { BrandLogo } from '../branding/BrandLogo';
 import { Avatar } from '../common/Avatar';
 
 export const Sidebar: React.FC = () => {
   const { user, isAdmin } = useAuth();
+  const dashboardPath = isAdmin ? '/admin' : '/dashboard';
 
   const navItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { label: 'Dashboard', path: dashboardPath, icon: LayoutDashboard },
     { label: 'Find Opportunities', path: '/opportunities', icon: Search },
     { label: 'Application Tracker', path: '/applications', icon: Kanban },
     { label: 'CV Builder', path: '/cv-builder', icon: FileText },
@@ -42,7 +41,6 @@ export const Sidebar: React.FC = () => {
   ];
 
   const adminNavItems = [
-    { label: 'Admin Dashboard', path: '/admin', icon: Shield },
     { label: 'Manage Users', path: '/admin/users', icon: Users },
     { label: 'Manage Opportunities', path: '/admin/opportunities', icon: Briefcase },
     { label: 'Manage Resources', path: '/admin/resources', icon: BookOpen },
@@ -53,7 +51,6 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside className="w-64 flex-shrink-0 hidden md:flex flex-col border-r border-slate-200/80 dark:border-white/[0.06] bg-white dark:bg-[#0A0A0A] min-h-[calc(100vh-4rem)] p-4 select-none">
-      <BrandLogo to="/dashboard" className="mb-5 px-1 py-1" />
       {/* User Mini Card */}
       {user && (
         <div className="mb-5 p-3 rounded-2xl bg-slate-50 dark:bg-[#111111] border border-slate-200/60 dark:border-white/[0.06]">

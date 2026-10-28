@@ -510,6 +510,34 @@ export interface Database {
           is_read?: boolean;
         };
       };
+      user_documents: {
+        Row: {
+          id: string;
+          user_id: string;
+          bucket_id: string;
+          object_path: string;
+          file_name: string;
+          mime_type: string;
+          size_bytes: number;
+          category: 'cv' | 'certificate' | 'application' | 'other';
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          bucket_id?: string;
+          object_path: string;
+          file_name: string;
+          mime_type: string;
+          size_bytes: number;
+          category: 'cv' | 'certificate' | 'application' | 'other';
+          created_at?: string;
+        };
+        Update: {
+          category?: 'cv' | 'certificate' | 'application' | 'other';
+          file_name?: string;
+        };
+      };
     };
   };
 }

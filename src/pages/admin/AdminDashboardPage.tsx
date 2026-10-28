@@ -28,9 +28,9 @@ export const AdminDashboardPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="dashboard-sections space-y-8">
       {/* Admin Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+      <div className="dashboard-reveal flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Badge variant="blue" size="sm">Admin Console</Badge>
@@ -55,8 +55,8 @@ export const AdminDashboardPage: React.FC = () => {
       </div>
 
       {/* Admin Metrics Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="p-5 flex flex-col justify-between" hoverEffect>
+      <div className="dashboard-reveal dashboard-reveal-delay-1 grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="dashboard-stat-card p-5 flex flex-col justify-between" style={{ '--stat-index': 0 } as React.CSSProperties} hoverEffect>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-400 uppercase">Total Candidates</span>
             <div className="w-9 h-9 rounded-xl bg-brand-blue-50 dark:bg-brand-blue-950 text-brand-blue-700 dark:text-brand-blue-300 flex items-center justify-center">
@@ -74,7 +74,7 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="p-5 flex flex-col justify-between" hoverEffect>
+        <Card className="dashboard-stat-card p-5 flex flex-col justify-between" style={{ '--stat-index': 1 } as React.CSSProperties} hoverEffect>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-400 uppercase">Active Opportunities</span>
             <div className="w-9 h-9 rounded-xl bg-brand-green-50 dark:bg-brand-green-950 text-brand-green-700 dark:text-brand-green-300 flex items-center justify-center">
@@ -89,7 +89,7 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="p-5 flex flex-col justify-between" hoverEffect>
+        <Card className="dashboard-stat-card p-5 flex flex-col justify-between" style={{ '--stat-index': 2 } as React.CSSProperties} hoverEffect>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-400 uppercase">Applications Tracked</span>
             <div className="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-950 text-purple-700 dark:text-purple-300 flex items-center justify-center">
@@ -104,7 +104,7 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="p-5 flex flex-col justify-between" hoverEffect>
+        <Card className="dashboard-stat-card p-5 flex flex-col justify-between" style={{ '--stat-index': 3 } as React.CSSProperties} hoverEffect>
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-400 uppercase">Portfolios Published</span>
             <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-300 flex items-center justify-center">

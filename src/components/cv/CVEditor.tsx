@@ -15,6 +15,7 @@ import {
 import { CVData, Experience, Education, UserSkill, Project, Certification, Language } from '../../types';
 import { Input, Textarea } from '../common/Input';
 import { Button } from '../common/Button';
+import { aiService } from '../../lib/aiService';
 
 interface CVEditorProps {
   cvData: CVData;
@@ -24,6 +25,7 @@ interface CVEditorProps {
 export const CVEditor: React.FC<CVEditorProps> = ({ cvData, onChange }) => {
   const [activeTab, setActiveTab] = useState<'personal' | 'summary' | 'experience' | 'education' | 'skills' | 'projects' | 'languages'>('personal');
   const [isEnhancingSummary, setIsEnhancingSummary] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const updatePersonalInfo = (field: keyof CVData['personalInfo'], value: string) => {
     onChange({
@@ -35,15 +37,34 @@ export const CVEditor: React.FC<CVEditorProps> = ({ cvData, onChange }) => {
     });
   };
 
-  const handleEnhanceSummary = () => {
+  const handleEnhanceSummary = async () => {
+    setAiError(null);
+    if (!aiService.isConfigured()) {
+      setAiError('AI writing is unavailable until the secure CareerLaunch AI service is configured.');
+      return;
+    }
     setIsEnhancingSummary(true);
-    setTimeout(() => {
-      onChange({
-        ...cvData,
-        summary: `${cvData.personalInfo.headline || 'High-performing professional'} with proven technical proficiency in modern web frameworks, distributed architectures, and API integrations. Dedicated to building reliable digital infrastructure for African enterprises with strong problem-solving agility, clean code hygiene, and cross-functional leadership.`,
-      });
+    try {
+      const evidence = [
+        `Current summary: ${cvData.summary || '(not provided)'}`,
+        `Headline: ${cvData.personalInfo.headline || '(not provided)'}`,
+        `Skills: ${cvData.skills.map((skill) => skill.skillName).join(', ') || '(not provided)'}`,
+        `Experience: ${cvData.experience.map((item) => `${item.position} at ${item.company}: ${item.description}`).join('\n') || '(not provided)'}`,
+        `Projects: ${cvData.projects.map((item) => `${item.title}: ${item.description}`).join('\n') || '(not provided)'}`,
+      ].join('\n');
+      const result = await aiService.sendMessage(
+        `Rewrite my professional summary into a concise, polished CV summary using only the evidence below. Do not add skills, employers, achievements, years, or outcomes that are not stated. Return only the improved summary.\n\n${evidence}`,
+        [],
+        'improve_cv',
+        { headline: cvData.personalInfo.headline, skills: cvData.skills.map((skill) => skill.skillName) }
+      );
+      if (!result.success) throw new Error(result.error || 'The AI service could not improve this summary.');
+      onChange({ ...cvData, summary: result.content });
+    } catch (cause) {
+      setAiError(cause instanceof Error ? cause.message : 'Could not improve the summary. Please try again.');
+    } finally {
       setIsEnhancingSummary(false);
-    }, 500);
+    }
   };
 
   // --- Experience helpers ---
@@ -268,12 +289,18 @@ export const CVEditor: React.FC<CVEditorProps> = ({ cvData, onChange }) => {
                 size="sm"
                 variant="accent"
                 onClick={handleEnhanceSummary}
+                disabled={!aiService.isConfigured()}
                 isLoading={isEnhancingSummary}
                 leftIcon={<Wand2 className="w-3.5 h-3.5" />}
               >
                 AI Enhance Summary
               </Button>
             </div>
+            {aiError ? (
+              <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">{aiError}</p>
+            ) : !aiService.isConfigured() ? (
+              <p className="text-xs text-slate-500">AI summary writing becomes available after the secure CareerLaunch AI service is configured.</p>
+            ) : null}
             <Textarea
               rows={6}
               placeholder="Provide a concise 3-4 sentence summary of your background, core technical strengths, and what value you bring to an employer..."

@@ -24,9 +24,18 @@ The login and registration screens include Google OAuth through Supabase Auth. T
 
 Google OAuth creates accounts with the default `job_seeker` role. Email/password registration also supports the listed early-career roles. Role selection for Google-created accounts should be completed in a future onboarding step.
 
-## AI service
+## Secure uploads and AI setup
 
-The AI interface calls `VITE_AI_API_URL`, which must point to a secured server-side endpoint. Configure provider credentials on that server only. Without the endpoint, the UI should show that AI is unavailable.
+The profile page supports private CV, certificate, and application-document uploads, plus a public profile avatar. Before enabling uploads in an existing Supabase project, apply `supabase/migrations/202610280001_user_documents_and_storage.sql`. It creates the document metadata table, two Storage buckets, and owner-scoped RLS/storage policies without deleting existing data. Documents use private storage and short-lived signed download links.
+
+CareerLaunch AI runs in a Supabase Edge Function; provider credentials never go to the browser:
+
+1. Apply the migration above to the Supabase project.
+2. Deploy the function with `supabase functions deploy career-ai`.
+3. Add the provider key as a Supabase secret with `supabase secrets set GEMINI_API_KEY=YOUR_KEY` (replace `YOUR_KEY` in your terminal; do not add it to `.env`, Vercel VITE variables, or source control).
+4. Set `VITE_AI_ENABLED=true` in local `.env` and the Vercel project environment, then rebuild/redeploy the Vite app. Keep it `false` until the function and secret are ready.
+
+The AI Career Coach and CV summary enhancer use the authenticated Edge Function. If the setting or provider secret is missing, they explain that setup is required rather than returning sample AI output. Supabase Edge Functions validate the caller's JWT; the handler also verifies the session with Supabase Auth.
 
 ## Current deployment limitations
 

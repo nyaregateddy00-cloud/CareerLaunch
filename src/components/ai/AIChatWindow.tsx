@@ -101,7 +101,7 @@ export const AIChatWindow: React.FC = () => {
         const noticeMessage: Message = {
           id: `msg-${Date.now() + 1}`,
           sender: 'system',
-          text: 'AI integration is not connected yet. Configure VITE_AI_API_URL with a secured server-side endpoint to enable career coaching. Provider API keys must stay on the server and must not be placed in browser-exposed VITE_ variables.',
+          text: 'CareerLaunch AI is not enabled yet. The platform administrator needs to deploy the secure Supabase AI function, add the provider key as a server-side secret, and enable AI for this deployment.',
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
         setMessages((prev) => [...prev, noticeMessage]);
@@ -129,8 +129,8 @@ export const AIChatWindow: React.FC = () => {
 
       const aiMessage: Message = {
         id: `msg-${Date.now() + 1}`,
-        sender: 'assistant',
-        text: res.content || (res.error ? `Error: ${res.error}` : 'No response generated.'),
+        sender: res.success ? 'assistant' : 'system',
+        text: res.success ? res.content : (res.error || 'CareerLaunch AI could not complete that request.'),
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, aiMessage]);
@@ -176,7 +176,7 @@ export const AIChatWindow: React.FC = () => {
               {isAIConfigured ? (
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-brand-green-700 dark:text-brand-green-300 bg-brand-green-50 dark:bg-brand-green-950 px-2 py-0.5 rounded-full border border-brand-green-200 dark:border-brand-green-800">
                   <span className="w-1.5 h-1.5 rounded-full bg-brand-green-500 animate-pulse"></span>
-                  Active (Gemini 1.5)
+                  AI enabled
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800">
@@ -185,7 +185,7 @@ export const AIChatWindow: React.FC = () => {
               )}
             </div>
             <p className="text-xs text-slate-500">
-              African Career Intelligence • Powered by Regional Talent Insights
+              Practical career guidance for Africa and global opportunities
             </p>
           </div>
         </div>
@@ -205,7 +205,7 @@ export const AIChatWindow: React.FC = () => {
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
             <span>
-              <strong>Preview Mode:</strong> Configure a server-side AI endpoint to enable live responses.
+              <strong>AI is not connected yet:</strong> Deploy the secure CareerLaunch Supabase AI function and configure its server-side provider key to enable live responses.
             </span>
           </div>
         </div>

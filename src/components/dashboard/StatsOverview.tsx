@@ -64,7 +64,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat, idx) => (
-        <Card key={idx} className="p-5 flex flex-col justify-between" hoverEffect>
+        <Card key={stat.label} className="dashboard-stat-card p-5 flex flex-col justify-between" style={{ '--stat-index': idx } as React.CSSProperties} hoverEffect>
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               {stat.label}

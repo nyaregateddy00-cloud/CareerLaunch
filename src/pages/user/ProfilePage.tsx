@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   User,
   MapPin,
@@ -39,10 +39,15 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { Avatar } from '../../components/common/Avatar';
 import { useToast } from '../../hooks/useToast';
 import { formatMonthYear } from '../../lib/utils';
+import { UserDocuments } from '../../components/profile/UserDocuments';
+import { uploadProfileAvatar } from '../../lib/documentService';
+import { supabase } from '../../lib/supabase';
 
 export const ProfilePage: React.FC = () => {
   const { user, updateProfile } = useAuth();
   const { showToast } = useToast();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   // Basic Profile form state
   const [fullName, setFullName] = useState(user?.fullName || '');
@@ -101,6 +106,24 @@ export const ProfilePage: React.FC = () => {
       twitterUrl,
     });
     showToast('Profile information saved successfully!', 'success');
+  };
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !user) return;
+    setAvatarUploading(true);
+    try {
+      const avatarUrl = await uploadProfileAvatar(file);
+      const { error } = await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
+      if (error) throw new Error(error.message);
+      updateProfile({ avatarUrl });
+      showToast('Profile photo updated.', 'success');
+    } catch (cause) {
+      showToast(cause instanceof Error ? cause.message : 'Could not upload your profile photo.', 'error');
+    } finally {
+      setAvatarUploading(false);
+    }
   };
 
   // --- Experience helpers ---
@@ -217,15 +240,16 @@ export const ProfilePage: React.FC = () => {
           <div className="relative group">
             <Avatar src={user?.avatarUrl} name={user?.fullName || 'CareerLaunch member'} alt={user?.fullName ? `${user.fullName} profile photo` : 'Profile photo'} className="h-24 w-24 rounded-2xl border-2 border-slate-200 shadow-sm sm:h-28 sm:w-28 dark:border-slate-700" fallbackClassName="text-xl sm:text-2xl" />
             <button
-              onClick={() =>
-                showToast('Photo upload connects to Supabase Storage when configured.', 'info')
-              }
-              className="absolute inset-0 bg-slate-900/60 rounded-2xl flex flex-col items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={avatarUploading}
+              className="absolute -bottom-2 -right-2 grid h-9 w-9 place-items-center rounded-xl border border-white bg-white text-brand-blue-700 shadow-md transition hover:bg-brand-blue-50 focus-visible:outline-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-brand-green-300 dark:hover:bg-slate-700 disabled:cursor-wait"
               title="Change Photo"
+              aria-label={avatarUploading ? 'Uploading profile photo' : 'Change profile photo'}
             >
-              <Camera className="w-6 h-6 mb-1" />
-              <span className="text-[10px] font-semibold">Change</span>
+              <Camera className={`h-4 w-4 ${avatarUploading ? 'animate-pulse' : ''}`} />
             </button>
+            <input ref={avatarInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleAvatarUpload} className="sr-only" aria-label="Upload a profile photo" />
           </div>
 
           <div className="flex-1 text-center sm:text-left space-y-1">
@@ -258,6 +282,8 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
       </Card>
+
+      <UserDocuments />
 
       {/* Basic Personal Information Form */}
       <Card className="p-6 sm:p-8 space-y-6">
