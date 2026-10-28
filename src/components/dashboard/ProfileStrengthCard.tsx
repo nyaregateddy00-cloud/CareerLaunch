@@ -84,7 +84,7 @@ export const ProfileStrengthCard: React.FC<ProfileStrengthCardProps> = ({ user }
         </div>
 
         {/* Action recommendations list */}
-        <div className="bg-brand-blue-950/90 dark:bg-[#111111] border border-brand-blue-800/80 dark:border-white/10 rounded-lg p-4 min-w-[280px] sm:min-w-[320px] space-y-2">
+        <div className="w-full min-w-0 md:w-auto md:min-w-[320px] bg-brand-blue-950/90 dark:bg-[#111111] border border-brand-blue-800/80 dark:border-white/10 rounded-lg p-4 space-y-2">
           <h4 className="text-[11px] font-bold uppercase tracking-wider text-brand-blue-200 dark:text-slate-400">
             {incompleteItems.length > 0 ? 'Recommended next steps' : 'Profile checklist'}
           </h4>

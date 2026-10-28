@@ -161,7 +161,7 @@ export const AIChatWindow: React.FC = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-card dark:shadow-card-dark overflow-hidden flex flex-col h-[calc(100vh-9rem)] max-h-[820px]">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-card dark:shadow-card-dark overflow-hidden flex flex-col h-[calc(100vh-8rem)] h-[calc(100dvh-8rem)] min-h-[400px] max-h-[820px]">
       {/* Top Header */}
       <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/80 flex items-center justify-between">
         <div className="flex items-center gap-3">

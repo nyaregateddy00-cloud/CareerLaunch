@@ -4,7 +4,7 @@ import { Navbar } from './Navbar';
 
 export const PublicLayout: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-black text-slate-900 dark:text-[#F5F5F5] transition-colors duration-200">
+    <div className="min-h-screen min-h-dvh flex flex-col overflow-x-clip bg-white dark:bg-black text-slate-900 dark:text-[#F5F5F5] transition-colors duration-200">
       <Navbar />
       <main className="flex-1">
         <Outlet />

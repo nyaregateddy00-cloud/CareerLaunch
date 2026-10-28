@@ -15,15 +15,15 @@ export const AppLayout: React.FC = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAFAFA] dark:bg-black text-slate-900 dark:text-[#F5F5F5] transition-colors duration-200">
+    <div className="min-h-screen min-h-dvh flex flex-col bg-[#FAFAFA] dark:bg-black text-slate-900 dark:text-[#F5F5F5] transition-colors duration-200">
       <Navbar />
-      <div className="flex-1 flex overflow-hidden">
+      <div className="min-h-0 flex flex-1 overflow-hidden">
         <Sidebar />
         <main
           ref={mainRef}
-          className="flex-1 overflow-y-auto"
+          className="min-h-0 min-w-0 w-full flex-1 overflow-x-hidden overflow-y-auto"
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 page-enter" key={location.pathname}>
+          <div className="min-w-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 page-enter" key={location.pathname}>
             <Outlet />
           </div>
         </main>
