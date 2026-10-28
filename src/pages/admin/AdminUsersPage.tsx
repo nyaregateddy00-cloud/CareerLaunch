@@ -6,6 +6,7 @@ import { Card } from '../../components/common/Card';
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { formatDate } from '../../lib/utils';
+import { Avatar } from '../../components/common/Avatar';
 
 export const AdminUsersPage: React.FC = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -112,11 +113,7 @@ export const AdminUsersPage: React.FC = () => {
                 <tr key={u.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-850/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <img
-                        src={u.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100'}
-                        alt={u.fullName}
-                        className="w-9 h-9 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
-                      />
+                      <Avatar src={u.avatarUrl} name={u.fullName} alt={`${u.fullName} profile photo`} className="h-9 w-9 rounded-xl border border-slate-200 dark:border-slate-700" />
                       <div>
                         <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                           <span>{u.fullName}</span>

@@ -36,6 +36,7 @@ import { Select } from '../../components/common/Select';
 import { Button } from '../../components/common/Button';
 import { Badge } from '../../components/common/Badge';
 import { PageHeader } from '../../components/common/PageHeader';
+import { Avatar } from '../../components/common/Avatar';
 import { useToast } from '../../hooks/useToast';
 import { formatMonthYear } from '../../lib/utils';
 
@@ -214,14 +215,7 @@ export const ProfilePage: React.FC = () => {
       <Card className="p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           <div className="relative group">
-            <img
-              src={
-                user?.avatarUrl ||
-                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200'
-              }
-              alt={user?.fullName || 'User Profile'}
-              className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-slate-200 dark:border-slate-700 shadow-sm"
-            />
+            <Avatar src={user?.avatarUrl} name={user?.fullName || 'CareerLaunch member'} alt={user?.fullName ? `${user.fullName} profile photo` : 'Profile photo'} className="h-24 w-24 rounded-2xl border-2 border-slate-200 shadow-sm sm:h-28 sm:w-28 dark:border-slate-700" fallbackClassName="text-xl sm:text-2xl" />
             <button
               onClick={() =>
                 showToast('Photo upload connects to Supabase Storage when configured.', 'info')

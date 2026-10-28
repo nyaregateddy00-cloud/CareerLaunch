@@ -13,7 +13,9 @@ import {
 } from 'lucide-react';
 import { UserProfile, Project, Experience, Education, UserSkill } from '../../types';
 import { Button } from '../common/Button';
-import { formatMonthYear } from '../../lib/utils';
+import { formatMonthYear, safeExternalUrl } from '../../lib/utils';
+import { Avatar } from '../common/Avatar';
+import { FallbackImage } from '../common/FallbackImage';
 
 interface PublicPortfolioViewProps {
   user: UserProfile;
@@ -58,11 +60,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
       <section className="py-14 sm:py-20 border-b border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-[#0A0A0A]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <div className="relative inline-block mb-5">
-            <img
-              src={user.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200'}
-              alt={user.fullName}
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover border-4 border-white dark:border-[#111111] shadow-md mx-auto"
-            />
+            <Avatar src={user.avatarUrl} name={user.fullName} alt={`${user.fullName} profile photo`} className="mx-auto h-24 w-24 rounded-2xl border-4 border-white shadow-md sm:h-32 sm:w-32 dark:border-[#111111]" fallbackClassName="text-2xl sm:text-3xl" />
             <div className="absolute bottom-0 right-0 w-5 h-5 rounded-full bg-brand-green-500 border-2 border-white dark:border-[#111111] flex items-center justify-center text-white shadow-xs" title="Available for hire">
               <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
             </div>
@@ -131,13 +129,9 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                 key={proj.id}
                 className="bg-white dark:bg-[#111111] border border-slate-200/80 dark:border-white/10 rounded-xl overflow-hidden shadow-xs hover:border-slate-300 dark:hover:border-white/20 transition-all flex flex-col justify-between"
               >
-                {proj.imageUrl && (
+                {safeExternalUrl(proj.imageUrl) && (
                   <div className="h-44 w-full overflow-hidden bg-slate-100 dark:bg-white/[0.04]">
-                    <img
-                      src={proj.imageUrl}
-                      alt={proj.title}
-                      className="w-full h-full object-cover"
-                    />
+                    <FallbackImage src={safeExternalUrl(proj.imageUrl)} alt={`${proj.title} project preview`} className="h-full w-full" imageClassName="h-full w-full object-cover" fallbackClassName="h-full w-full bg-slate-100 dark:bg-white/[0.04]" />
                   </div>
                 )}
                 <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">

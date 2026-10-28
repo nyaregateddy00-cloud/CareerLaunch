@@ -6,6 +6,17 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
+/** Return a safe web URL for user- or database-supplied image/link values. */
+export function safeExternalUrl(value?: string | null): string | undefined {
+  if (!value) return undefined;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function formatDate(dateString?: string): string {
   if (!dateString) return '';
   const date = new Date(dateString);

@@ -21,6 +21,7 @@ import { INITIAL_USER_TEDDY, INITIAL_USER_AMINA, INITIAL_USER_ADMIN } from '../.
 import { mockStorage } from '../../lib/mockStorage';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { BrandLogo } from '../branding/BrandLogo';
+import { Avatar } from '../common/Avatar';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout, switchUser, isAdmin } = useAuth();
@@ -191,11 +192,7 @@ export const Navbar: React.FC = () => {
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                     className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                   >
-                    <img
-                      src={user.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100'}
-                      alt={user.fullName}
-                      className="w-8 h-8 rounded-lg object-cover border border-slate-200 dark:border-slate-700"
-                    />
+                    <Avatar src={user.avatarUrl} name={user.fullName} className="h-8 w-8 rounded-lg border border-slate-200 dark:border-slate-700" />
                     <span className="hidden md:block text-xs font-semibold text-slate-800 dark:text-slate-200 max-w-[100px] truncate">
                       {user.fullName.split(' ')[0]}
                     </span>

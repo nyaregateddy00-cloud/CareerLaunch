@@ -12,9 +12,10 @@ import { Opportunity } from '../../types';
 import { Modal } from '../common/Modal';
 import { Badge } from '../common/Badge';
 import { Button } from '../common/Button';
-import { formatDate } from '../../lib/utils';
+import { formatDate, safeExternalUrl } from '../../lib/utils';
 import { mockStorage } from '../../lib/mockStorage';
 import { useAuth } from '../../context/AuthContext';
+import { FallbackImage } from '../common/FallbackImage';
 
 interface OpportunityDetailModalProps {
   opportunity: Opportunity | null;
@@ -61,11 +62,12 @@ export const OpportunityDetailModal: React.FC<OpportunityDetailModalProps> = ({
         {/* Header with Company Logo & Quick Details */}
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-100 dark:border-white/[0.08]">
           <div className="flex items-center gap-4">
-            {opportunity.companyLogo ? (
-              <img
-                src={opportunity.companyLogo}
+            {safeExternalUrl(opportunity.companyLogo) ? (
+              <FallbackImage
+                src={safeExternalUrl(opportunity.companyLogo)}
                 alt={opportunity.company}
-                className="w-14 h-14 rounded-xl object-cover border border-slate-200 dark:border-white/10 shrink-0"
+                className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-slate-200 bg-brand-blue-50 text-brand-blue-700 dark:border-white/10 dark:bg-brand-blue-950 dark:text-brand-blue-300"
+                imageClassName="h-14 w-14 shrink-0 rounded-xl border border-slate-200 object-cover dark:border-white/10"
               />
             ) : (
               <div className="w-14 h-14 rounded-xl bg-brand-blue-50 dark:bg-white/[0.06] flex items-center justify-center text-brand-blue-700 dark:text-brand-blue-300 border border-slate-200 dark:border-white/10 shrink-0">

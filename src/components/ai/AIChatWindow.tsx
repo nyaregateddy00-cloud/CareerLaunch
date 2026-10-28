@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../common/Button';
+import { Avatar } from '../common/Avatar';
 import { aiService, AIChatMessage } from '../../lib/aiService';
 import { mockStorage } from '../../lib/mockStorage';
 
@@ -253,14 +254,7 @@ export const AIChatWindow: React.FC = () => {
             >
               {/* Avatar */}
               {msg.sender === 'user' ? (
-                <img
-                  src={
-                    user?.avatarUrl ||
-                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100'
-                  }
-                  alt="User"
-                  className="w-8 h-8 rounded-xl object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0"
-                />
+                <Avatar src={user?.avatarUrl} name={user?.fullName || 'You'} className="h-8 w-8 shrink-0 rounded-xl border border-slate-200 dark:border-slate-700" />
               ) : (
                 <div className="w-8 h-8 rounded-xl bg-brand-green-500 flex items-center justify-center text-white flex-shrink-0 shadow-sm">
                   <Bot className="w-4 h-4" />

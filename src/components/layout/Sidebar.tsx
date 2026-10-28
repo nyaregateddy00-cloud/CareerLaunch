@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { BrandLogo } from '../branding/BrandLogo';
+import { Avatar } from '../common/Avatar';
 
 export const Sidebar: React.FC = () => {
   const { user, isAdmin } = useAuth();
@@ -57,11 +58,7 @@ export const Sidebar: React.FC = () => {
       {user && (
         <div className="mb-5 p-3 rounded-2xl bg-slate-50 dark:bg-[#111111] border border-slate-200/60 dark:border-white/[0.06]">
           <div className="flex items-center gap-3">
-            <img
-              src={user.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100'}
-              alt={user.fullName}
-              className="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
-            />
+            <Avatar src={user.avatarUrl} name={user.fullName} alt={`${user.fullName} profile photo`} className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-700" />
             <div className="min-w-0 flex-1">
               <h4 className="text-xs font-bold text-slate-900 dark:text-white truncate">{user.fullName}</h4>
               <p className="text-[11px] text-slate-500 capitalize truncate">{user.role.replace('_', ' ')}</p>

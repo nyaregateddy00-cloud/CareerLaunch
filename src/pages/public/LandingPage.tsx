@@ -262,6 +262,7 @@ export const LandingPage: React.FC = () => {
                 priority
                 sizes="(max-width: 1024px) 100vw, 44vw"
                 className="mb-5 shadow-xs"
+                aspectRatio="16/10"
                 imageClassName="aspect-[16/10] rounded-xl"
               />
 

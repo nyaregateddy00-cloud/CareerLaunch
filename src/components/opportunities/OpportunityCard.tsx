@@ -2,7 +2,8 @@ import React from 'react';
 import { Bookmark, MapPin, Calendar, Building2, ArrowUpRight } from 'lucide-react';
 import { Opportunity } from '../../types';
 import { Badge } from '../common/Badge';
-import { formatDate } from '../../lib/utils';
+import { formatDate, safeExternalUrl } from '../../lib/utils';
+import { FallbackImage } from '../common/FallbackImage';
 
 interface OpportunityCardProps {
   opportunity: Opportunity;
@@ -69,11 +70,12 @@ export const OpportunityCard: React.FC<OpportunityCardProps> = ({
 
         {/* Company & Title */}
         <div className="flex items-start gap-3.5 mb-3">
-          {opportunity.companyLogo ? (
-            <img
-              src={opportunity.companyLogo}
+          {safeExternalUrl(opportunity.companyLogo) ? (
+            <FallbackImage
+              src={safeExternalUrl(opportunity.companyLogo)}
               alt={opportunity.company}
-              className="w-10 h-10 rounded-lg object-cover border border-slate-200/80 dark:border-white/10 shrink-0"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-lg border border-slate-200/80 bg-brand-blue-50 text-brand-blue-700 dark:border-white/10 dark:bg-brand-blue-950 dark:text-brand-blue-300"
+              imageClassName="h-10 w-10 shrink-0 rounded-lg border border-slate-200/80 object-cover dark:border-white/10"
             />
           ) : (
             <div className="w-10 h-10 rounded-lg bg-brand-blue-50 dark:bg-white/[0.06] flex items-center justify-center text-brand-blue-700 dark:text-brand-blue-300 border border-slate-200/80 dark:border-white/10 shrink-0">
